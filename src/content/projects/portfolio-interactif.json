@@ -1,11 +1,9 @@
 {
   "title": "Mon Portfolio Interactif",
-  "description": "Design System \"Cyber-Holographique\" personnalisé, animations fluides et optimisation complète UX/UI.",
-  "descriptionEn": "Custom \"Cyber-Holographic\" Design System, fluid animations and complete UX/UI optimization.",
-  "tags": ["Tailwind CSS", "UI/UX", "Astro", "Framer Motion"],
-  "image": "/images/projects/portfolio-interactif.png",
-  "url": "https://lecomte-albert-cv.vercel.app/#",
-  "featured": true,
-  "order": 1,
-  "category": "design"
+  "category": "branding",
+  "image": "/images/Albert.png",
+  "description": "Conception intégrale de ce site en Tailwind CSS. Design System 'Cyber-Holographique' personnalisé, animations fluides et optimisation complète UX/UI.",
+  "descriptionEn": "Integral design of this site in Tailwind CSS. Personalized 'Cyber-Holographic' Design System, smooth animations and complete UX/UI optimization.",
+  "tags": ["Astro", "Tailwind CSS", "i18n", "Figma"],
+  "order": 4
 }
