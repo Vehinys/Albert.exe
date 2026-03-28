@@ -38,7 +38,8 @@
       "Bash(sed -i 's|/images/cactus\\\\.png|/images/cactus.webp|g' src/content/projects/neon-cactus.json)",
       "Bash(sed -i 's|/images/Albert\\\\.png|/images/Albert.webp|g' src/content/projects/portfolio-interactif.json)",
       "Bash(rm *.png *.jpg)",
-      "Bash(ls *.webp)"
+      "Bash(ls *.webp)",
+      "Bash(ls public/images/*.jpg)"
     ]
   }
 }
