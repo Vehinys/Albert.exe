@@ -15,88 +15,160 @@ const projects = allProjects
   .map(p => ({ ...p.data, id: p.id }))
   .sort((a, b) => a.order - b.order);
 
-const categories = ['design', 'development', 'wordpress'] as const;
+const filters = ['all', 'design', 'development', 'wordpress'] as const;
+type Filter = (typeof filters)[number];
+
+const filterLabel: Record<Filter, string> = {
+  all:         t('projects.filter.all'),
+  design:      t('projects.filter.design'),
+  development: t('projects.filter.development'),
+  wordpress:   t('projects.filter.wordpress'),
+};
 ---
 
 <section id="projects" class="projects section-padding" aria-labelledby="projects-title">
-  <div class="projects__container">
-    <div class="projects__header">
-      <p class="section-label">{t('projects.title')}</p>
-      <h2 id="projects-title" class="section-title">{t('projects.subtitle')}</h2>
+  <div class="proj__container">
+
+    <!-- Section header -->
+    <div class="proj__header">
+      <p class="proj__label"><span aria-hidden="true">// </span>{t('projects.title')}</p>
+      <h2 id="projects-title" class="proj__title">{t('projects.subtitle')}</h2>
     </div>
 
-    <!-- Filtres -->
-    <div class="projects__filters" role="group" aria-label={lang === 'fr' ? 'Filtrer par catégorie' : 'Filter by category'}>
-      <button class="filter-btn filter-btn--active" data-filter="all" aria-pressed="true">
-        {t('projects.filter.all')}
-      </button>
-      {categories.map(cat => (
-        <button class="filter-btn" data-filter={cat} aria-pressed="false">
-          {t(`projects.filter.${cat}`)}
-        </button>
-      ))}
-    </div>
+    <!-- Terminal panel -->
+    <div class="proj-panel" role="region" aria-label={lang === 'fr' ? 'Liste des projets' : 'Project list'}>
 
-    <!-- Grille -->
-    <ul class="projects__grid" role="list" id="projects-grid">
-      {projects.map(project => (
-        <li class="project-card glass-card" data-category={project.category}>
-          <div class="project-card__image">
-            <img
-              src={project.image}
-              alt={project.title}
-              width="800"
-              height="450"
-              loading="lazy"
-              decoding="async"
-              class="project-card__img"
-            />
-            {project.featured && (
-              <span class="project-card__badge" aria-label={t('projects.featured')}>
-                {t('projects.featured')}
-              </span>
-            )}
+      <!-- Window bar -->
+      <div class="proj-panel__bar" aria-hidden="true">
+        <div class="proj-panel__dots">
+          <span class="proj-panel__dot" style="background:#FF5F57"></span>
+          <span class="proj-panel__dot" style="background:#FEBC2E"></span>
+          <span class="proj-panel__dot" style="background:#28C840"></span>
+        </div>
+        <span class="proj-panel__barlabel">bash — ls projects/</span>
+      </div>
+
+      <!-- Panel body -->
+      <div class="proj-panel__body">
+
+        <!-- Prompt + filter row -->
+        <div class="proj-controls">
+          <p class="proj-prompt" aria-hidden="true">
+            <span class="proj-prompt__caret">❯</span>
+            <span class="proj-prompt__cmd">$ ls -la projects/</span>
+          </p>
+          <div
+            class="proj-filters"
+            role="group"
+            aria-label={lang === 'fr' ? 'Filtrer par catégorie' : 'Filter by category'}
+          >
+            {filters.map(f => (
+              <button
+                class={`proj-filter${f === 'all' ? ' proj-filter--active' : ''}`}
+                data-filter={f}
+                aria-pressed={f === 'all' ? 'true' : 'false'}
+                type="button"
+              >
+                {filterLabel[f]}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div class="project-card__body">
-            <h3 class="project-card__title">{project.title}</h3>
-            <p class="project-card__desc">
-              {lang === 'en' ? project.descriptionEn : project.description}
-            </p>
+        <!-- Project grid -->
+        <ul
+          class="proj-grid"
+          role="list"
+          id="projects-grid"
+          aria-label={lang === 'fr' ? 'Projets' : 'Projects'}
+        >
+          {projects.map(project => (
+            <li class="proj-card" data-category={project.category} role="listitem">
 
-            <ul class="project-card__tags" role="list" aria-label={lang === 'fr' ? 'Technologies utilisées' : 'Technologies used'}>
-              {project.tags.map(tag => (
-                <li class="tag">{tag}</li>
-              ))}
-            </ul>
+              <!-- Image + overlay -->
+              <div class="proj-card__img-wrap">
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  width="800"
+                  height="450"
+                  loading="lazy"
+                  decoding="async"
+                  class="proj-card__img"
+                />
+                <div class="proj-card__overlay" aria-hidden="true">
+                  <span class={`proj-card__cat proj-card__cat--${project.category}`}>
+                    {project.category}
+                  </span>
+                  {project.featured && (
+                    <span class="proj-card__feat">
+                      {t('projects.featured')}
+                    </span>
+                  )}
+                </div>
+              </div>
 
-            <div class="project-card__actions">
-              {project.url && (
-                <a href={project.url} class="project-link" target="_blank" rel="noopener noreferrer" aria-label={`${t('projects.view.live')} — ${project.title}`}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                  </svg>
-                  {t('projects.view.live')}
-                </a>
-              )}
-              {project.github && (
-                <a href={project.github} class="project-link" target="_blank" rel="noopener noreferrer" aria-label={`${t('projects.view.github')} — ${project.title}`}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-                  </svg>
-                  {t('projects.view.github')}
-                </a>
-              )}
-            </div>
-          </div>
-        </li>
-      ))}
-    </ul>
+              <!-- Body -->
+              <div class="proj-card__body">
+                <h3 class="proj-card__title">{project.title}</h3>
+                <p class="proj-card__desc">
+                  {lang === 'en' ? project.descriptionEn : project.description}
+                </p>
+
+                <ul
+                  class="proj-card__tags"
+                  role="list"
+                  aria-label={lang === 'fr' ? 'Technologies utilisées' : 'Technologies used'}
+                >
+                  {project.tags.map(tag => <li class="proj-tag">{tag}</li>)}
+                </ul>
+
+                <div class="proj-card__links">
+                  {project.github && (
+                    <a
+                      href={project.github}
+                      class="proj-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${t('projects.view.github')} — ${project.title}`}
+                    >
+                      <span aria-hidden="true">↗</span>
+                      {t('projects.view.github')}
+                    </a>
+                  )}
+                  {project.url && (
+                    <a
+                      href={project.url}
+                      class="proj-link proj-link--live"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${t('projects.view.live')} — ${project.title}`}
+                    >
+                      <span aria-hidden="true">↗</span>
+                      {t('projects.view.live')}
+                    </a>
+                  )}
+                </div>
+              </div>
+
+            </li>
+          ))}
+        </ul>
+
+      </div><!-- /.proj-panel__body -->
+    </div><!-- /.proj-panel -->
+
   </div>
 </section>
 
 <style>
-.projects__container {
+/* ── Section ────────────────────────────────────────────────────── */
+.projects {
+  padding-top: var(--section-padding);
+}
+
+/* ── Container ─────────────────────────────────────────────────── */
+.proj__container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
@@ -105,185 +177,332 @@ const categories = ['design', 'development', 'wordpress'] as const;
   gap: 2.5rem;
 }
 
-.projects__header {
+/* ── Header ────────────────────────────────────────────────────── */
+.proj__header {
   text-align: center;
 }
 
-.section-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #3b82f6;
+.proj__label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-acid-green);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.75rem;
+  letter-spacing: 0.12em;
+  font-family: var(--font-family-mono);
+  margin-bottom: 0.625rem;
 }
 
-.section-title {
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+.proj__title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text);
 }
 
-.projects__filters {
+/* ── Terminal panel ────────────────────────────────────────────── */
+.proj-panel {
+  background: #0D0D1A;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* ── Window bar ────────────────────────────────────────────────── */
+.proj-panel__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.proj-panel__dots {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.proj-panel__dot {
+  width: 0.6875rem;
+  height: 0.6875rem;
+  border-radius: 50%;
+  display: block;
+}
+
+.proj-panel__barlabel {
+  font-size: 0.6875rem;
+  color: #94A3B8;
+  font-family: var(--font-family-mono);
+  flex: 1;
+  text-align: center;
+}
+
+/* ── Panel body ────────────────────────────────────────────────── */
+.proj-panel__body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Controls row ──────────────────────────────────────────────── */
+.proj-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.proj-prompt {
+  font-family: var(--font-family-mono);
+  font-size: 0.8125rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.proj-prompt__caret {
+  color: var(--color-acid-green);
+}
+
+.proj-prompt__cmd {
+  color: #C4B5FD;
+}
+
+/* ── Filter buttons ────────────────────────────────────────────── */
+.proj-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
+  gap: 0.375rem;
 }
 
-.filter-btn {
-  padding: 0.5rem 1.25rem;
-  border-radius: 999px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  color: var(--color-text-subtle);
-  font-size: 0.875rem;
-  font-weight: 500;
+.proj-filter {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  background: rgba(139, 92, 246, 0.05);
+  color: #64748B;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-family: var(--font-family-mono);
+  border-radius: 0.25rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.filter-btn:hover,
-.filter-btn--active {
-  background: rgba(59,130,246,0.15);
-  border-color: rgba(59,130,246,0.4);
-  color: #60a5fa;
+.proj-filter:hover {
+  background: rgba(204, 255, 0, 0.06);
+  border-color: rgba(204, 255, 0, 0.3);
+  color: var(--color-acid-green);
 }
 
-.filter-btn:focus-visible {
-  outline: 3px solid var(--color-focus);
+.proj-filter--active {
+  background: rgba(204, 255, 0, 0.08);
+  border-color: rgba(204, 255, 0, 0.4);
+  color: var(--color-acid-green);
+}
+
+.proj-filter:focus-visible {
+  outline: 2px solid var(--color-acid-green);
   outline-offset: 2px;
 }
 
-.projects__grid {
+/* ── Grid ──────────────────────────────────────────────────────── */
+.proj-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
 @media (min-width: 640px) {
-  .projects__grid { grid-template-columns: 1fr 1fr; }
+  .proj-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (min-width: 1024px) {
-  .projects__grid { grid-template-columns: repeat(3, 1fr); }
+  .proj-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
-.project-card {
+/* ── Card ──────────────────────────────────────────────────────── */
+.proj-card {
   display: flex;
   flex-direction: column;
+  background: rgba(9, 9, 20, 0.9);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 0.5rem;
   overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.project-card[data-hidden] {
+.proj-card:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.1);
+}
+
+.proj-card[data-hidden] {
   display: none;
 }
 
-.project-card__image {
+/* ── Card image ────────────────────────────────────────────────── */
+.proj-card__img-wrap {
   position: relative;
-  height: 180px;
-  background: var(--glass-bg);
-  border-bottom: 1px solid var(--glass-border);
+  height: 165px;
   overflow: hidden;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
 }
 
-.project-card__img {
+.proj-card__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
   transition: transform 0.4s ease;
 }
 
-.project-card:hover .project-card__img {
+.proj-card:hover .proj-card__img {
   transform: scale(1.04);
 }
 
-.project-card__badge {
+.proj-card__overlay {
   position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  padding: 0.25rem 0.625rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  background: rgba(59,130,246,0.2);
-  border: 1px solid rgba(59,130,246,0.4);
-  color: #60a5fa;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  inset: 0;
+  background: linear-gradient(to top, rgba(9, 9, 20, 0.85) 0%, transparent 55%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0.5rem 0.625rem;
+  pointer-events: none;
 }
 
-.project-card__body {
-  padding: 1.25rem;
+/* ── Category badge ────────────────────────────────────────────── */
+.proj-card__cat {
+  font-family: var(--font-family-mono);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.2rem;
+}
+
+.proj-card__cat--development {
+  background: rgba(204, 255, 0, 0.1);
+  border: 1px solid rgba(204, 255, 0, 0.3);
+  color: var(--color-acid-green);
+}
+
+.proj-card__cat--design {
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: #A78BFA;
+}
+
+.proj-card__cat--wordpress {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #F59E0B;
+}
+
+/* ── Featured badge ────────────────────────────────────────────── */
+.proj-card__feat {
+  font-family: var(--font-family-mono);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.2rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #F59E0B;
+}
+
+/* ── Card body ─────────────────────────────────────────────────── */
+.proj-card__body {
+  padding: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.625rem;
   flex: 1;
 }
 
-.project-card__title {
-  font-size: 1.05rem;
+.proj-card__title {
+  font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--color-text);
+  color: #FAF5FF;
   margin: 0;
+  font-family: var(--font-family-mono);
+  line-height: 1.3;
 }
 
-.project-card__desc {
-  font-size: 0.875rem;
-  color: var(--color-text-subtle);
-  line-height: 1.6;
+.proj-card__desc {
+  font-size: 0.8125rem;
+  color: rgba(196, 181, 253, 0.7);
+  line-height: 1.65;
   margin: 0;
   flex: 1;
 }
 
-.project-card__tags {
+/* ── Tags ──────────────────────────────────────────────────────── */
+.proj-card__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.375rem;
+  gap: 0.3rem;
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.tag {
-  padding: 0.2rem 0.625rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  color: var(--color-text-subtle);
+.proj-tag {
+  font-family: var(--font-family-mono);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.2rem;
+  background: rgba(139, 92, 246, 0.07);
+  border: 1px solid rgba(139, 92, 246, 0.22);
+  color: #A78BFA;
 }
 
-.project-card__actions {
+/* ── Links ─────────────────────────────────────────────────────── */
+.proj-card__links {
   display: flex;
-  gap: 0.75rem;
-  padding-top: 0.25rem;
+  gap: 0.875rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+  margin-top: auto;
 }
 
-.project-link {
+.proj-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #60a5fa;
+  gap: 0.3rem;
+  font-family: var(--font-family-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #64748B;
   text-decoration: none;
-  transition: color 0.2s ease, gap 0.2s ease;
+  letter-spacing: 0.03em;
+  transition: color 0.15s ease;
 }
 
-.project-link:hover {
-  color: #93c5fd;
-  gap: 0.5rem;
+.proj-link:hover {
+  color: var(--color-acid-green);
 }
 
-.project-link:focus-visible {
-  outline: 3px solid var(--color-focus);
+.proj-link--live:hover {
+  color: #F59E0B;
+}
+
+.proj-link:focus-visible {
+  outline: 2px solid var(--color-acid-green);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -291,18 +510,18 @@ const categories = ['design', 'development', 'wordpress'] as const;
 
 <script>
 (function () {
-  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
-  const cards = document.querySelectorAll<HTMLElement>('.project-card');
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.proj-filter');
+  const cards = document.querySelectorAll<HTMLElement>('.proj-card');
 
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const filter = btn.dataset['filter'] ?? 'all';
 
       filterBtns.forEach(b => {
-        b.classList.remove('filter-btn--active');
+        b.classList.remove('proj-filter--active');
         b.setAttribute('aria-pressed', 'false');
       });
-      btn.classList.add('filter-btn--active');
+      btn.classList.add('proj-filter--active');
       btn.setAttribute('aria-pressed', 'true');
 
       cards.forEach(card => {
