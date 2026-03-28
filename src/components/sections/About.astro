@@ -9,168 +9,724 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-const stats = [
-  { value: '5+', key: 'about.years' },
-  { value: '40+', key: 'about.projects' },
-  { value: '30+', key: 'about.clients' },
-  { value: '100%', key: 'about.satisfaction' },
+const tableRows = [
+  {
+    key: lang === 'fr' ? 'Nom complet'        : 'Full Name',
+    val: 'Albert Lecomte',
+  },
+  {
+    key: lang === 'fr' ? 'Titre'              : 'Title',
+    val: lang === 'fr' ? 'Concepteur Designer UI' : 'UI Designer Conceptor',
+  },
+  {
+    key: lang === 'fr' ? 'Version'            : 'Version',
+    val: lang === 'fr' ? 'En recherche active (CDI)' : 'Actively seeking (CDI)',
+  },
+  {
+    key: lang === 'fr' ? 'Spécialisation'     : 'Specialization',
+    val: 'WordPress · UI/UX Design · SEO',
+  },
+  {
+    key: lang === 'fr' ? 'Certification RQTH' : 'RQTH Certification',
+    val: lang === 'fr' ? 'Reconnu' : 'Recognized',
+  },
+  {
+    key: lang === 'fr' ? 'Langues'            : 'Languages',
+    val: lang === 'fr'
+      ? 'Français (natif) · Anglais (compréhension écrite)'
+      : 'French (native) · English (reading comprehension)',
+  },
 ] as const;
+
+const ramModules = [
+  {
+    title:  lang === 'fr' ? 'Concepteur Designer UI (Niv. 6)'        : 'UI Designer Conceptor (L. 6)',
+    school: 'GRETA Alsace Sud',
+    period: '2025 — 2026',
+    status: lang === 'fr' ? 'EN COURS' : 'IN PROGRESS',
+    done: false,
+  },
+  {
+    title:  lang === 'fr' ? 'Développeur Web & Mobile (Niv. 5)'      : 'Web & Mobile Developer (L. 5)',
+    school: 'Elan Formation',
+    period: '2024',
+    status: 'ACQUIS ✓',
+    done: true,
+  },
+  {
+    title:  lang === 'fr' ? 'Infographiste Metteur en Page (Niv. 4)' : 'Graphic Designer Page Setter (L. 4)',
+    school: 'GRETA Sud Alsace',
+    period: '2022 — 2023',
+    status: 'ACQUIS ✓',
+    done: true,
+  },
+  {
+    title:  lang === 'fr' ? 'Titre Pro. Vendeur Conseil (Niv. 4)'    : 'Sales Advisor Certificate (L. 4)',
+    school: 'CEFA Saint-Anne (Belgique)',
+    period: '2006',
+    status: 'ACQUIS ✓',
+    done: true,
+  },
+] as const;
+
+const panelTitle = lang === 'fr' ? 'Propriétés système — Albert Lecomte' : 'System Properties — Albert Lecomte';
+const infoTitle  = lang === 'fr' ? 'Informations système'                 : 'System Information';
+const descTitle  = lang === 'fr' ? 'Description'                          : 'Description';
+const hwTitle    = lang === 'fr' ? 'Spécifications matérielles'           : 'Hardware Specifications';
+const ramLabel   = lang === 'fr' ? 'Formations diplômantes'               : 'Degrees';
 ---
 
 <section id="about" class="about section-padding" aria-labelledby="about-title">
   <div class="about__container">
+
+    <!-- Header -->
     <div class="about__header">
-      <p class="section-label">{t('about.title')}</p>
-      <h2 id="about-title" class="section-title">{t('about.subtitle')}</h2>
+      <p class="about__label"><span aria-hidden="true">// </span>{t('about.title')}</p>
+      <h2 id="about-title" class="about__title">{panelTitle}</h2>
     </div>
 
-    <div class="about__grid">
-      <div class="about__content">
-        <p class="about__text">{t('about.p1')}</p>
-        <p class="about__text">{t('about.p2')}</p>
-        <p class="about__text">{t('about.p3')}</p>
+    <!-- Main panel -->
+    <div class="about-panel" role="region" aria-label={panelTitle}>
 
-        <a href="/cv/albert-lecomte-cv.pdf" class="btn btn--primary about__cv" download aria-label={`${t('about.cv.download')} (PDF)`}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          {t('about.cv.download')}
-        </a>
+      <!-- Fake title bar -->
+      <div class="about-titlebar" aria-hidden="true">
+        <span class="about-titlebar__icon">🖥️</span>
+        <span class="about-titlebar__text">{panelTitle}</span>
       </div>
 
-      <div class="about__stats" aria-label={lang === 'fr' ? 'Statistiques' : 'Statistics'}>
-        {stats.map(({ value, key }) => (
-          <div class="stat glass-card">
-            <span class="stat__value gradient-text">{value}</span>
-            <span class="stat__label">{t(key)}</span>
+      <!-- Body -->
+      <div class="about-body">
+
+        <!-- Left: identity -->
+        <aside class="about-identity" aria-label={lang === 'fr' ? 'Identité' : 'Identity'}>
+          <div class="about-avatar">
+            <img
+              src="/images/Albert.webp"
+              alt="Albert Lecomte"
+              class="about-avatar__photo"
+              width="120"
+              height="120"
+              loading="lazy"
+            />
           </div>
-        ))}
+          <p class="about-identity__name">Albert Lecomte</p>
+          <p class="about-identity__job">
+            {lang === 'fr' ? 'Concepteur Designer UI' : 'UI Designer Conceptor'}
+          </p>
+          <div class="about-badges">
+            <span class="about-badge about-badge--location">
+              <span aria-hidden="true">📍</span>
+              Mulhouse, Alsace
+            </span>
+            <span class="about-badge about-badge--available">
+              <span class="about-badge-dot" aria-hidden="true"></span>
+              {lang === 'fr' ? 'Disponible' : 'Available'}
+            </span>
+            <span class="about-badge about-badge--rqth">
+              <span aria-hidden="true">♿</span>
+              RQTH
+            </span>
+          </div>
+        </aside>
+
+        <!-- Right: details -->
+        <div class="about-details">
+
+          <!-- Properties table -->
+          <section aria-label={infoTitle}>
+            <div class="about-section-hd">
+              <span class="about-section-hd__icon" aria-hidden="true">ℹ️</span>
+              <span class="about-section-hd__text">{infoTitle}</span>
+            </div>
+            <dl class="about-table">
+              {tableRows.map((row, i) => (
+                <div class={`about-table__row${i % 2 === 0 ? ' about-table__row--even' : ''}`}>
+                  <dt class="about-table__key">{row.key}</dt>
+                  <dd class="about-table__val">{row.val}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
+          <!-- Description -->
+          <section class="about-desc" aria-label={descTitle}>
+            <div class="about-section-hd">
+              <span class="about-section-hd__icon" aria-hidden="true">📄</span>
+              <span class="about-section-hd__text">{descTitle}</span>
+            </div>
+            <div class="about-desc__body">
+              <p>{t('about.p1')}</p>
+              <p>{t('about.p2')}</p>
+              <p>{t('about.p3')}</p>
+            </div>
+          </section>
+
+          <!-- Hardware specs -->
+          <section class="about-hw" aria-label={hwTitle}>
+            <div class="about-section-hd">
+              <span class="about-section-hd__icon" aria-hidden="true">⚡</span>
+              <span class="about-section-hd__text">{hwTitle}</span>
+            </div>
+            <div class="about-specs">
+              <div class="about-spec">
+                <span class="about-spec__label">
+                  {lang === 'fr' ? 'CPU : WordPress, UI & SEO' : 'CPU: WordPress, UI & SEO'}
+                </span>
+                <span class="about-spec__val">OVERCLOCKED 🔥</span>
+              </div>
+              <div class="about-spec">
+                <span class="about-spec__label">
+                  {lang === 'fr' ? 'GPU : Stage Businet' : 'GPU: Businet Internship'}
+                </span>
+                <span class="about-spec__val">
+                  {lang === 'fr' ? 'Refonte + SEO 🔧' : 'Redesign + SEO 🔧'}
+                </span>
+              </div>
+              <div class="about-spec">
+                <span class="about-spec__label">
+                  {lang === 'fr' ? 'RAM : Formations diplômantes' : 'RAM: Degrees obtained'}
+                </span>
+                <button
+                  class="about-spec__val about-ram-btn"
+                  type="button"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                >
+                  {lang === 'fr' ? '4 modules ✨' : '4 modules ✨'}
+                  <span class="about-ram-arrow" aria-hidden="true"> ▾</span>
+                </button>
+              </div>
+
+              <!-- RAM popup -->
+              <ul
+                class="about-ram-popup"
+                hidden
+                role="listbox"
+                aria-label={ramLabel}
+              >
+                {ramModules.map(m => (
+                  <li class="about-ram-item" role="option" aria-selected="false">
+                    <span class="about-ram-item__icon" aria-hidden="true">
+                      {m.done ? '✅' : '⏳'}
+                    </span>
+                    <div class="about-ram-item__info">
+                      <p class="about-ram-item__title">{m.title}</p>
+                      <p class="about-ram-item__meta">{m.school} · {m.period}</p>
+                    </div>
+                    <span class={`about-ram-item__badge ${m.done ? 'about-ram-item__badge--done' : 'about-ram-item__badge--wip'}`}>
+                      {m.status}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+
+          <!-- Actions -->
+          <div class="about-actions">
+            <a
+              href="/cv/albert-lecomte-cv.pdf"
+              download
+              class="about-btn about-btn--primary"
+              aria-label={`${t('about.cv.download')} (PDF)`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" style="flex-shrink:0">
+                <rect width="24" height="24" rx="3" fill="#E02020"/>
+                <rect x="2" y="10" width="20" height="9" rx="1.5" fill="#B91C1C"/>
+                <text x="12" y="17.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" font-weight="900" fill="white" letter-spacing="0.3">PDF</text>
+              </svg>
+              {t('about.cv.download')}
+            </a>
+            <a href="#contact" class="about-btn">
+              <span aria-hidden="true">📧</span>
+              {lang === 'fr' ? 'Me contacter' : 'Contact me'}
+            </a>
+          </div>
+
+        </div>
       </div>
     </div>
+
   </div>
 </section>
 
 <style>
+/* ── Container ─────────────────────────────────────────────────── */
 .about__container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 2.5rem;
 }
 
+/* ── Section header ────────────────────────────────────────────── */
 .about__header {
   text-align: center;
 }
 
-.section-label {
-  font-size: 0.875rem;
-  font-weight: 600;
+.about__label {
+  font-size: 0.8125rem;
+  font-weight: 700;
   color: var(--color-acid-green);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.75rem;
+  letter-spacing: 0.12em;
+  font-family: var(--font-family-mono);
+  margin-bottom: 0.625rem;
 }
 
-.section-title {
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+.about__title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text);
 }
 
-.about__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 3rem;
-  align-items: start;
+/* ── Panel ─────────────────────────────────────────────────────── */
+.about-panel {
+  background: #0D0D1A;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 
-@media (min-width: 768px) {
-  .about__grid {
-    grid-template-columns: 3fr 2fr;
+/* ── Fake title bar ────────────────────────────────────────────── */
+.about-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.06) 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.35);
+  user-select: none;
+}
+
+.about-titlebar__icon {
+  font-size: 0.875rem;
+}
+
+.about-titlebar__text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #C4B5FD;
+  letter-spacing: 0.02em;
+  font-family: var(--font-family-mono);
+}
+
+/* ── Body layout ───────────────────────────────────────────────── */
+.about-body {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .about-body {
+    grid-template-columns: 220px 1fr;
   }
 }
 
-.about__content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+@media (min-width: 900px) {
+  .about-body {
+    grid-template-columns: 260px 1fr;
+  }
 }
 
-.about__text {
-  font-size: 1.05rem;
-  color: var(--color-text-subtle);
-  line-height: 1.8;
+/* ── Left: identity ────────────────────────────────────────────── */
+.about-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1.25rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+@media (min-width: 640px) {
+  .about-identity {
+    border-bottom: none;
+    border-right: 1px solid rgba(139, 92, 246, 0.2);
+  }
+}
+
+.about-avatar {
+  width: 7.5rem;
+  height: 7.5rem;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(245, 158, 11, 0.4));
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.25), 0 0 48px rgba(139, 92, 246, 0.08);
+  flex-shrink: 0;
+}
+
+.about-avatar__photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.about-identity__name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #FAF5FF;
+  margin: 0.25rem 0 0;
+}
+
+.about-identity__job {
+  font-size: 0.8125rem;
+  color: #F59E0B;
+  font-weight: 600;
   margin: 0;
 }
 
-.about__cv {
-  align-self: flex-start;
-  margin-top: 0.5rem;
+.about-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.25rem;
 }
 
-.about__stats {
+.about-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-family: var(--font-family-mono);
+}
+
+.about-badge--location {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: #C4B5FD;
+}
+
+.about-badge--available {
+  background: rgba(204, 255, 0, 0.07);
+  border: 1px solid rgba(204, 255, 0, 0.2);
+  color: var(--color-acid-green);
+}
+
+.about-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-acid-green);
+  flex-shrink: 0;
+  animation: var(--animate-glow) 2s infinite alternate;
+}
+
+.about-badge--rqth {
+  background: rgba(255, 0, 153, 0.07);
+  border: 1px solid rgba(255, 0, 153, 0.2);
+  color: var(--color-neon-pink);
+}
+
+/* ── Right: details ────────────────────────────────────────────── */
+.about-details {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Section sub-header ────────────────────────────────────────── */
+.about-section-hd {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: rgba(139, 92, 246, 0.07);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.about-section-hd__icon {
+  font-size: 0.75rem;
+}
+
+.about-section-hd__text {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8B5CF6;
+  font-family: var(--font-family-mono);
+}
+
+/* ── Properties table ──────────────────────────────────────────── */
+.about-table {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.about-table__row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 40% 60%;
+  padding: 0.45rem 1rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.07);
+}
+
+.about-table__row--even {
+  background: rgba(139, 92, 246, 0.04);
+}
+
+.about-table__key {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94A3B8;
+  font-family: var(--font-family-mono);
+  padding-right: 0.5rem;
+}
+
+.about-table__val {
+  font-size: 0.75rem;
+  color: #FAF5FF;
+  margin: 0;
+}
+
+/* ── Description ───────────────────────────────────────────────── */
+.about-desc__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+}
+
+.about-desc__body p {
+  font-size: 0.875rem;
+  color: #C4B5FD;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Hardware specs ────────────────────────────────────────────── */
+.about-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  position: relative;
+}
+
+.about-spec {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
 }
 
-.stat {
-  padding: 1.5rem 1.25rem;
+.about-spec__label {
+  font-size: 0.75rem;
+  color: #94A3B8;
+  font-weight: 500;
+  font-family: var(--font-family-mono);
+}
+
+.about-spec__val {
+  font-size: 0.75rem;
+  color: #F59E0B;
+  font-weight: 700;
+  font-family: var(--font-family-mono);
+}
+
+/* RAM button */
+.about-ram-btn {
+  background: none;
+  border: none;
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #F59E0B;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.about-ram-btn:hover {
+  color: #FCD34D;
+}
+
+.about-ram-btn:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.about-ram-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.about-ram-btn[aria-expanded="true"] .about-ram-arrow {
+  transform: rotate(180deg);
+}
+
+/* RAM popup */
+.about-ram-popup {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0.375rem;
+  background: rgba(4, 2, 14, 0.97);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 0.375rem;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
   gap: 0.375rem;
 }
 
-.stat__value {
-  font-size: 2rem;
-  font-weight: 800;
-  font-family: var(--font-family-display, 'Space Grotesk', sans-serif);
-  letter-spacing: -0.03em;
+.about-ram-popup[hidden] {
+  display: none;
 }
 
-.stat__label {
-  font-size: 0.8rem;
-  color: var(--color-text-subtle);
-  font-weight: 500;
-}
-
-/* Btn shared */
-.btn {
-  display: inline-flex;
+.about-ram-item {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.625rem;
-  font-size: 0.95rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+}
+
+.about-ram-item__icon {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.about-ram-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.about-ram-item__title {
+  margin: 0;
+  font-size: 0.75rem;
   font-weight: 600;
-  text-decoration: none;
-  transition: all 0.25s ease;
+  color: #FAF5FF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.about-ram-item__meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.6875rem;
+  color: #94A3B8;
+  font-family: var(--font-family-mono);
+}
+
+.about-ram-item__badge {
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+  font-family: var(--font-family-mono);
+}
+
+.about-ram-item__badge--done {
+  background: rgba(204, 255, 0, 0.08);
+  border: 1px solid rgba(204, 255, 0, 0.25);
+  color: var(--color-acid-green);
+}
+
+.about-ram-item__badge--wip {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #F59E0B;
+}
+
+/* ── Actions ───────────────────────────────────────────────────── */
+.about-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+  background: rgba(139, 92, 246, 0.03);
+}
+
+.about-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.45rem 1rem;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.08);
+  color: #C4B5FD;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 0.3rem;
   cursor: pointer;
-  border: none;
+  text-decoration: none;
+  font-family: var(--font-family-mono);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-.btn--primary {
-  background: white;
-  color: black;
-  border-radius: 999px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.9rem 2rem;
+.about-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.6);
+  color: #FAF5FF;
 }
 
-.btn--primary:hover {
-  background: var(--color-acid-green);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(204, 255, 0, 0.3);
+.about-btn--primary {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #F59E0B;
 }
 
-.btn:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 3px;
+.about-btn--primary:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #F59E0B;
+  color: #FCD34D;
+}
+
+.about-btn:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
 }
 </style>
+
+<script>
+(function () {
+  const ramBtn  = document.querySelector<HTMLButtonElement>('.about-ram-btn');
+  const ramList = document.querySelector<HTMLElement>('.about-ram-popup');
+  if (!ramBtn || !ramList) return;
+
+  ramBtn.addEventListener('click', () => {
+    const isOpen = ramBtn.getAttribute('aria-expanded') === 'true';
+    ramBtn.setAttribute('aria-expanded', String(!isOpen));
+    ramList.hidden = isOpen;
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !ramList.hidden) {
+      ramList.hidden = true;
+      ramBtn.setAttribute('aria-expanded', 'false');
+      ramBtn.focus();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (
+      !ramList.hidden &&
+      !ramBtn.contains(e.target as Node) &&
+      !ramList.contains(e.target as Node)
+    ) {
+      ramList.hidden = true;
+      ramBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+})();
+</script>
