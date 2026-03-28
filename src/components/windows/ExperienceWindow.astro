@@ -1,15 +1,14 @@
 ---
 import type { Lang } from '../../i18n/utils';
-import { useTranslations } from '../../i18n/utils';
 
 interface Props {
   lang: Lang;
 }
 
 const { lang } = Astro.props;
-const t = useTranslations(lang);
 
 interface TimelineItem {
+  hash: string;
   period: string;
   title: Record<'fr' | 'en', string>;
   company: string;
@@ -21,7 +20,8 @@ interface TimelineItem {
 
 const experiences: TimelineItem[] = [
   {
-    period: '2026 (2 mois)',
+    hash: 'a1b2c3',
+    period: '2026',
     title: { fr: 'Refonte site WordPress — Stage CDUI', en: 'WordPress Redesign — UI Designer Intern' },
     company: 'NAPOCOM',
     location: 'Remote/France',
@@ -33,6 +33,7 @@ const experiences: TimelineItem[] = [
     current: true,
   },
   {
+    hash: 'd4e5f6',
     period: '2023 — 2024',
     title: { fr: 'Vendeur Polyvalent (CDI)', en: 'Multiskilled Salesperson (CDI)' },
     company: 'BLACKSTORE France',
@@ -44,7 +45,8 @@ const experiences: TimelineItem[] = [
     tags: ['Vente', 'Conseil', 'Merchandising', 'Gestion'],
   },
   {
-    period: '2022 (Stage)',
+    hash: 'g7h8i9',
+    period: '2022',
     title: { fr: 'Création de maquette — Stage', en: 'Mockup Creation — Intern' },
     company: 'E-NAUMAD',
     location: 'France',
@@ -55,6 +57,7 @@ const experiences: TimelineItem[] = [
     tags: ['WordPress', 'PHP', 'CSS', 'Photoshop', 'Figma'],
   },
   {
+    hash: 'j1k2l3',
     period: '2015 — 2021',
     title: { fr: 'Vendeur Polyvalent (CDI)', en: 'Multiskilled Salesperson (CDI)' },
     company: 'IKEA',
@@ -69,6 +72,7 @@ const experiences: TimelineItem[] = [
 
 const education: TimelineItem[] = [
   {
+    hash: 'm4n5o6',
     period: '2025 — 2026',
     title: { fr: 'Concepteur Designer UI (Niveau 6)', en: 'UI Designer Conceptor (Level 6)' },
     company: 'GRETA Alsace Sud',
@@ -78,8 +82,10 @@ const education: TimelineItem[] = [
       en: 'Level: In progress. Design for WordPress & UI/UX. Adobe Suite. HTML5/CSS3 and Symfony Framework.',
     },
     tags: ['Adobe Suite', 'Symfony', 'WordPress'],
+    current: true,
   },
   {
+    hash: 'p7q8r9',
     period: '2024',
     title: { fr: 'Développeur Web & Mobile (Niveau 5)', en: 'Web & Mobile Developer (Level 5)' },
     company: 'Elan Formation',
@@ -91,6 +97,7 @@ const education: TimelineItem[] = [
     tags: ['JS/PHP', 'Symfony', 'SQL', 'Agile'],
   },
   {
+    hash: 's1t2u3',
     period: '2022 — 2023',
     title: { fr: 'Infographiste Metteur en Page (Niveau 4)', en: 'Graphic Designer Page Setter (Level 4)' },
     company: 'GRETA Sud Alsace',
@@ -102,43 +109,102 @@ const education: TimelineItem[] = [
     tags: ['InDesign', 'Photoshop', 'Illustrator'],
   },
 ];
+
+const labels = {
+  fr: {
+    tabExp: 'Expériences',
+    tabEdu: 'Formation',
+    branch: '⎇ main | albert-lecomte/career',
+    current: 'Actuel',
+    headBadge: 'HEAD → current',
+    stageLabel: 'Stage',
+    diplomaLabel: 'Diplôme',
+    inProgressLabel: 'En cours',
+  },
+  en: {
+    tabExp: 'Experience',
+    tabEdu: 'Education',
+    branch: '⎇ main | albert-lecomte/career',
+    current: 'Current',
+    headBadge: 'HEAD → current',
+    stageLabel: 'Intern',
+    diplomaLabel: 'Degree',
+    inProgressLabel: 'In Progress',
+  },
+} as const;
+
+const l = labels[lang];
 ---
 
-<div class="exp-win">
-  <!-- Experience -->
-  <div class="exp-section">
-    <div class="exp-section__header">
-      <span class="win-label">{t('experience.title')}</span>
-      <h2 class="win-title">{t('experience.subtitle')}</h2>
-    </div>
+<div class="gitlog-win" role="region" aria-label={lang === 'fr' ? 'Historique de carrière' : 'Career history'}>
 
-    <ol class="timeline" aria-label={lang === 'fr' ? 'Expériences professionnelles' : 'Work experience'}>
+  <!-- Toolbar -->
+  <div class="gitlog-toolbar">
+    <span class="gitlog-branch" aria-label={lang === 'fr' ? 'Branche Git' : 'Git branch'}>
+      {l.branch}
+    </span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="gitlog-tabs" role="tablist" aria-label={lang === 'fr' ? 'Onglets' : 'Tabs'}>
+    <button
+      class="gitlog-tab gitlog-tab--active"
+      role="tab"
+      id="gitlog-tab-exp"
+      aria-selected="true"
+      aria-controls="gitlog-panel-exp"
+      type="button"
+    >
+      <span aria-hidden="true">💼</span>
+      {l.tabExp}
+    </button>
+    <button
+      class="gitlog-tab"
+      role="tab"
+      id="gitlog-tab-edu"
+      aria-selected="false"
+      aria-controls="gitlog-panel-edu"
+      type="button"
+    >
+      <span aria-hidden="true">🎓</span>
+      {l.tabEdu}
+    </button>
+  </div>
+
+  <!-- Panel: Experiences -->
+  <div
+    class="gitlog-panel"
+    id="gitlog-panel-exp"
+    role="tabpanel"
+    aria-labelledby="gitlog-tab-exp"
+  >
+    <ol class="gitlog-list" aria-label={lang === 'fr' ? 'Expériences professionnelles' : 'Professional experience'}>
       {experiences.map((item, i) => (
-        <li class="timeline__item">
-          <div class="timeline__marker" aria-hidden="true">
-            <div class={`timeline__dot timeline__dot--exp${item.current ? ' timeline__dot--current' : ''}`}></div>
-            {i < experiences.length - 1 && <div class="timeline__line timeline__line--exp"></div>}
+        <li class="gitlog-commit">
+          <div class="gitlog-commit__graph" aria-hidden="true">
+            <span class={`gitlog-dot ${item.current ? 'gitlog-dot--current' : 'gitlog-dot--exp'}`}></span>
+            {i < experiences.length - 1 && <span class="gitlog-line gitlog-line--exp"></span>}
           </div>
-
-          <div class="timeline__content">
-            <div class="timeline__meta">
-              <time class="timeline__period">{item.period}</time>
+          <div class="gitlog-commit__body">
+            <div class="gitlog-commit__meta">
+              <code class="gitlog-hash">{item.hash}</code>
               {item.current && (
-                <span class="timeline__badge" aria-label={lang === 'fr' ? 'Poste actuel' : 'Current position'}>
-                  {lang === 'fr' ? 'Actuel' : 'Current'}
+                <span class="gitlog-head-badge" aria-label={lang === 'fr' ? 'Poste actuel' : 'Current position'}>
+                  {l.headBadge}
                 </span>
               )}
+              <time class="gitlog-period">{item.period}</time>
             </div>
-
-            <h3 class="timeline__title">{item.title[lang]}</h3>
-            <p class="timeline__company">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              {item.company} — {item.location}
+            <h3 class="gitlog-commit__title">{item.title[lang]}</h3>
+            <p class="gitlog-commit__author">
+              <span aria-hidden="true">⎇</span>
+              {item.company}
+              <span class="gitlog-sep" aria-hidden="true">—</span>
+              <span class="gitlog-location">{item.location}</span>
             </p>
-            <p class="timeline__desc">{item.description[lang]}</p>
-
-            <ul class="timeline__tags" role="list">
-              {item.tags.map(tag => <li class="exp-tag">{tag}</li>)}
+            <p class="gitlog-commit__message">"{item.description[lang]}"</p>
+            <ul class="gitlog-tags" role="list" aria-label={lang === 'fr' ? 'Technologies' : 'Technologies'}>
+              {item.tags.map(tag => <li class="gitlog-tag">{tag}</li>)}
             </ul>
           </div>
         </li>
@@ -146,196 +212,299 @@ const education: TimelineItem[] = [
     </ol>
   </div>
 
-  <!-- Education -->
-  <div class="exp-section">
-    <div class="exp-section__header">
-      <span class="win-label">{t('education.title')}</span>
-      <h2 class="win-title">{t('education.subtitle')}</h2>
-    </div>
-
-    <ol class="timeline" aria-label={lang === 'fr' ? 'Formation académique' : 'Academic background'}>
+  <!-- Panel: Education -->
+  <div
+    class="gitlog-panel gitlog-panel--hidden"
+    id="gitlog-panel-edu"
+    role="tabpanel"
+    aria-labelledby="gitlog-tab-edu"
+    tabindex="0"
+  >
+    <ol class="gitlog-list" aria-label={lang === 'fr' ? 'Formation académique' : 'Academic background'}>
       {education.map((item, i) => (
-        <li class="timeline__item">
-          <div class="timeline__marker" aria-hidden="true">
-            <div class="timeline__dot timeline__dot--edu"></div>
-            {i < education.length - 1 && <div class="timeline__line timeline__line--edu"></div>}
+        <li class="gitlog-commit">
+          <div class="gitlog-commit__graph" aria-hidden="true">
+            <span class={`gitlog-dot ${item.current ? 'gitlog-dot--edu-current' : 'gitlog-dot--edu'}`}></span>
+            {i < education.length - 1 && <span class="gitlog-line gitlog-line--edu"></span>}
           </div>
-
-          <div class="timeline__content">
-            <time class="timeline__period">{item.period}</time>
-            <h3 class="timeline__title">{item.title[lang]}</h3>
-            <p class="timeline__company">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-              {item.company} — {item.location}
+          <div class="gitlog-commit__body">
+            <div class="gitlog-commit__meta">
+              <code class="gitlog-hash gitlog-hash--edu">{item.hash}</code>
+              {item.current && (
+                <span class="gitlog-head-badge gitlog-head-badge--edu">
+                  {l.inProgressLabel}
+                </span>
+              )}
+              <time class="gitlog-period">{item.period}</time>
+            </div>
+            <h3 class="gitlog-commit__title">{item.title[lang]}</h3>
+            <p class="gitlog-commit__author gitlog-commit__author--edu">
+              <span aria-hidden="true">🎓</span>
+              {item.company}
+              <span class="gitlog-sep" aria-hidden="true">—</span>
+              <span class="gitlog-location">{item.location}</span>
             </p>
-            <p class="timeline__desc">{item.description[lang]}</p>
-            <ul class="timeline__tags" role="list">
-              {item.tags.map(tag => <li class="exp-tag exp-tag--edu">{tag}</li>)}
+            <p class="gitlog-commit__message">"{item.description[lang]}"</p>
+            <ul class="gitlog-tags" role="list" aria-label={lang === 'fr' ? 'Technologies' : 'Technologies'}>
+              {item.tags.map(tag => <li class="gitlog-tag gitlog-tag--edu">{tag}</li>)}
             </ul>
           </div>
         </li>
       ))}
     </ol>
   </div>
+
 </div>
 
 <style>
-.exp-win {
+/* ── Root ──────────────────────────────────────────────────────── */
+.gitlog-win {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  background: #06050F;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-size: 0.8125rem;
 }
 
-.win-label {
+/* ── Toolbar ───────────────────────────────────────────────────── */
+.gitlog-toolbar {
+  padding: 0.4rem 0.875rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.18);
+  flex-shrink: 0;
+}
+
+.gitlog-branch {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: #4ade80;
+  letter-spacing: 0.03em;
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────── */
+.gitlog-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+  flex-shrink: 0;
+}
+
+.gitlog-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #94A3B8;
   font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #F59E0B;
-  display: block;
-  margin-bottom: 0.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
-.win-title {
-  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-  font-weight: 700;
-  color: #FAF5FF;
-  margin: 0;
+.gitlog-tab:hover {
+  color: #C4B5FD;
 }
 
-.exp-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.gitlog-tab--active {
+  color: #A78BFA;
+  border-bottom-color: #8B5CF6;
 }
 
-.exp-section__header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
+.gitlog-tab:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: -2px;
 }
 
-.timeline {
-  display: flex;
-  flex-direction: column;
+/* ── Panels ────────────────────────────────────────────────────── */
+.gitlog-panel {
+  overflow-y: auto;
+  padding: 0.875rem 0.875rem 0.875rem 0.75rem;
+}
+
+.gitlog-panel--hidden {
+  display: none;
+}
+
+/* ── Commit list ───────────────────────────────────────────────── */
+.gitlog-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.timeline__item {
+.gitlog-commit {
   display: grid;
   grid-template-columns: 1.5rem 1fr;
-  gap: 1rem;
-  padding-bottom: 1.125rem;
+  gap: 0.75rem;
+  padding-bottom: 0;
 }
 
-.timeline__marker {
+/* ── Graph column ──────────────────────────────────────────────── */
+.gitlog-commit__graph {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 1rem;
+  padding-top: 0.875rem;
+  flex-shrink: 0;
 }
 
-.timeline__dot {
-  width: 10px;
-  height: 10px;
+.gitlog-dot {
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
   z-index: 1;
-  border: 2px solid #8B5CF6;
-  background: #08060F;
+  border: 2px solid;
 }
 
-.timeline__dot--exp {
+.gitlog-dot--exp {
   border-color: #8B5CF6;
+  background: #06050F;
 }
 
-.timeline__dot--current {
-  background: #8B5CF6;
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
-}
-
-.timeline__dot--edu {
+.gitlog-dot--current {
   border-color: #F59E0B;
+  background: #F59E0B;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7), 0 0 20px rgba(245, 158, 11, 0.3);
 }
 
-.timeline__line {
+.gitlog-dot--edu {
+  border-color: #A78BFA;
+  background: #06050F;
+}
+
+.gitlog-dot--edu-current {
+  border-color: #A78BFA;
+  background: #A78BFA;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.6);
+}
+
+.gitlog-line {
   width: 2px;
   flex: 1;
-  margin-top: 4px;
+  min-height: 1rem;
+  margin-top: 3px;
 }
 
-.timeline__line--exp {
-  background: linear-gradient(to bottom, rgba(139, 92, 246, 0.4), transparent);
+.gitlog-line--exp {
+  background: linear-gradient(to bottom, rgba(139, 92, 246, 0.5), rgba(139, 92, 246, 0.1));
 }
 
-.timeline__line--edu {
-  background: linear-gradient(to bottom, rgba(245, 158, 11, 0.4), transparent);
+.gitlog-line--edu {
+  background: linear-gradient(to bottom, rgba(167, 139, 250, 0.5), rgba(167, 139, 250, 0.1));
 }
 
-.timeline__content {
-  background: rgba(139, 92, 246, 0.05);
-  border: 1px solid rgba(139, 92, 246, 0.14);
-  border-radius: 0.625rem;
-  padding: 0.875rem 1rem;
+/* ── Commit body ───────────────────────────────────────────────── */
+.gitlog-commit__body {
+  padding: 0.75rem 0 1rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
-.timeline__meta {
+.gitlog-list li:last-child .gitlog-commit__body {
+  border-bottom: none;
+}
+
+.gitlog-commit__meta {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
-.timeline__period {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #8B5CF6;
-  text-transform: uppercase;
+.gitlog-hash {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: #F59E0B;
+  background: rgba(245, 158, 11, 0.08);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
   letter-spacing: 0.04em;
 }
 
-.timeline__badge {
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
+.gitlog-hash--edu {
+  color: #A78BFA;
+  background: rgba(167, 139, 250, 0.08);
+}
+
+.gitlog-head-badge {
   font-size: 0.65rem;
   font-weight: 700;
-  background: rgba(74, 222, 128, 0.12);
-  border: 1px solid rgba(74, 222, 128, 0.3);
-  color: #4ade80;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #F59E0B;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  letter-spacing: 0.02em;
 }
 
-.timeline__title {
-  font-size: 0.9375rem;
+.gitlog-head-badge--edu {
+  background: rgba(167, 139, 250, 0.12);
+  border-color: rgba(167, 139, 250, 0.35);
+  color: #A78BFA;
+}
+
+.gitlog-period {
+  font-size: 0.7rem;
+  color: #475569;
+  margin-left: auto;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.gitlog-commit__title {
+  font-size: 0.9rem;
   font-weight: 700;
   color: #FAF5FF;
   margin: 0;
   line-height: 1.3;
 }
 
-.timeline__company {
+.gitlog-commit__author {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
+  color: #8B5CF6;
+  margin: 0;
   font-weight: 500;
-  color: #F59E0B;
-  margin: 0;
 }
 
-.timeline__desc {
-  font-size: 0.8125rem;
+.gitlog-commit__author--edu {
+  color: #A78BFA;
+}
+
+.gitlog-sep {
+  color: rgba(139, 92, 246, 0.3);
+}
+
+.gitlog-location {
+  color: #94A3B8;
+}
+
+.gitlog-commit__message {
+  font-size: 0.8rem;
   color: #C4B5FD;
-  line-height: 1.7;
+  line-height: 1.65;
   margin: 0;
+  font-style: italic;
+  padding-left: 0.5rem;
+  border-left: 2px solid rgba(139, 92, 246, 0.2);
 }
 
-.timeline__tags {
+/* ── Tags ──────────────────────────────────────────────────────── */
+.gitlog-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem;
@@ -344,19 +513,49 @@ const education: TimelineItem[] = [
   margin: 0.25rem 0 0;
 }
 
-.exp-tag {
-  padding: 0.15rem 0.5rem;
-  border-radius: 0.375rem;
+.gitlog-tag {
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.25rem;
   font-size: 0.65rem;
   font-weight: 600;
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.2);
   color: #A78BFA;
+  font-family: 'Consolas', 'Courier New', monospace;
 }
 
-.exp-tag--edu {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: rgba(245, 158, 11, 0.2);
-  color: #F59E0B;
+.gitlog-tag--edu {
+  background: rgba(167, 139, 250, 0.08);
+  border-color: rgba(167, 139, 250, 0.2);
+  color: #C4B5FD;
 }
 </style>
+
+<script>
+(function () {
+  const win = document.querySelector<HTMLElement>('.gitlog-win');
+  if (!win) return;
+
+  const tabs   = win.querySelectorAll<HTMLButtonElement>('.gitlog-tab');
+  const panels = win.querySelectorAll<HTMLElement>('.gitlog-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetId = tab.getAttribute('aria-controls');
+      if (!targetId) return;
+
+      tabs.forEach(t => {
+        t.classList.remove('gitlog-tab--active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      panels.forEach(p => p.classList.add('gitlog-panel--hidden'));
+
+      tab.classList.add('gitlog-tab--active');
+      tab.setAttribute('aria-selected', 'true');
+
+      const target = win.querySelector<HTMLElement>(`#${targetId}`);
+      target?.classList.remove('gitlog-panel--hidden');
+    });
+  });
+})();
+</script>

@@ -1,124 +1,245 @@
 ---
 import { getCollection } from 'astro:content';
 import type { Lang } from '../../i18n/utils';
-import { useTranslations } from '../../i18n/utils';
 
 interface Props {
   lang: Lang;
 }
 
 const { lang } = Astro.props;
-const t = useTranslations(lang);
 
 const allHobbies = await getCollection('hobbies');
 const hobbiesItems = allHobbies
   .map(h => ({ ...h.data, id: h.id }))
   .sort((a, b) => a.order - b.order);
+
+// Build terminal lines per hobby
+interface TermLine {
+  type: 'header' | 'check' | 'detail' | 'blank' | 'prompt' | 'command' | 'system';
+  text: string;
+  delay: number; // in ms
+}
+
+const sysHeader = lang === 'fr'
+  ? 'Microsoft Windows Albert.exe [Version 1.0.2026]'
+  : 'Microsoft Windows Albert.exe [Version 1.0.2026]';
+
+const copyright = lang === 'fr'
+  ? '(c) Albert Lecomte Corp. Tous droits réservés.'
+  : '(c) Albert Lecomte Corp. All rights reserved.';
+
+const whoamiResult = lang === 'fr'
+  ? 'Albert Lecomte \u2014 Concepteur Designer UI, Geek & Créatif'
+  : 'Albert Lecomte \u2014 UI Designer Conceptor, Geek & Creative';
+
+const loadingText = lang === 'fr'
+  ? 'Chargement des passions en cours...'
+  : 'Loading passions...';
+
+const listCmd = lang === 'fr' ? 'hobbies --list --verbose' : 'hobbies --list --verbose';
+
+// Build lines with delays
+const lines: TermLine[] = [];
+let delay = 0;
+const BASE = 120; // ms per line
+
+function addLine(type: TermLine['type'], text: string) {
+  lines.push({ type, text, delay });
+  delay += BASE;
+}
+
+addLine('system', sysHeader);
+addLine('system', copyright);
+addLine('blank', '');
+addLine('prompt', 'whoami');
+addLine('detail', whoamiResult);
+addLine('blank', '');
+addLine('prompt', listCmd);
+addLine('blank', '');
+addLine('detail', loadingText);
+addLine('blank', '');
+
+hobbiesItems.forEach(h => {
+  const name = lang === 'fr' ? h.name : h.nameEn;
+  const desc = lang === 'fr' ? h.description : h.descriptionEn;
+  addLine('check', `${h.icon}  ${name}`);
+  // Split description into lines at sentence boundaries (rough split by '. ')
+  const parts = desc.split('. ').filter(Boolean);
+  parts.forEach((part, i) => {
+    const text = i < parts.length - 1 ? `${part}.` : part;
+    addLine('detail', `    > ${text}`);
+  });
+  addLine('blank', '');
+});
+
+// Remove trailing blank
+if (lines[lines.length - 1]?.type === 'blank') {
+  lines.pop();
+}
+
+// Final prompt (cursor)
+addLine('prompt', '');
 ---
 
-<div class="hob-win">
-  <div class="hob-win__header">
-    <span class="win-label">{t('hobbies.title')}</span>
-    <h2 class="win-title">{t('hobbies.subtitle')}</h2>
+<div class="cmd-outer" role="region" aria-label={lang === 'fr' ? 'Passions — Terminal' : 'Hobbies — Terminal'}>
+
+  <!-- Inner title bar simulation -->
+  <div class="cmd-titlebar" aria-hidden="true">
+    <span class="cmd-titlebar__text">
+      {lang === 'fr' ? 'Invite de commandes — Albert.exe' : 'Command Prompt — Albert.exe'}
+    </span>
   </div>
 
-  <ul class="hob-win__grid" role="list">
-    {hobbiesItems.map(hobby => (
-      <li class="hob-card" role="listitem">
-        <div class="hob-card__icon" aria-hidden="true">
-          {hobby.icon}
+  <!-- Terminal body -->
+  <div class="cmd-body" aria-label={lang === 'fr' ? 'Sortie du terminal' : 'Terminal output'} role="log" aria-live="off">
+    {lines.map((line, i) => {
+      const isLastLine = i === lines.length - 1;
+      return (
+        <div
+          class="cmd-line"
+          style={`animation-delay: ${line.delay}ms`}
+          aria-hidden={line.type === 'blank' || line.type === 'prompt' ? 'true' : undefined}
+        >
+          {line.type === 'prompt' && (
+            <span class="cmd-prompt-prefix">C:\Users\Albert&gt;&nbsp;</span>
+          )}
+          {line.type === 'prompt' && line.text && (
+            <span class="cmd-command">{line.text}</span>
+          )}
+          {line.type === 'prompt' && !line.text && isLastLine && (
+            <span class="cmd-cursor" aria-hidden="true">█</span>
+          )}
+          {line.type === 'system' && (
+            <span class="cmd-sys">{line.text}</span>
+          )}
+          {line.type === 'check' && (
+            <span class="cmd-check">
+              <span class="cmd-check__marker" aria-hidden="true">[✓]&nbsp;</span>
+              <span class="cmd-check__name">{line.text}</span>
+            </span>
+          )}
+          {line.type === 'detail' && line.text !== '' && (
+            <span class="cmd-detail">{line.text}</span>
+          )}
+          {line.type === 'command' && (
+            <span class="cmd-command">{line.text}</span>
+          )}
+          {line.type === 'blank' && (
+            <span>&nbsp;</span>
+          )}
         </div>
-        <div class="hob-card__content">
-          <h3 class="hob-card__name">
-            {lang === 'en' ? hobby.nameEn : hobby.name}
-          </h3>
-          <p class="hob-card__desc">
-            {lang === 'en' ? hobby.descriptionEn : hobby.description}
-          </p>
-        </div>
-      </li>
-    ))}
-  </ul>
+      );
+    })}
+  </div>
 </div>
 
 <style>
-.hob-win {
+/* ── Outer wrapper ─────────────────────────────────────────────── */
+.cmd-outer {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  background: #0C0C0C;
+  border: 1px solid #333;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  font-family: 'Consolas', 'Courier New', monospace;
 }
 
-.win-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #F59E0B;
+/* ── Title bar ─────────────────────────────────────────────────── */
+.cmd-titlebar {
+  background: #1A1A2E;
+  border-bottom: 1px solid #222;
+  padding: 0.3rem 0.75rem;
+  flex-shrink: 0;
+}
+
+.cmd-titlebar__text {
+  font-size: 0.7rem;
+  color: #AAAACC;
+  letter-spacing: 0.02em;
+}
+
+/* ── Terminal body ─────────────────────────────────────────────── */
+.cmd-body {
+  padding: 0.75rem 1rem;
+  overflow-y: auto;
+  max-height: 480px;
+}
+
+/* ── Lines ─────────────────────────────────────────────────────── */
+.cmd-line {
   display: block;
-  margin-bottom: 0.25rem;
+  line-height: 1.6;
+  min-height: 1.4em;
+  opacity: 0;
+  animation: cmd-reveal 0.01s forwards;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.win-title {
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
+@keyframes cmd-reveal {
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmd-line {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* ── Line types ────────────────────────────────────────────────── */
+.cmd-sys {
+  font-size: 0.75rem;
+  color: #8888CC;
+}
+
+.cmd-prompt-prefix {
+  font-size: 0.8rem;
+  color: #FFFFFF;
   font-weight: 700;
-  color: #FAF5FF;
-  margin: 0;
 }
 
-.hob-win__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.cmd-command {
+  font-size: 0.8rem;
+  color: #F59E0B;
 }
 
-.hob-card {
-  background: rgba(139, 92, 246, 0.06);
-  border: 1px solid rgba(139, 92, 246, 0.18);
-  border-radius: 0.875rem;
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+.cmd-check {
+  display: inline;
 }
 
-.hob-card:hover {
-  border-color: rgba(139, 92, 246, 0.4);
-  transform: translateY(-3px);
-}
-
-.hob-card__icon {
-  font-size: 2rem;
-  width: 3.25rem;
-  height: 3.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  border-radius: 0.75rem;
-}
-
-.hob-card__content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.hob-card__name {
-  font-size: 1rem;
+.cmd-check__marker {
+  font-size: 0.8rem;
+  color: #4ADE80;
   font-weight: 700;
-  color: #FAF5FF;
-  margin: 0;
 }
 
-.hob-card__desc {
-  font-size: 0.8125rem;
-  color: #C4B5FD;
-  line-height: 1.65;
-  margin: 0;
+.cmd-check__name {
+  font-size: 0.8rem;
+  color: #A78BFA;
+  font-weight: 700;
+}
+
+.cmd-detail {
+  font-size: 0.775rem;
+  color: #CCCCCC;
+}
+
+/* ── Cursor blink ──────────────────────────────────────────────── */
+.cmd-cursor {
+  display: inline-block;
+  color: #CCCCCC;
+  font-weight: 700;
+  animation: cmd-blink 1.2s step-end infinite;
+}
+
+@keyframes cmd-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmd-cursor { animation: none; }
 }
 </style>

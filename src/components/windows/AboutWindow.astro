@@ -1,177 +1,467 @@
 ---
 import type { Lang } from '../../i18n/utils';
-import { useTranslations } from '../../i18n/utils';
 
 interface Props {
   lang: Lang;
 }
 
 const { lang } = Astro.props;
-const t = useTranslations(lang);
 
-const stats = [
-  { value: '5+',   key: 'about.years' },
-  { value: '40+',  key: 'about.projects' },
-  { value: '30+',  key: 'about.clients' },
-  { value: '100%', key: 'about.satisfaction' },
-] as const;
+const labels = {
+  fr: {
+    windowTitle: 'Propriétés système — Albert Lecomte',
+    headerSection: 'Informations système',
+    fullName: 'Nom complet',
+    jobTitle: 'Titre',
+    version: 'Version',
+    specialization: 'Spécialisation',
+    rqth: 'Certification RQTH',
+    languages: 'Langues',
+    hwSpecs: 'Spécifications matérielles',
+    cpu: 'CPU : WordPress & UI',
+    ram: 'RAM : Projets livrés',
+    gpu: 'GPU : Clients satisfaits',
+    perf: 'PERF : Satisfaction',
+    downloadCv: 'Télécharger CV',
+    contact: 'Contact',
+    location: 'Mulhouse, Alsace',
+    available: 'Disponible',
+    versionValue: 'En recherche active (CDI)',
+    langValue: 'Français (natif), Anglais (B2)',
+    specCpu: '5+ ans d\'XP',
+    specRam: '40+',
+    specGpu: '30+',
+    specPerf: '100%',
+  },
+  en: {
+    windowTitle: 'System Properties — Albert Lecomte',
+    headerSection: 'System Information',
+    fullName: 'Full Name',
+    jobTitle: 'Title',
+    version: 'Version',
+    specialization: 'Specialization',
+    rqth: 'RQTH Certification',
+    languages: 'Languages',
+    hwSpecs: 'Hardware Specifications',
+    cpu: 'CPU: WordPress & UI',
+    ram: 'RAM: Projects delivered',
+    gpu: 'GPU: Satisfied clients',
+    perf: 'PERF: Satisfaction rate',
+    downloadCv: 'Download CV',
+    contact: 'Contact',
+    location: 'Mulhouse, Alsace',
+    available: 'Available',
+    versionValue: 'Actively seeking (CDI)',
+    langValue: 'French (native), English (B2)',
+    specCpu: '5+ yrs XP',
+    specRam: '40+',
+    specGpu: '30+',
+    specPerf: '100%',
+  },
+} as const;
+
+const l = labels[lang];
+
+const tableRows = [
+  { key: l.fullName,       value: 'Albert Lecomte' },
+  { key: l.jobTitle,       value: lang === 'fr' ? 'Concepteur Designer UI' : 'UI Designer Conceptor' },
+  { key: l.version,        value: l.versionValue },
+  { key: l.specialization, value: lang === 'fr' ? 'WordPress & UI/UX Design' : 'WordPress & UI/UX Design' },
+  { key: l.rqth,           value: lang === 'fr' ? 'Reconnu' : 'Recognized' },
+  { key: l.languages,      value: l.langValue },
+];
+
+const specs = [
+  { label: l.cpu,  value: l.specCpu,  pct: 80 },
+  { label: l.ram,  value: l.specRam,  pct: 100 },
+  { label: l.gpu,  value: l.specGpu,  pct: 100 },
+  { label: l.perf, value: l.specPerf, pct: 100 },
+];
 ---
 
-<div class="about-win">
-  <div class="about-win__header">
-    <span class="win-label">{t('about.title')}</span>
-    <h2 class="win-title">{t('about.subtitle')}</h2>
+<div class="sysinfo-win" role="region" aria-label={l.windowTitle}>
+
+  <!-- Title bar -->
+  <div class="sysinfo-titlebar" aria-hidden="true">
+    <span class="sysinfo-titlebar__icon">🖥️</span>
+    <span class="sysinfo-titlebar__text">{l.windowTitle}</span>
   </div>
 
-  <div class="about-win__grid">
-    <div class="about-win__content">
-      <p class="about-win__text">{t('about.p1')}</p>
-      <p class="about-win__text">{t('about.p2')}</p>
-      <p class="about-win__text">{t('about.p3')}</p>
+  <!-- Body -->
+  <div class="sysinfo-body">
 
-      <a
-        href="/cv/albert-lecomte-cv.pdf"
-        class="about-win__cv-btn"
-        download
-        aria-label={`${t('about.cv.download')} (PDF)`}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
-        </svg>
-        {t('about.cv.download')}
-      </a>
-    </div>
+    <!-- Left column: identity -->
+    <aside class="sysinfo-identity" aria-label={lang === 'fr' ? 'Identité' : 'Identity'}>
+      <div class="sysinfo-avatar" aria-hidden="true">
+        <span class="sysinfo-avatar__emoji">👨‍💻</span>
+      </div>
+      <p class="sysinfo-identity__name">Albert Lecomte</p>
+      <p class="sysinfo-identity__title">
+        {lang === 'fr' ? 'Concepteur Designer UI' : 'UI Designer Conceptor'}
+      </p>
+      <div class="sysinfo-badges">
+        <span class="sysinfo-badge sysinfo-badge--location">
+          <span aria-hidden="true">📍</span>
+          {l.location}
+        </span>
+        <span class="sysinfo-badge sysinfo-badge--available">
+          <span aria-hidden="true">🟢</span>
+          {l.available}
+        </span>
+      </div>
+    </aside>
 
-    <div class="about-win__stats" aria-label={lang === 'fr' ? 'Statistiques' : 'Statistics'}>
-      {stats.map(({ value, key }) => (
-        <div class="stat-card">
-          <span class="stat-card__value">{value}</span>
-          <span class="stat-card__label">{t(key)}</span>
+    <!-- Right column: table + specs -->
+    <div class="sysinfo-details">
+
+      <!-- Properties table -->
+      <section aria-label={l.headerSection}>
+        <div class="sysinfo-section-header">
+          <span class="sysinfo-section-icon" aria-hidden="true">ℹ️</span>
+          <span class="sysinfo-section-title">{l.headerSection}</span>
         </div>
-      ))}
+        <dl class="sysinfo-table">
+          {tableRows.map((row, i) => (
+            <div class={`sysinfo-table__row ${i % 2 === 0 ? 'sysinfo-table__row--even' : ''}`}>
+              <dt class="sysinfo-table__key">{row.key}</dt>
+              <dd class="sysinfo-table__value">{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <!-- Hardware specs -->
+      <section class="sysinfo-hw" aria-label={l.hwSpecs}>
+        <div class="sysinfo-section-header">
+          <span class="sysinfo-section-icon" aria-hidden="true">⚡</span>
+          <span class="sysinfo-section-title">{l.hwSpecs}</span>
+        </div>
+        <div class="sysinfo-specs">
+          {specs.map(spec => (
+            <div class="sysinfo-spec">
+              <div class="sysinfo-spec__header">
+                <span class="sysinfo-spec__label">{spec.label}</span>
+                <span class="sysinfo-spec__value">{spec.value}</span>
+              </div>
+              <div
+                class="sysinfo-spec__bar"
+                role="progressbar"
+                aria-valuenow={spec.pct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={`${spec.label}: ${spec.value}`}
+              >
+                <div class="sysinfo-spec__fill" style={`width: ${spec.pct}%`}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Action buttons -->
+      <div class="sysinfo-actions">
+        <a
+          href="/cv/albert-lecomte-cv.pdf"
+          download
+          class="sysinfo-btn sysinfo-btn--primary"
+          aria-label={`${l.downloadCv} (PDF)`}
+        >
+          <span aria-hidden="true">📥</span>
+          {l.downloadCv}
+        </a>
+        <a
+          href="#window-contact"
+          class="sysinfo-btn"
+          aria-label={l.contact}
+        >
+          <span aria-hidden="true">📧</span>
+          {l.contact}
+        </a>
+      </div>
+
     </div>
   </div>
 </div>
 
 <style>
-.about-win {
+/* ── Container ─────────────────────────────────────────────────── */
+.sysinfo-win {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  background: #0D0D1A;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-size: 0.8125rem;
 }
 
-.about-win__header {
+/* ── Title bar ─────────────────────────────────────────────────── */
+.sysinfo-titlebar {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.25) 0%, rgba(139, 92, 246, 0.08) 100%);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.35);
+  user-select: none;
 }
 
-.win-label {
+.sysinfo-titlebar__icon {
+  font-size: 0.875rem;
+}
+
+.sysinfo-titlebar__text {
   font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #F59E0B;
-  display: block;
+  font-weight: 600;
+  color: #C4B5FD;
+  letter-spacing: 0.02em;
 }
 
-.win-title {
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 700;
-  color: #FAF5FF;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.about-win__grid {
+/* ── Body layout ───────────────────────────────────────────────── */
+.sysinfo-body {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 35% 65%;
+  min-height: 0;
 }
 
-@media (min-width: 500px) {
-  .about-win__grid {
-    grid-template-columns: 3fr 2fr;
-    align-items: start;
+@media (max-width: 520px) {
+  .sysinfo-body {
+    grid-template-columns: 1fr;
   }
 }
 
-.about-win__content {
+/* ── Left: identity ────────────────────────────────────────────── */
+.sysinfo-identity {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-}
-
-.about-win__text {
-  font-size: 0.9375rem;
-  color: #C4B5FD;
-  line-height: 1.8;
-  margin: 0;
-}
-
-.about-win__cv-btn {
-  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #F59E0B;
-  text-decoration: none;
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  align-self: flex-start;
+  gap: 0.625rem;
+  padding: 1.5rem 1rem;
+  border-right: 1px solid rgba(139, 92, 246, 0.2);
+  text-align: center;
+}
+
+.sysinfo-avatar {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.05) 70%);
+  border: 2px solid rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 40px rgba(139, 92, 246, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sysinfo-avatar__emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.sysinfo-identity__name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #FAF5FF;
+  margin: 0;
   margin-top: 0.25rem;
 }
 
-.about-win__cv-btn:hover {
-  background: rgba(245, 158, 11, 0.25);
+.sysinfo-identity__title {
+  font-size: 0.75rem;
+  color: #F59E0B;
+  margin: 0;
+  font-weight: 600;
+}
+
+.sysinfo-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.sysinfo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.sysinfo-badge--location {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: #C4B5FD;
+}
+
+.sysinfo-badge--available {
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  color: #4ade80;
+}
+
+/* ── Right: details ────────────────────────────────────────────── */
+.sysinfo-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Section header ────────────────────────────────────────────── */
+.sysinfo-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.875rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.sysinfo-section-icon {
+  font-size: 0.75rem;
+}
+
+.sysinfo-section-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8B5CF6;
+}
+
+/* ── Properties table ──────────────────────────────────────────── */
+.sysinfo-table {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.sysinfo-table__row {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  padding: 0.4rem 0.875rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+}
+
+.sysinfo-table__row--even {
+  background: rgba(139, 92, 246, 0.04);
+}
+
+.sysinfo-table__key {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94A3B8;
+  padding-right: 0.5rem;
+}
+
+.sysinfo-table__value {
+  font-size: 0.75rem;
+  color: #FAF5FF;
+  margin: 0;
+}
+
+/* ── Hardware specs ────────────────────────────────────────────── */
+.sysinfo-hw {
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.sysinfo-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 0.875rem;
+}
+
+.sysinfo-spec__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.25rem;
+}
+
+.sysinfo-spec__label {
+  font-size: 0.7rem;
+  color: #94A3B8;
+  font-weight: 500;
+}
+
+.sysinfo-spec__value {
+  font-size: 0.7rem;
+  color: #F59E0B;
+  font-weight: 700;
+}
+
+.sysinfo-spec__bar {
+  height: 6px;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.sysinfo-spec__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #F59E0B, #FCD34D);
+  border-radius: 999px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sysinfo-spec__fill {
+    transition: none;
+  }
+}
+
+/* ── Action buttons ────────────────────────────────────────────── */
+.sysinfo-actions {
+  display: flex;
+  gap: 0.625rem;
+  padding: 0.875rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+  background: rgba(139, 92, 246, 0.03);
+}
+
+.sysinfo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4rem 0.875rem;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.08);
+  color: #C4B5FD;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  letter-spacing: 0.01em;
+}
+
+.sysinfo-btn:hover {
+  background: rgba(139, 92, 246, 0.22);
+  border-color: rgba(139, 92, 246, 0.6);
+  color: #FAF5FF;
+}
+
+.sysinfo-btn--primary {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #F59E0B;
+}
+
+.sysinfo-btn--primary:hover {
+  background: rgba(245, 158, 11, 0.22);
   border-color: #F59E0B;
   color: #FCD34D;
 }
 
-.about-win__cv-btn:focus-visible {
+.sysinfo-btn:focus-visible {
   outline: 2px solid #F59E0B;
   outline-offset: 2px;
-}
-
-.about-win__stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.stat-card {
-  padding: 1.125rem 0.875rem;
-  background: rgba(139, 92, 246, 0.08);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  border-radius: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.25rem;
-}
-
-.stat-card__value {
-  font-size: 1.75rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #A78BFA, #F59E0B);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: -0.03em;
-  line-height: 1;
-}
-
-.stat-card__label {
-  font-size: 0.75rem;
-  color: #C4B5FD;
-  font-weight: 500;
-  line-height: 1.3;
 }
 </style>

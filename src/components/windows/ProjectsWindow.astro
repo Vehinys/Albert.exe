@@ -1,326 +1,720 @@
 ---
 import { getCollection } from 'astro:content';
 import type { Lang } from '../../i18n/utils';
-import { useTranslations } from '../../i18n/utils';
 
 interface Props {
   lang: Lang;
 }
 
 const { lang } = Astro.props;
-const t = useTranslations(lang);
 
 const allProjects = await getCollection('projects');
 const projects = allProjects
   .map(p => ({ ...p.data, id: p.id }))
   .sort((a, b) => a.order - b.order);
 
-const categories = ['design', 'development', 'wordpress', 'branding'] as const;
+const totalCount = projects.length;
+
+const labels = {
+  fr: {
+    addressBarBase: 'Albert.exe > Projets',
+    categories: 'Catégories',
+    all: 'Tous les projets',
+    design: 'Design',
+    development: 'Développement',
+    wordpress: 'WordPress',
+    branding: 'Branding',
+    gridView: 'Grille',
+    listView: 'Liste',
+    viewLive: 'Voir ↗',
+    viewCode: 'Code </>',
+    selected: '1 sélectionné',
+    items: (n: number) => `${n} élément${n > 1 ? 's' : ''}`,
+    filterLabel: 'Filtrer par catégorie',
+    gridLabel: 'Vue en grille',
+    listLabel: 'Vue en liste',
+  },
+  en: {
+    addressBarBase: 'Albert.exe > Projects',
+    categories: 'Categories',
+    all: 'All projects',
+    design: 'Design',
+    development: 'Development',
+    wordpress: 'WordPress',
+    branding: 'Branding',
+    gridView: 'Grid',
+    listView: 'List',
+    viewLive: 'View ↗',
+    viewCode: 'Code </>',
+    selected: '1 selected',
+    items: (n: number) => `${n} item${n > 1 ? 's' : ''}`,
+    filterLabel: 'Filter by category',
+    gridLabel: 'Grid view',
+    listLabel: 'List view',
+  },
+} as const;
+
+const l = labels[lang];
+
+const folders = [
+  { key: 'all',         icon: '📁', label: l.all },
+  { key: 'design',      icon: '🎨', label: l.design },
+  { key: 'development', icon: '⚙️', label: l.development },
+  { key: 'wordpress',   icon: '🔧', label: l.wordpress },
+  { key: 'branding',    icon: '✏️', label: l.branding },
+] as const;
 ---
 
-<div class="proj-win">
-  <div class="proj-win__header">
-    <span class="win-label">{t('projects.title')}</span>
-    <h2 class="win-title">{t('projects.subtitle')}</h2>
-  </div>
+<div class="xplr-win" role="region" aria-label={lang === 'fr' ? 'Explorateur de projets' : 'Project Explorer'}>
 
-  <!-- Filters -->
-  <div class="proj-win__filters" role="group" aria-label={lang === 'fr' ? 'Filtrer par catégorie' : 'Filter by category'}>
-    <button class="proj-filter proj-filter--active" data-filter="all" aria-pressed="true" type="button">
-      {t('projects.filter.all')}
-    </button>
-    {categories.map(cat => (
-      <button class="proj-filter" data-filter={cat} aria-pressed="false" type="button">
-        {t(`projects.filter.${cat}`)}
+  <!-- Toolbar -->
+  <div class="xplr-toolbar" role="toolbar" aria-label={lang === 'fr' ? 'Barre d\'outils' : 'Toolbar'}>
+    <div class="xplr-addressbar" aria-label={lang === 'fr' ? 'Chemin de navigation' : 'Navigation path'}>
+      <span class="xplr-addressbar__icon" aria-hidden="true">📂</span>
+      <span class="xplr-addressbar__path" id="xplr-address-text">{l.addressBarBase} &gt; {l.all}</span>
+    </div>
+    <div class="xplr-viewtoggle" role="group" aria-label={lang === 'fr' ? 'Mode d\'affichage' : 'View mode'}>
+      <button
+        class="xplr-viewbtn xplr-viewbtn--active"
+        id="xplr-btn-grid"
+        type="button"
+        title={l.gridLabel}
+        aria-label={l.gridLabel}
+        aria-pressed="true"
+      >
+        <span aria-hidden="true">⊞</span>
+        <span class="xplr-viewbtn__label">{l.gridView}</span>
       </button>
-    ))}
+      <button
+        class="xplr-viewbtn"
+        id="xplr-btn-list"
+        type="button"
+        title={l.listLabel}
+        aria-label={l.listLabel}
+        aria-pressed="false"
+      >
+        <span aria-hidden="true">☰</span>
+        <span class="xplr-viewbtn__label">{l.listView}</span>
+      </button>
+    </div>
+    <span class="xplr-itemcount" id="xplr-count" aria-live="polite" aria-atomic="true">
+      {l.items(totalCount)}
+    </span>
   </div>
 
-  <!-- Grid -->
-  <ul class="proj-win__grid" id="proj-win-grid" role="list">
-    {projects.map(project => (
-      <li class="proj-card" data-category={project.category} role="listitem">
-        <div class="proj-card__image">
-          <img
-            src={project.image}
-            alt={project.title}
-            width="400"
-            height="225"
-            loading="lazy"
-            decoding="async"
-            class="proj-card__img"
-          />
-          {project.featured && (
-            <span class="proj-card__badge">{t('projects.featured')}</span>
-          )}
-        </div>
+  <!-- Main area -->
+  <div class="xplr-main">
 
-        <div class="proj-card__body">
-          <h3 class="proj-card__title">{project.title}</h3>
-          <p class="proj-card__desc">
-            {lang === 'en' ? project.descriptionEn : project.description}
-          </p>
+    <!-- Sidebar -->
+    <nav class="xplr-sidebar" aria-label={l.categories}>
+      <p class="xplr-sidebar__title" aria-hidden="true">
+        <span>📂</span> {l.categories}
+      </p>
+      <ul class="xplr-sidebar__list" role="list">
+        {folders.map((f, i) => (
+          <li>
+            <button
+              class={`xplr-folder ${i === 0 ? 'xplr-folder--active' : ''}`}
+              data-filter={f.key}
+              data-label={f.label}
+              type="button"
+              aria-pressed={i === 0 ? 'true' : 'false'}
+            >
+              <span class="xplr-folder__icon" aria-hidden="true">{f.icon}</span>
+              <span class="xplr-folder__name">{f.label}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
 
-          <ul class="proj-card__tags" role="list" aria-label={lang === 'fr' ? 'Technologies' : 'Technologies'}>
-            {project.tags.map(tag => (
-              <li class="proj-tag">{tag}</li>
-            ))}
-          </ul>
+    <!-- Content area -->
+    <div class="xplr-content" role="main">
+      <ul class="xplr-grid" id="xplr-grid" role="list" aria-label={lang === 'fr' ? 'Projets' : 'Projects'}>
+        {projects.map(project => (
+          <li
+            class="xplr-file"
+            data-category={project.category}
+            role="listitem"
+          >
+            <div class="xplr-file__thumb">
+              <img
+                src={project.image}
+                alt={project.title}
+                width="200"
+                height="140"
+                loading="lazy"
+                decoding="async"
+                class="xplr-file__img"
+              />
+              {project.featured && (
+                <span class="xplr-file__star" aria-label={lang === 'fr' ? 'En vedette' : 'Featured'}>⭐</span>
+              )}
+              <!-- Hover overlay -->
+              <div class="xplr-file__overlay" aria-hidden="true">
+                <p class="xplr-file__desc">
+                  {lang === 'en' ? project.descriptionEn : project.description}
+                </p>
+                <div class="xplr-file__actions">
+                  {project.url && (
+                    <a
+                      href={project.url}
+                      class="xplr-file__action"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      tabindex="-1"
+                    >
+                      {labels[lang].viewLive}
+                    </a>
+                  )}
+                  {project.github && (
+                    <a
+                      href={project.github}
+                      class="xplr-file__action"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      tabindex="-1"
+                    >
+                      {labels[lang].viewCode}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div class="xplr-file__meta">
+              <span class="xplr-file__name">{project.title}</span>
+              <span class="xplr-file__type">{project.category}</span>
+            </div>
+            <!-- Accessible links outside overlay -->
+            <div class="xplr-file__a11y-links">
+              {project.url && (
+                <a
+                  href={project.url}
+                  class="sr-only-focusable"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${lang === 'fr' ? 'Voir le site' : 'View site'} — ${project.title}`}
+                >
+                  {labels[lang].viewLive}
+                </a>
+              )}
+              {project.github && (
+                <a
+                  href={project.github}
+                  class="sr-only-focusable"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${lang === 'fr' ? 'Voir le code' : 'View code'} — ${project.title}`}
+                >
+                  {labels[lang].viewCode}
+                </a>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
 
-          <div class="proj-card__actions">
-            {project.url && (
-              <a
-                href={project.url}
-                class="proj-link"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${t('projects.view.live')} — ${project.title}`}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-                {t('projects.view.live')}
-              </a>
-            )}
-            {project.github && (
-              <a
-                href={project.github}
-                class="proj-link"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${t('projects.view.github')} — ${project.title}`}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-                </svg>
-                {t('projects.view.github')}
-              </a>
-            )}
-          </div>
-        </div>
-      </li>
-    ))}
-  </ul>
+  </div>
+
+  <!-- Status bar -->
+  <div class="xplr-statusbar" role="status" aria-live="polite" aria-atomic="true">
+    <span id="xplr-status-left">{l.items(totalCount)}</span>
+    <span class="xplr-statusbar__sep" aria-hidden="true">|</span>
+    <span id="xplr-status-right">{l.selected}</span>
+  </div>
+
 </div>
 
 <style>
-.proj-win {
+/* ── Root ──────────────────────────────────────────────────────── */
+.xplr-win {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-}
-
-.win-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #F59E0B;
-  display: block;
-  margin-bottom: 0.25rem;
-}
-
-.win-title {
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 700;
-  color: #FAF5FF;
-  margin: 0;
-}
-
-.proj-win__filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-}
-
-.proj-filter {
-  padding: 0.375rem 0.875rem;
-  border-radius: 999px;
+  background: #0A0812;
   border: 1px solid rgba(139, 92, 246, 0.25);
-  background: rgba(139, 92, 246, 0.06);
-  color: #C4B5FD;
+  border-radius: 0.5rem;
+  overflow: hidden;
   font-size: 0.8125rem;
-  font-weight: 500;
+  height: 100%;
+  min-height: 400px;
+}
+
+.sr-only-focusable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.sr-only-focusable:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  white-space: normal;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  background: #8B5CF6;
+  color: #fff;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  outline: 2px solid #F59E0B;
+}
+
+/* ── Toolbar ───────────────────────────────────────────────────── */
+.xplr-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.375rem 0.75rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  flex-shrink: 0;
+}
+
+.xplr-addressbar {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  min-width: 0;
+}
+
+.xplr-addressbar__icon {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.xplr-addressbar__path {
+  font-size: 0.75rem;
+  color: #C4B5FD;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xplr-viewtoggle {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.xplr-viewbtn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 0.25rem;
+  color: #94A3B8;
+  font-size: 0.7rem;
   cursor: pointer;
-  transition: all 0.2s ease;
   font-family: inherit;
+  transition: all 0.15s ease;
 }
 
-.proj-filter:hover,
-.proj-filter--active {
+.xplr-viewbtn:hover,
+.xplr-viewbtn--active {
   background: rgba(139, 92, 246, 0.2);
-  border-color: rgba(139, 92, 246, 0.5);
-  color: #FAF5FF;
+  border-color: rgba(139, 92, 246, 0.45);
+  color: #C4B5FD;
 }
 
-.proj-filter:focus-visible {
+.xplr-viewbtn:focus-visible {
   outline: 2px solid #F59E0B;
   outline-offset: 2px;
 }
 
-.proj-win__grid {
+.xplr-viewbtn__label {
+  display: none;
+}
+
+@media (min-width: 400px) {
+  .xplr-viewbtn__label { display: inline; }
+}
+
+.xplr-itemcount {
+  font-size: 0.7rem;
+  color: #94A3B8;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ── Main layout ───────────────────────────────────────────────── */
+.xplr-main {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
+  grid-template-columns: 160px 1fr;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .xplr-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────── */
+.xplr-sidebar {
+  border-right: 1px solid rgba(139, 92, 246, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem 0;
+  overflow-y: auto;
+}
+
+.xplr-sidebar__title {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8B5CF6;
+  margin: 0 0 0.25rem;
+}
+
+.xplr-sidebar__list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.proj-card {
-  background: rgba(139, 92, 246, 0.06);
-  border: 1px solid rgba(139, 92, 246, 0.18);
-  border-radius: 0.75rem;
+.xplr-folder {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  color: #94A3B8;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.xplr-folder:hover {
+  background: rgba(139, 92, 246, 0.08);
+  color: #C4B5FD;
+}
+
+.xplr-folder--active {
+  background: rgba(139, 92, 246, 0.12);
+  border-left-color: #8B5CF6;
+  color: #FAF5FF;
+}
+
+.xplr-folder:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: -2px;
+}
+
+.xplr-folder__icon {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.xplr-folder__name {
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Content area ──────────────────────────────────────────────── */
+.xplr-content {
+  overflow-y: auto;
+  padding: 0.75rem;
+}
+
+/* ── Grid view (default) ───────────────────────────────────────── */
+.xplr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.xplr-file {
   display: flex;
   flex-direction: column;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  gap: 0.375rem;
+  cursor: default;
 }
 
-.proj-card:hover {
-  border-color: rgba(139, 92, 246, 0.4);
-  transform: translateY(-2px);
-}
-
-.proj-card[data-hidden] {
+.xplr-file[data-hidden] {
   display: none;
 }
 
-.proj-card__image {
+.xplr-file__thumb {
   position: relative;
-  height: 140px;
-  background: rgba(139, 92, 246, 0.08);
+  aspect-ratio: 1 / 1;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  border-radius: 0.375rem;
   overflow: hidden;
 }
 
-.proj-card__img {
+.xplr-file__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s ease;
+  transition: transform 0.3s ease;
 }
 
-.proj-card:hover .proj-card__img {
-  transform: scale(1.04);
+@media (prefers-reduced-motion: reduce) {
+  .xplr-file__img { transition: none; }
 }
 
-.proj-card__badge {
+.xplr-file:hover .xplr-file__img {
+  transform: scale(1.05);
+}
+
+.xplr-file__star {
   position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  background: rgba(245, 158, 11, 0.2);
-  border: 1px solid rgba(245, 158, 11, 0.4);
-  color: #F59E0B;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  top: 0.3rem;
+  right: 0.3rem;
+  font-size: 0.75rem;
 }
 
-.proj-card__body {
-  padding: 0.875rem 1rem;
+.xplr-file__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 6, 15, 0.88);
+  backdrop-filter: blur(4px);
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: 0.5rem;
-  flex: 1;
+  padding: 0.625rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.proj-card__title {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #FAF5FF;
-  margin: 0;
-  line-height: 1.3;
+@media (prefers-reduced-motion: reduce) {
+  .xplr-file__overlay { transition: none; }
 }
 
-.proj-card__desc {
-  font-size: 0.8125rem;
+.xplr-file:hover .xplr-file__overlay {
+  opacity: 1;
+}
+
+.xplr-file__desc {
+  font-size: 0.6875rem;
   color: #C4B5FD;
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 0;
-  flex: 1;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.proj-card__tags {
+.xplr-file__actions {
   display: flex;
+  gap: 0.375rem;
   flex-wrap: wrap;
-  gap: 0.25rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
 }
 
-.proj-tag {
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+.xplr-file__action {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  background: rgba(139, 92, 246, 0.25);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  border-radius: 0.25rem;
+  color: #C4B5FD;
   font-size: 0.65rem;
   font-weight: 600;
-  background: rgba(139, 92, 246, 0.1);
-  border: 1px solid rgba(139, 92, 246, 0.2);
-  color: #A78BFA;
-}
-
-.proj-card__actions {
-  display: flex;
-  gap: 0.625rem;
-  padding-top: 0.25rem;
-}
-
-.proj-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #A78BFA;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: background 0.15s ease;
 }
 
-.proj-link:hover {
+.xplr-file__action:hover {
+  background: rgba(139, 92, 246, 0.45);
   color: #FAF5FF;
 }
 
-.proj-link:focus-visible {
-  outline: 2px solid #F59E0B;
-  outline-offset: 2px;
-  border-radius: 2px;
+.xplr-file__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0 0.125rem;
+}
+
+.xplr-file__name {
+  font-size: 0.7rem;
+  color: #FAF5FF;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xplr-file__type {
+  font-size: 0.6rem;
+  color: #8B5CF6;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── List view (toggled via JS) ────────────────────────────────── */
+.xplr-grid--list {
+  grid-template-columns: 1fr;
+  gap: 0.25rem;
+}
+
+.xplr-grid--list .xplr-file {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: background 0.15s ease;
+}
+
+.xplr-grid--list .xplr-file:hover {
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.xplr-grid--list .xplr-file__thumb {
+  width: 2.5rem;
+  height: 2.5rem;
+  aspect-ratio: unset;
+  flex-shrink: 0;
+  border-radius: 0.25rem;
+}
+
+.xplr-grid--list .xplr-file__overlay {
+  display: none;
+}
+
+.xplr-grid--list .xplr-file__meta {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+}
+
+.xplr-grid--list .xplr-file__name {
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+}
+
+/* ── Status bar ────────────────────────────────────────────────── */
+.xplr-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.875rem;
+  background: rgba(139, 92, 246, 0.05);
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+  font-size: 0.6875rem;
+  color: #94A3B8;
+  flex-shrink: 0;
+}
+
+.xplr-statusbar__sep {
+  color: rgba(139, 92, 246, 0.3);
 }
 </style>
 
 <script>
 (function () {
-  const filterBtns = document.querySelectorAll<HTMLButtonElement>('#window-projects .proj-filter');
-  const cards = document.querySelectorAll<HTMLElement>('#window-projects .proj-card');
+  const win = document.querySelector<HTMLElement>('.xplr-win');
+  if (!win) return;
 
-  filterBtns.forEach(btn => {
+  const folderBtns = win.querySelectorAll<HTMLButtonElement>('.xplr-folder');
+  const cards      = win.querySelectorAll<HTMLElement>('.xplr-file');
+  const gridEl     = win.querySelector<HTMLElement>('#xplr-grid');
+  const btnGrid    = win.querySelector<HTMLButtonElement>('#xplr-btn-grid');
+  const btnList    = win.querySelector<HTMLButtonElement>('#xplr-btn-list');
+  const addrText   = win.querySelector<HTMLElement>('#xplr-address-text');
+  const countEl    = win.querySelector<HTMLElement>('#xplr-count');
+  const statusLeft = win.querySelector<HTMLElement>('#xplr-status-left');
+  const isEn       = document.documentElement.lang === 'en' || win.closest('[lang="en"]') !== null;
+
+  function updateCount(n: number): void {
+    const txt = isEn
+      ? `${n} item${n !== 1 ? 's' : ''}`
+      : `${n} élément${n !== 1 ? 's' : ''}`;
+    if (countEl) countEl.textContent = txt;
+    if (statusLeft) statusLeft.textContent = txt;
+  }
+
+  folderBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const filter = btn.dataset['filter'] ?? 'all';
+      const label  = btn.dataset['label'] ?? '';
 
-      filterBtns.forEach(b => {
-        b.classList.remove('proj-filter--active');
+      folderBtns.forEach(b => {
+        b.classList.remove('xplr-folder--active');
         b.setAttribute('aria-pressed', 'false');
       });
-      btn.classList.add('proj-filter--active');
+      btn.classList.add('xplr-folder--active');
       btn.setAttribute('aria-pressed', 'true');
 
+      const base = isEn ? 'Albert.exe > Projects' : 'Albert.exe > Projets';
+      if (addrText) addrText.textContent = `${base} > ${label}`;
+
+      let visible = 0;
       cards.forEach(card => {
         const cat = card.dataset['category'];
         if (filter === 'all' || cat === filter) {
           card.removeAttribute('data-hidden');
+          visible++;
         } else {
           card.setAttribute('data-hidden', 'true');
         }
       });
+
+      updateCount(visible);
     });
   });
+
+  // View toggle
+  function setView(mode: 'grid' | 'list'): void {
+    if (!gridEl || !btnGrid || !btnList) return;
+    if (mode === 'list') {
+      gridEl.classList.add('xplr-grid--list');
+      btnList.classList.add('xplr-viewbtn--active');
+      btnGrid.classList.remove('xplr-viewbtn--active');
+      btnList.setAttribute('aria-pressed', 'true');
+      btnGrid.setAttribute('aria-pressed', 'false');
+    } else {
+      gridEl.classList.remove('xplr-grid--list');
+      btnGrid.classList.add('xplr-viewbtn--active');
+      btnList.classList.remove('xplr-viewbtn--active');
+      btnGrid.setAttribute('aria-pressed', 'true');
+      btnList.setAttribute('aria-pressed', 'false');
+    }
+  }
+
+  btnGrid?.addEventListener('click', () => setView('grid'));
+  btnList?.addEventListener('click', () => setView('list'));
 })();
 </script>
