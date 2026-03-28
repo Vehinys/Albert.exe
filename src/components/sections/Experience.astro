@@ -18,6 +18,7 @@ interface LogEntry {
   location: string;
   description: Record<'fr' | 'en', string>;
   tags: string[];
+  url?: string;
   head?: boolean;
   wip?: boolean;
 }
@@ -29,6 +30,7 @@ const experiences: LogEntry[] = [
     period: '2026 (2 mois)',
     title: { fr: 'Refonte site WordPress — Stage CDUI', en: 'WordPress Redesign — UI Designer Intern' },
     company: 'NAPOCOM',
+    url: 'https://www.napocom.fr',
     location: 'Remote/France',
     description: {
       fr: "Refonte complète du site web de l'agence. Optimisation UX/UI, intégration de maquettes, et configuration avancée de WordPress.",
@@ -43,6 +45,7 @@ const experiences: LogEntry[] = [
     period: '2023 — 2024',
     title: { fr: 'Vendeur Polyvalent (CDI)', en: 'Multiskilled Salesperson (CDI)' },
     company: 'BLACKSTORE France',
+    url: 'https://www.blackstore.fr',
     location: 'Mulhouse',
     description: {
       fr: 'Accueil et conseil client personnalisé. Gestion complète de la caisse, des stocks, inventaires et merchandising. Responsabilité des ouvertures et fermetures.',
@@ -56,6 +59,7 @@ const experiences: LogEntry[] = [
     period: '2022 (Stage)',
     title: { fr: 'Création de maquette — Stage', en: 'Mockup Creation — Intern' },
     company: 'E-NAUMAD',
+    url: 'https://www.e-naumad.fr',
     location: 'France',
     description: {
       fr: 'Stagiaire Frontend, personnalisation avancée de sites WordPress. Création de visuels et maquettes (Photoshop, Figma).',
@@ -69,6 +73,7 @@ const experiences: LogEntry[] = [
     period: '2015 — 2021',
     title: { fr: 'Vendeur Polyvalent (CDI)', en: 'Multiskilled Salesperson (CDI)' },
     company: 'IKEA',
+    url: 'https://www.ikea.com/fr/fr/',
     location: 'Mulhouse',
     description: {
       fr: "6 ans d'expérience en relation client, gestion de stock, merchandising et logistique (CACES). Travail d'équipe, rigueur, gestion du stress.",
