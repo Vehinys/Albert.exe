@@ -1,12 +1,10 @@
 ---
 import { getCollection } from 'astro:content';
 import type { Lang } from '../../i18n/utils';
-import { useTranslations } from '../../i18n/utils';
 
 interface Props { lang: Lang; }
 
 const { lang } = Astro.props;
-const t = useTranslations(lang);
 
 // Design skills from content collection
 const allSkillEntries = await getCollection('skills');
