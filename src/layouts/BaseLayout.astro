@@ -1,6 +1,5 @@
 ---
 import SEO from '../components/seo/SEO.astro';
-import AccessibilityPanel from '../components/layout/AccessibilityPanel.astro';
 import type { Lang } from '../i18n/utils';
 import '../styles/global.css';
 
@@ -58,7 +57,5 @@ const { title, description, lang, image, isLegal = false } = Astro.props;
     </a>
 
     <slot />
-
-    <AccessibilityPanel lang={lang} />
   </body>
 </html>
