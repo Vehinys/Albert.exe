@@ -56,9 +56,9 @@ const wpItems = [
 
 const labels = {
   fr: {
-    tabProcesses: 'Design',
-    tabCode:      'Code',
-    tabWp:        'WordPress',
+    tabProcesses: 'Processus',
+    tabCode:      'Environnement',
+    tabWp:        'CMS',
     colProcess:   'Processus',
     colUsage:     'Utilisation',
     colLevel:     'Version',
@@ -68,9 +68,9 @@ const labels = {
     wpTitle:      'Environnement WordPress',
   },
   en: {
-    tabProcesses: 'Design',
-    tabCode:      'Code',
-    tabWp:        'WordPress',
+    tabProcesses: 'Processes',
+    tabCode:      'Environment',
+    tabWp:        'CMS',
     colProcess:   'Process',
     colUsage:     'Usage',
     colLevel:     'Version',
@@ -96,7 +96,6 @@ const l = labels[lang];
       aria-controls="panel-processes"
       type="button"
     >
-      <span aria-hidden="true">📋</span>
       {l.tabProcesses}
     </button>
     <button
@@ -107,7 +106,6 @@ const l = labels[lang];
       aria-controls="panel-code"
       type="button"
     >
-      <span aria-hidden="true">🖥️</span>
       {l.tabCode}
     </button>
     <button
@@ -118,7 +116,6 @@ const l = labels[lang];
       aria-controls="panel-wp"
       type="button"
     >
-      <span aria-hidden="true">🌐</span>
       {l.tabWp}
     </button>
   </div>
@@ -152,7 +149,16 @@ const l = labels[lang];
                     class={`taskmgr-state taskmgr-state--${processStates[skill.level]?.cls ?? 'grey'}`}
                     aria-label={`${skill.name}: ${processStates[skill.level]?.text ?? ''}`}
                   >
-                    {processStates[skill.level]?.text ?? 'UNKNOWN'}
+                    {processStates[skill.level]?.cls === 'green' ? (
+                      <>
+                        {processStates[skill.level]?.text}
+                        <span class="taskmgr-running" aria-hidden="true">
+                          <span>.</span><span>.</span><span>.</span>
+                        </span>
+                      </>
+                    ) : (
+                      processStates[skill.level]?.text ?? 'UNKNOWN'
+                    )}
                   </span>
                 </td>
                 <td class="taskmgr-td taskmgr-td--level">{verLabel}</td>
@@ -191,6 +197,9 @@ const l = labels[lang];
             <span class="taskmgr-cmd__name">{item.name}</span>
             <span class="taskmgr-cmd__arrow" aria-hidden="true">→</span>
             <span class="taskmgr-cmd__tag">{lang === 'fr' ? item.catFr : item.catEn}</span>
+            <span class="taskmgr-cmd__running" aria-hidden="true">
+              RUNNING<span class="taskmgr-running"><span>.</span><span>.</span><span>.</span></span>
+            </span>
           </li>
         ))}
       </ul>
@@ -225,6 +234,9 @@ const l = labels[lang];
             <span class="taskmgr-cmd__name">{item.name}</span>
             <span class="taskmgr-cmd__arrow" aria-hidden="true">→</span>
             <span class="taskmgr-cmd__tag">{lang === 'fr' ? item.catFr : item.catEn}</span>
+            <span class="taskmgr-cmd__running" aria-hidden="true">
+              RUNNING<span class="taskmgr-running"><span>.</span><span>.</span><span>.</span></span>
+            </span>
           </li>
         ))}
       </ul>
@@ -403,6 +415,33 @@ const l = labels[lang];
 .taskmgr-state--yellow { color: #F59E0B; }
 .taskmgr-state--grey   { color: #475569; }
 
+.taskmgr-running {
+  display: inline-flex;
+  gap: 0.02em;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.55rem;
+  font-weight: 700;
+  margin-left: 0.25em;
+  vertical-align: middle;
+}
+
+.taskmgr-running span {
+  opacity: 0;
+  animation: dot-seq 1.2s infinite both;
+}
+.taskmgr-running span:nth-child(1) { animation-delay: 0s; }
+.taskmgr-running span:nth-child(2) { animation-delay: 0.2s; }
+.taskmgr-running span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-seq {
+  0%,  60%, 100% { opacity: 0; }
+  20%, 40%       { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taskmgr-running span { animation: none; opacity: 1; }
+}
+
 .taskmgr-td--level {
   font-size: 0.7rem;
   color: #C4B5FD;
@@ -517,6 +556,17 @@ const l = labels[lang];
   font-size: 0.65rem;
   min-width: 7rem;
   text-align: right;
+}
+
+.taskmgr-cmd__running {
+  margin-left: auto;
+  color: #4ade80;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 /* ── Footer ────────────────────────────────────────────────────── */
