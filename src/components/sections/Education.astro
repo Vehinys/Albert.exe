@@ -1,0 +1,464 @@
+---
+import type { Lang } from '../../i18n/utils';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+interface EduEntry {
+  hash: string;
+  prefix: string;
+  period: string;
+  title: Record<'fr' | 'en', string>;
+  company: string;
+  url?: string;
+  location: string;
+  description: Record<'fr' | 'en', string>;
+  tags: string[];
+  wip?: boolean;
+}
+
+const education: EduEntry[] = [
+  {
+    hash: 'f15d8b0',
+    prefix: 'feat(edu)',
+    period: '2025 — 2026',
+    title: { fr: 'Concepteur Designer UI — Niveau 6', en: 'UI Designer Conceptor — Level 6' },
+    company: 'GRETA Alsace Sud',
+    url: 'https://www.greta-cfa-alsace.fr/reseau/greta-alsace-sud/',
+    location: 'Mulhouse',
+    description: {
+      fr: 'En cours. Conception pour WordPress & UI/UX Design. Suite Adobe (Photoshop, Illustrator, XD). Intégration HTML5/CSS3 et Framework Symfony.',
+      en: 'In progress. Design for WordPress & UI/UX. Adobe Suite (Photoshop, Illustrator, XD). HTML5/CSS3 and Symfony Framework.',
+    },
+    tags: ['Adobe Suite', 'Symfony', 'WordPress'],
+    wip: true,
+  },
+  {
+    hash: '9e3a71c',
+    prefix: 'feat(edu)',
+    period: '2024',
+    title: { fr: 'Développeur Web & Mobile — Niveau 5', en: 'Web & Mobile Developer — Level 5' },
+    company: 'Elan Formation',
+    url: 'https://elan-formation.fr/accueil',
+    location: 'Mulhouse',
+    description: {
+      fr: 'Diplôme acquis. Maquettage Figma, JS, PHP, Symfony, SQL/NoSQL. Gestion de projet Agile, GitHub, Sécurité Web.',
+      en: 'Degree acquired. Figma wireframing, JS, PHP, Symfony, SQL/NoSQL. Agile project management, GitHub, Web Security.',
+    },
+    tags: ['JS/PHP', 'Symfony', 'SQL', 'Agile'],
+  },
+  {
+    hash: '6b4c2d9',
+    prefix: 'feat(edu)',
+    period: '2022 — 2023',
+    title: { fr: 'Infographiste Metteur en Page — Niveau 4', en: 'Graphic Designer Page Setter — Level 4' },
+    company: 'GRETA Sud Alsace',
+    url: 'https://www.greta-cfa-alsace.fr/reseau/greta-alsace-sud/',
+    location: 'Mulhouse',
+    description: {
+      fr: 'Diplôme acquis. Analyse des besoins, propositions graphiques, InDesign, Photoshop, Illustrator.',
+      en: 'Degree acquired. Needs analysis, graphic proposals, InDesign, Photoshop, Illustrator.',
+    },
+    tags: ['InDesign', 'Photoshop', 'Illustrator'],
+  },
+  {
+    hash: '3f892a1',
+    prefix: 'feat(edu)',
+    period: '2021 — 2022',
+    title: { fr: 'Découverte Métiers du Numérique', en: 'Introduction to Digital Professions' },
+    company: 'Elan Formation',
+    url: 'https://elan-formation.fr/accueil',
+    location: 'Mulhouse',
+    description: {
+      fr: 'Non diplômant. Initiation HTML/CSS/JS/PHP. Photoshop, Illustrator et Figma.',
+      en: 'Non-degree. Introduction to HTML/CSS/JS/PHP. Photoshop, Illustrator and Figma.',
+    },
+    tags: ['Initiation', 'Design', 'Web'],
+  },
+];
+
+const panelTitle = lang === 'fr' ? 'Parcours académique' : 'Academic Background';
+const gitCmd     = lang === 'fr'
+  ? '$ git log edu/ --all --author="Albert Lecomte"'
+  : '$ git log edu/ --all --author="Albert Lecomte"';
+const wipLabel   = lang === 'fr' ? 'EN COURS' : 'IN PROGRESS';
+const schoolKey  = lang === 'fr' ? 'École' : 'School';
+---
+
+<section id="education" class="education section-padding" aria-labelledby="education-title">
+  <div class="edu__container">
+
+    <!-- Section header -->
+    <div class="edu__header">
+      <p class="edu__label"><span aria-hidden="true">// </span>{t('education.title')}</p>
+      <h2 id="education-title" class="edu__title">{panelTitle}</h2>
+    </div>
+
+    <!-- Git log terminal panel -->
+    <div class="edu-panel" role="region" aria-label={lang === 'fr' ? 'Parcours académique' : 'Academic background'}>
+
+      <!-- Window bar -->
+      <div class="edu-panel__bar" aria-hidden="true">
+        <div class="edu-panel__dots">
+          <span class="edu-panel__dot" style="background:#FF5F57"></span>
+          <span class="edu-panel__dot" style="background:#FEBC2E"></span>
+          <span class="edu-panel__dot" style="background:#28C840"></span>
+        </div>
+        <span class="edu-panel__barlabel">bash — git log edu/</span>
+      </div>
+
+      <!-- Log body -->
+      <div class="edu-log">
+
+        <!-- Shell prompt -->
+        <p class="edu-prompt" aria-hidden="true">
+          <span class="edu-prompt__caret">❯</span>
+          <span class="edu-prompt__cmd">{gitCmd}</span>
+        </p>
+
+        <!-- Entries -->
+        <div role="list" aria-label={lang === 'fr' ? 'Formation académique' : 'Academic training'}>
+          {education.map((item, i) => (
+            <article class="edu-entry" role="listitem">
+
+              <!-- Left: dot + line -->
+              <div class="edu-entry__marker" aria-hidden="true">
+                <span class="edu-entry__dot"></span>
+                {i < education.length - 1 && <span class="edu-entry__line"></span>}
+              </div>
+
+              <!-- Right: commit info -->
+              <div class="edu-entry__body">
+
+                <!-- Hash + WIP badge -->
+                <div class="edu-entry__hashrow">
+                  <span class="edu-hash">{item.hash}</span>
+                  {item.wip && (
+                    <span class="edu-wip-badge">
+                      {'(HEAD → edu/niveau-6, '}
+                      <span class="edu-wip-badge__text">⏳ {wipLabel}</span>
+                      {')'}
+                    </span>
+                  )}
+                </div>
+
+                <!-- Conventional commit title -->
+                <p class="edu-entry__title">
+                  <span class="edu-prefix">{item.prefix}:</span>
+                  <span class="edu-title-text"> {item.title[lang]}</span>
+                </p>
+
+                <!-- Meta -->
+                <p class="edu-entry__meta">
+                  <span class="edu-meta-key">{schoolKey}:</span>
+                  {item.url
+                    ? <a href={item.url} class="edu-meta-val edu-meta-link" target="_blank" rel="noopener noreferrer"> {item.company}</a>
+                    : <span class="edu-meta-val"> {item.company}</span>
+                  }
+                  <span class="edu-meta-sep"> · </span>
+                  <time class="edu-meta-date">{item.period}</time>
+                </p>
+
+                <!-- Description -->
+                <p class="edu-entry__desc">{item.description[lang]}</p>
+
+                <!-- Tags -->
+                <ul class="edu-tags" role="list" aria-label="Technologies">
+                  {item.tags.map(tag => <li class="edu-tag">{tag}</li>)}
+                </ul>
+
+              </div>
+            </article>
+          ))}
+        </div>
+
+      </div><!-- /.edu-log -->
+    </div><!-- /.edu-panel -->
+
+  </div>
+</section>
+
+<style>
+/* ── Section ────────────────────────────────────────────────────── */
+.education {
+  padding-top: var(--section-padding);
+}
+
+/* ── Container ─────────────────────────────────────────────────── */
+.edu__container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* ── Section header ────────────────────────────────────────────── */
+.edu__header {
+  text-align: center;
+}
+
+.edu__label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-neon-pink);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: var(--font-family-mono);
+  margin-bottom: 0.625rem;
+}
+
+.edu__title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+/* ── Terminal panel ────────────────────────────────────────────── */
+.edu-panel {
+  background: #0D0D1A;
+  border: 1px solid rgba(255, 0, 153, 0.35);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* ── Window bar ────────────────────────────────────────────────── */
+.edu-panel__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: rgba(255, 0, 153, 0.08);
+  border-bottom: 1px solid rgba(255, 0, 153, 0.18);
+}
+
+.edu-panel__dots {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.edu-panel__dot {
+  width: 0.6875rem;
+  height: 0.6875rem;
+  border-radius: 50%;
+  display: block;
+}
+
+.edu-panel__barlabel {
+  font-size: 0.6875rem;
+  color: #94A3B8;
+  font-family: var(--font-family-mono);
+  flex: 1;
+  text-align: center;
+}
+
+/* ── Log body ──────────────────────────────────────────────────── */
+.edu-log {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Shell prompt ──────────────────────────────────────────────── */
+.edu-prompt {
+  font-family: var(--font-family-mono);
+  font-size: 0.8125rem;
+  margin: 0 0 1.75rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.edu-prompt__caret {
+  color: var(--color-neon-pink);
+  flex-shrink: 0;
+}
+
+.edu-prompt__cmd {
+  color: #C4B5FD;
+}
+
+/* ── Entry ─────────────────────────────────────────────────────── */
+.edu-entry {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  gap: 0.875rem;
+}
+
+.edu-entry + .edu-entry {
+  padding-top: 1.25rem;
+}
+
+/* ── Marker ────────────────────────────────────────────────────── */
+.edu-entry__marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0.125rem;
+}
+
+.edu-entry__dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--color-neon-pink);
+  box-shadow: 0 0 6px rgba(255, 0, 153, 0.55);
+  flex-shrink: 0;
+}
+
+.edu-entry__line {
+  width: 1px;
+  flex: 1;
+  margin-top: 0.3rem;
+  background: linear-gradient(to bottom, rgba(255, 0, 153, 0.25), rgba(255, 0, 153, 0.04));
+}
+
+/* ── Entry body ────────────────────────────────────────────────── */
+.edu-entry__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-bottom: 1.25rem;
+}
+
+.edu-entry:last-child .edu-entry__body {
+  padding-bottom: 0;
+}
+
+/* ── Hash row ──────────────────────────────────────────────────── */
+.edu-entry__hashrow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.2rem;
+}
+
+.edu-hash {
+  font-family: var(--font-family-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-neon-pink);
+  letter-spacing: 0.05em;
+  background: rgba(255, 0, 153, 0.06);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.2rem;
+  border: 1px solid rgba(255, 0, 153, 0.15);
+}
+
+.edu-wip-badge {
+  font-family: var(--font-family-mono);
+  font-size: 0.6875rem;
+  color: #94A3B8;
+}
+
+.edu-wip-badge__text {
+  color: #F59E0B;
+  font-weight: 700;
+}
+
+/* ── Entry title ───────────────────────────────────────────────── */
+.edu-entry__title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  font-family: var(--font-family-mono);
+  line-height: 1.4;
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+.edu-prefix {
+  color: var(--color-neon-pink);
+}
+
+.edu-title-text {
+  color: #FAF5FF;
+}
+
+/* ── Meta ──────────────────────────────────────────────────────── */
+.edu-entry__meta {
+  font-size: 0.75rem;
+  font-family: var(--font-family-mono);
+  margin: 0;
+  color: #94A3B8;
+  line-height: 1.6;
+  flex-wrap: wrap;
+}
+
+.edu-meta-key {
+  color: #64748B;
+}
+
+.edu-meta-val {
+  color: #C4B5FD;
+  font-weight: 600;
+}
+
+.edu-meta-sep {
+  color: #2D3748;
+  padding: 0 0.1rem;
+}
+
+.edu-meta-date {
+  color: #F59E0B;
+  font-weight: 600;
+}
+
+/* ── School link ───────────────────────────────────────────────── */
+.edu-meta-link {
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.edu-meta-link:hover {
+  color: var(--color-neon-pink);
+  text-decoration: underline;
+}
+
+.edu-meta-link:focus-visible {
+  outline: 2px solid var(--color-neon-pink);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Description ───────────────────────────────────────────────── */
+.edu-entry__desc {
+  font-size: 0.875rem;
+  color: rgba(196, 181, 253, 0.75);
+  line-height: 1.7;
+  margin: 0.25rem 0 0;
+}
+
+/* ── Tags ──────────────────────────────────────────────────────── */
+.edu-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.edu-tag {
+  font-family: var(--font-family-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.2rem;
+  background: rgba(255, 0, 153, 0.06);
+  border: 1px solid rgba(255, 0, 153, 0.2);
+  color: var(--color-neon-pink);
+  letter-spacing: 0.03em;
+}
+</style>

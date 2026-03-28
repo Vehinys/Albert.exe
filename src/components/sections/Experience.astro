@@ -96,73 +96,10 @@ const experiences: LogEntry[] = [
   },
 ];
 
-const education: LogEntry[] = [
-  {
-    hash: 'f15d8b0',
-    prefix: 'feat(edu)',
-    period: '2025 — 2026',
-    title: { fr: 'Concepteur Designer UI — Niveau 6', en: 'UI Designer Conceptor — Level 6' },
-    company: 'GRETA Alsace Sud',
-    url: 'https://www.greta-cfa-alsace.fr/reseau/greta-alsace-sud/',
-    location: 'Mulhouse',
-    description: {
-      fr: 'En cours. Conception pour WordPress & UI/UX Design. Suite Adobe (Photoshop, Illustrator, XD). Intégration HTML5/CSS3 et Framework Symfony.',
-      en: 'In progress. Design for WordPress & UI/UX. Adobe Suite (Photoshop, Illustrator, XD). HTML5/CSS3 and Symfony Framework.',
-    },
-    tags: ['Adobe Suite', 'Symfony', 'WordPress'],
-    wip: true,
-  },
-  {
-    hash: '9e3a71c',
-    prefix: 'feat(edu)',
-    period: '2024',
-    title: { fr: 'Développeur Web & Mobile — Niveau 5', en: 'Web & Mobile Developer — Level 5' },
-    company: 'Elan Formation',
-    url: 'https://elan-formation.fr/accueil',
-    location: 'Mulhouse',
-    description: {
-      fr: 'Diplôme acquis. Maquettage Figma, JS, PHP, Symfony, SQL/NoSQL. Gestion de projet Agile, GitHub, Sécurité Web.',
-      en: 'Degree acquired. Figma wireframing, JS, PHP, Symfony, SQL/NoSQL. Agile project management, GitHub, Web Security.',
-    },
-    tags: ['JS/PHP', 'Symfony', 'SQL', 'Agile'],
-  },
-  {
-    hash: '6b4c2d9',
-    prefix: 'feat(edu)',
-    period: '2022 — 2023',
-    title: { fr: 'Infographiste Metteur en Page — Niveau 4', en: 'Graphic Designer Page Setter — Level 4' },
-    company: 'GRETA Sud Alsace',
-    url: 'https://www.greta-cfa-alsace.fr/reseau/greta-alsace-sud/',
-    location: 'Mulhouse',
-    description: {
-      fr: 'Diplôme acquis. Analyse des besoins, propositions graphiques, InDesign, Photoshop, Illustrator.',
-      en: 'Degree acquired. Needs analysis, graphic proposals, InDesign, Photoshop, Illustrator.',
-    },
-    tags: ['InDesign', 'Photoshop', 'Illustrator'],
-  },
-  {
-    hash: '3f892a1',
-    prefix: 'feat(edu)',
-    period: '2021 — 2022',
-    title: { fr: 'Découverte Métiers du Numérique', en: 'Introduction to Digital Professions' },
-    company: 'Elan Formation',
-    url: 'https://elan-formation.fr/accueil',
-    location: 'Mulhouse',
-    description: {
-      fr: 'Non diplômant. Initiation HTML/CSS/JS/PHP. Photoshop, Illustrator et Figma.',
-      en: 'Non-degree. Introduction to HTML/CSS/JS/PHP. Photoshop, Illustrator and Figma.',
-    },
-    tags: ['Initiation', 'Design', 'Web'],
-  },
-];
-
-const panelTitle  = lang === 'fr' ? 'Changelog professionnel' : 'Professional Changelog';
-const gitCmd      = `$ git log --all --graph --author="Albert Lecomte"`;
-const gitEduCmd   = lang === 'fr' ? '$ git checkout edu/parcours' : '$ git checkout edu/history';
-const headLabel   = lang === 'fr' ? 'ACTUEL' : 'CURRENT';
-const wipLabel    = lang === 'fr' ? 'EN COURS' : 'IN PROGRESS';
-const companyKey  = lang === 'fr' ? 'Entreprise' : 'Company';
-const schoolKey   = lang === 'fr' ? 'École' : 'School';
+const panelTitle = lang === 'fr' ? 'Changelog professionnel' : 'Professional Changelog';
+const gitCmd     = `$ git log career/ --all --author="Albert Lecomte"`;
+const headLabel  = lang === 'fr' ? 'ACTUEL' : 'CURRENT';
+const companyKey = lang === 'fr' ? 'Entreprise' : 'Company';
 ---
 
 <section id="experience" class="experience section-padding" aria-labelledby="experience-title">
@@ -247,62 +184,6 @@ const schoolKey   = lang === 'fr' ? 'École' : 'School';
                 <!-- tags -->
                 <ul class="exp-tags" role="list" aria-label="Technologies">
                   {item.tags.map(tag => <li class="exp-tag">{tag}</li>)}
-                </ul>
-
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <!-- ── Branch separator ── -->
-        <div class="exp-branch-sep" aria-hidden="true">
-          <span class="exp-branch-sep__line"></span>
-          <code class="exp-branch-sep__cmd">{gitEduCmd}</code>
-          <span class="exp-branch-sep__line"></span>
-        </div>
-
-        <!-- ── Education entries ── -->
-        <div role="list" aria-label={lang === 'fr' ? 'Formation académique' : 'Academic background'}>
-          {education.map((item, i) => (
-            <article class="exp-entry exp-entry--edu" role="listitem">
-
-              <div class="exp-entry__marker" aria-hidden="true">
-                <span class="exp-entry__dot exp-entry__dot--edu"></span>
-                {i < education.length - 1 && <span class="exp-entry__line exp-entry__line--edu"></span>}
-              </div>
-
-              <div class="exp-entry__body">
-
-                <div class="exp-entry__hashrow">
-                  <span class="exp-hash exp-hash--edu">{item.hash}</span>
-                  {item.wip && (
-                    <span class="exp-edu-badge">
-                      {'(HEAD → edu/niveau-6, '}
-                      <span class="exp-edu-badge__wip">⏳ {wipLabel}</span>
-                      {')'}
-                    </span>
-                  )}
-                </div>
-
-                <p class="exp-entry__title">
-                  <span class="exp-prefix exp-prefix--edu">{item.prefix}:</span>
-                  <span class="exp-title-text"> {item.title[lang]}</span>
-                </p>
-
-                <p class="exp-entry__meta">
-                  <span class="exp-meta-key">{schoolKey}:</span>
-                  {item.url
-                    ? <a href={item.url} class="exp-meta-val exp-meta-link exp-meta-link--edu" target="_blank" rel="noopener noreferrer"> {item.company}</a>
-                    : <span class="exp-meta-val"> {item.company}</span>
-                  }
-                  <span class="exp-meta-sep"> · </span>
-                  <time class="exp-meta-date">{item.period}</time>
-                </p>
-
-                <p class="exp-entry__desc">{item.description[lang]}</p>
-
-                <ul class="exp-tags" role="list" aria-label="Technologies">
-                  {item.tags.map(tag => <li class="exp-tag exp-tag--edu">{tag}</li>)}
                 </ul>
 
               </div>
@@ -449,20 +330,11 @@ const schoolKey   = lang === 'fr' ? 'École' : 'School';
   flex-shrink: 0;
 }
 
-.exp-entry__dot--edu {
-  background: var(--color-neon-pink);
-  box-shadow: 0 0 6px rgba(255, 0, 153, 0.55);
-}
-
 .exp-entry__line {
   width: 1px;
   flex: 1;
   margin-top: 0.3rem;
   background: linear-gradient(to bottom, rgba(204, 255, 0, 0.25), rgba(204, 255, 0, 0.04));
-}
-
-.exp-entry__line--edu {
-  background: linear-gradient(to bottom, rgba(255, 0, 153, 0.25), rgba(255, 0, 153, 0.04));
 }
 
 /* ── Entry body ────────────────────────────────────────────────── */
@@ -498,12 +370,6 @@ const schoolKey   = lang === 'fr' ? 'École' : 'School';
   border: 1px solid rgba(204, 255, 0, 0.15);
 }
 
-.exp-hash--edu {
-  color: var(--color-neon-pink);
-  background: rgba(255, 0, 153, 0.06);
-  border-color: rgba(255, 0, 153, 0.15);
-}
-
 /* HEAD badge — career */
 .exp-head-badge {
   font-family: var(--font-family-mono);
@@ -512,18 +378,6 @@ const schoolKey   = lang === 'fr' ? 'École' : 'School';
 }
 
 .exp-head-badge__current {
-  color: #F59E0B;
-  font-weight: 700;
-}
-
-/* HEAD badge — education */
-.exp-edu-badge {
-  font-family: var(--font-family-mono);
-  font-size: 0.6875rem;
-  color: #94A3B8;
-}
-
-.exp-edu-badge__wip {
   color: #F59E0B;
   font-weight: 700;
 }
@@ -540,10 +394,6 @@ const schoolKey   = lang === 'fr' ? 'École' : 'School';
 
 .exp-prefix {
   color: #8B5CF6;
-}
-
-.exp-prefix--edu {
-  color: var(--color-neon-pink);
 }
 
 .exp-title-text {
@@ -613,38 +463,7 @@ const schoolKey   = lang === 'fr' ? 'École' : 'School';
   letter-spacing: 0.03em;
 }
 
-.exp-tag--edu {
-  background: rgba(255, 0, 153, 0.06);
-  border-color: rgba(255, 0, 153, 0.2);
-  color: var(--color-neon-pink);
-}
-
-/* ── Branch separator ──────────────────────────────────────────── */
-.exp-branch-sep {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  margin: 1.75rem 0;
-}
-
-.exp-branch-sep__line {
-  flex: 1;
-  height: 1px;
-  background: rgba(255, 0, 153, 0.2);
-}
-
-.exp-branch-sep__cmd {
-  font-family: var(--font-family-mono);
-  font-size: 0.6875rem;
-  color: var(--color-neon-pink);
-  white-space: nowrap;
-  background: rgba(255, 0, 153, 0.06);
-  padding: 0.25rem 0.625rem;
-  border-radius: 0.25rem;
-  border: 1px solid rgba(255, 0, 153, 0.2);
-}
-
-/* ── Company / School link ─────────────────────────────────────── */
+/* ── Company link ─────────────────────────────────────── */
 .exp-meta-link {
   text-decoration: none;
   transition: color 0.15s ease;
@@ -655,17 +474,9 @@ const schoolKey   = lang === 'fr' ? 'École' : 'School';
   text-decoration: underline;
 }
 
-.exp-meta-link--edu:hover {
-  color: var(--color-neon-pink);
-}
-
 .exp-meta-link:focus-visible {
   outline: 2px solid var(--color-acid-green);
   outline-offset: 2px;
   border-radius: 2px;
-}
-
-.exp-meta-link--edu:focus-visible {
-  outline-color: var(--color-neon-pink);
 }
 </style>
