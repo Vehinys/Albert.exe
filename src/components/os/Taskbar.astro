@@ -421,47 +421,48 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
 
   // ── Start Menu ───────────────────────────────────────────────────────────────
   const startBtn  = document.getElementById('taskbar-start');
-  const startMenu = document.getElementById('start-menu');
+  const startMenu = document.getElementById('start-menu') as HTMLElement | null;
   if (!startBtn || !startMenu) return;
+  const menu = startMenu as HTMLElement;
 
   function openMenu(): void {
-    startMenu.hidden = false;
+    menu.hidden = false;
     // Force animation replay on subsequent opens
-    startMenu.style.animation = 'none';
-    void startMenu.offsetHeight; // reflow
-    startMenu.style.animation = '';
+    menu.style.animation = 'none';
+    void menu.offsetHeight; // reflow
+    menu.style.animation = '';
     startBtn!.setAttribute('aria-expanded', 'true');
-    const first = startMenu.querySelector<HTMLElement>('.start-menu__item');
+    const first = menu.querySelector<HTMLElement>('.start-menu__item');
     first?.focus();
   }
 
   function closeMenu(): void {
-    startMenu.hidden = true;
+    menu.hidden = true;
     startBtn!.setAttribute('aria-expanded', 'false');
   }
 
   startBtn.addEventListener('click', (e) => {
     e.stopPropagation(); // empêche le document listener de fermer immédiatement
-    if (startMenu.hidden) openMenu(); else closeMenu();
+    if (menu.hidden) openMenu(); else closeMenu();
   });
 
   // Close on outside click (ignore clicks inside menu ou sur le bouton)
   document.addEventListener('click', (e) => {
-    if (!startMenu.hidden && !startMenu.contains(e.target as Node)) {
+    if (!menu.hidden && !menu.contains(e.target as Node)) {
       closeMenu();
     }
   });
 
   // Close on Escape
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !startMenu.hidden) {
+    if (e.key === 'Escape' && !menu.hidden) {
       closeMenu();
       startBtn.focus();
     }
   });
 
   // Open window items in start menu
-  startMenu.addEventListener('click', async (e) => {
+  menu.addEventListener('click', async (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-start-open]');
     if (!btn) return;
     const id = btn.dataset['startOpen'];
