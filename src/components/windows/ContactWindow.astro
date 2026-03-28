@@ -1,169 +1,276 @@
 ---
 import type { Lang } from '../../i18n/utils';
-import { useTranslations } from '../../i18n/utils';
 
 interface Props {
   lang: Lang;
 }
 
 const { lang } = Astro.props;
-const t = useTranslations(lang);
 
 const formId = 'contact-win-form';
+
+const labels = {
+  fr: {
+    windowTitle: 'Nouveau message',
+    attach: 'Pièce jointe',
+    preview: 'Aperçu',
+    online: 'En ligne',
+    fromLabel: 'De :',
+    fromValue: 'Albert Lecomte <contact@albert-lecomte.fr>',
+    toLabel: 'À :',
+    toPlaceholder: 'Votre nom <votre@email.fr>',
+    subjectLabel: 'Objet :',
+    subjectPlaceholder: 'Objet de votre message',
+    bodyPlaceholder: 'Écrivez votre message ici...',
+    send: 'Envoyer',
+    infoTitle: 'Infos',
+    location: 'Mulhouse, Alsace',
+    locLabel: 'Localisation',
+    dispoLabel: 'Disponibilité',
+    dispoValue: 'Lun \u2013 Ven',
+    responseLabel: 'Réponse',
+    responseValue: '< 24h',
+    statusLabel: 'Statut',
+    statusValue: 'Disponible',
+    nameLabel: 'Votre nom',
+    emailLabel: 'Votre email',
+    sending: 'Envoi...',
+    success: 'Message envoyé avec succès !',
+    formAriaLabel: 'Formulaire de contact',
+  },
+  en: {
+    windowTitle: 'New message',
+    attach: 'Attach file',
+    preview: 'Preview',
+    online: 'Online',
+    fromLabel: 'From:',
+    fromValue: 'Albert Lecomte <contact@albert-lecomte.fr>',
+    toLabel: 'To:',
+    toPlaceholder: 'Your name <your@email.com>',
+    subjectLabel: 'Subject:',
+    subjectPlaceholder: 'Subject of your message',
+    bodyPlaceholder: 'Write your message here...',
+    send: 'Send',
+    infoTitle: 'Info',
+    location: 'Mulhouse, Alsace',
+    locLabel: 'Location',
+    dispoLabel: 'Availability',
+    dispoValue: 'Mon \u2013 Fri',
+    responseLabel: 'Response',
+    responseValue: '< 24h',
+    statusLabel: 'Status',
+    statusValue: 'Available',
+    nameLabel: 'Your name',
+    emailLabel: 'Your email',
+    sending: 'Sending...',
+    success: 'Message sent successfully!',
+    formAriaLabel: 'Contact form',
+  },
+} as const;
+
+const l = labels[lang];
 ---
 
-<div class="con-win">
-  <div class="con-win__header">
-    <span class="win-label">{t('contact.title')}</span>
-    <h2 class="win-title">{t('contact.subtitle')}</h2>
-    <p class="con-win__intro">{t('contact.intro')}</p>
+<div class="mail-win" role="region" aria-label={l.windowTitle}>
+
+  <!-- Toolbar -->
+  <div class="mail-toolbar">
+    <div class="mail-toolbar__left">
+      <span class="mail-toolbar__icon" aria-hidden="true">📧</span>
+      <span class="mail-toolbar__title">{l.windowTitle}</span>
+    </div>
+    <div class="mail-toolbar__right">
+      <button class="mail-toolbtn" type="button" aria-label={l.attach}>
+        <span aria-hidden="true">📎</span>
+        <span class="mail-toolbtn__label">{l.attach}</span>
+      </button>
+      <button class="mail-toolbtn" type="button" aria-label={l.preview}>
+        <span aria-hidden="true">👁️</span>
+        <span class="mail-toolbtn__label">{l.preview}</span>
+      </button>
+      <span class="mail-status">
+        <span aria-hidden="true">🟢</span>
+        {l.online}
+      </span>
+    </div>
   </div>
 
-  <div class="con-win__layout">
-    <!-- Info cards -->
-    <div class="con-win__info">
-      <div class="con-info-item">
-        <div class="con-info-item__icon" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
+  <!-- Content area -->
+  <div class="mail-content">
+
+    <!-- Compose form -->
+    <div class="mail-compose-wrap">
+
+      <!-- Email header fields -->
+      <div class="mail-headers">
+        <div class="mail-field">
+          <span class="mail-field__label" id="mail-from-label">{l.fromLabel}</span>
+          <span class="mail-field__readonly" aria-labelledby="mail-from-label">
+            {l.fromValue}
+          </span>
         </div>
-        <div>
-          <p class="con-info-item__label">{lang === 'fr' ? 'Localisation' : 'Location'}</p>
-          <p class="con-info-item__value">{t('contact.location')}</p>
-        </div>
+        <div class="mail-field-sep" aria-hidden="true"></div>
       </div>
 
-      <div class="con-info-item">
-        <div class="con-info-item__icon" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2">
-            <rect x="2" y="4" width="20" height="16" rx="2"/>
-            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-          </svg>
-        </div>
-        <div>
-          <p class="con-info-item__label">Email</p>
-          <a href="mailto:contact@albert-lecomte.fr" class="con-info-item__link">
-            contact@albert-lecomte.fr
-          </a>
-        </div>
-      </div>
+      <!-- Form -->
+      <form
+        id={formId}
+        class="mail-form"
+        novalidate
+        aria-label={l.formAriaLabel}
+      >
+        <div id="mail-status" role="status" aria-live="polite" class="mail-sr-only"></div>
 
-      <div class="con-info-item">
-        <div class="con-info-item__icon" aria-hidden="true">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <polyline points="12 6 12 12 16 14"/>
-          </svg>
+        <!-- To: -->
+        <div class="mail-field mail-field--input">
+          <label for="mail-to" class="mail-field__label">{l.toLabel}</label>
+          <input
+            type="email"
+            id="mail-to"
+            name="email"
+            class="mail-field__input"
+            placeholder={l.toPlaceholder}
+            required
+            aria-required="true"
+            autocomplete="email"
+            aria-describedby="mail-to-error"
+          />
+          <p id="mail-to-error" class="mail-field__error" role="alert" aria-live="polite"></p>
         </div>
-        <div>
-          <p class="con-info-item__label">{lang === 'fr' ? 'Disponibilité' : 'Availability'}</p>
-          <p class="con-info-item__value">{t('contact.availability')}</p>
-          <p class="con-info-item__sub">{t('contact.response.time')}</p>
+
+        <!-- From name (hidden for "To:" semantics — actual sender name field) -->
+        <div class="mail-field mail-field--input">
+          <label for="mail-name" class="mail-field__label">{l.nameLabel}&nbsp;:</label>
+          <input
+            type="text"
+            id="mail-name"
+            name="name"
+            class="mail-field__input"
+            placeholder={l.nameLabel}
+            required
+            aria-required="true"
+            autocomplete="name"
+            aria-describedby="mail-name-error"
+          />
+          <p id="mail-name-error" class="mail-field__error" role="alert" aria-live="polite"></p>
         </div>
-      </div>
+
+        <!-- Subject: -->
+        <div class="mail-field mail-field--input">
+          <label for="mail-subject" class="mail-field__label">{l.subjectLabel}</label>
+          <input
+            type="text"
+            id="mail-subject"
+            name="subject"
+            class="mail-field__input"
+            placeholder={l.subjectPlaceholder}
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- Divider -->
+        <div class="mail-body-divider" aria-hidden="true"></div>
+
+        <!-- Message body -->
+        <div class="mail-body-wrap">
+          <label for="mail-body" class="mail-sr-only">
+            {lang === 'fr' ? 'Corps du message' : 'Message body'}
+          </label>
+          <textarea
+            id="mail-body"
+            name="message"
+            class="mail-body"
+            rows={6}
+            required
+            aria-required="true"
+            placeholder={l.bodyPlaceholder}
+            aria-describedby="mail-body-error"
+          ></textarea>
+          <p id="mail-body-error" class="mail-field__error" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Divider -->
+        <div class="mail-body-divider" aria-hidden="true"></div>
+
+        <!-- Send button -->
+        <div class="mail-send-bar">
+          <button type="submit" id="mail-submit" class="mail-send-btn">
+            <span id="mail-btn-text">
+              <span aria-hidden="true">✉️</span>
+              {l.send}
+            </span>
+            <span id="mail-btn-loading" style="display:none" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mail-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              {l.sending}
+            </span>
+          </button>
+
+          <div id="mail-success" class="mail-success" style="display:none" role="alert" aria-live="polite">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            {l.success}
+          </div>
+        </div>
+
+      </form>
     </div>
 
-    <!-- Form -->
-    <form
-      id={formId}
-      class="con-form"
-      novalidate
-      aria-label={lang === 'fr' ? 'Formulaire de contact' : 'Contact form'}
-    >
-      <div id="con-status" role="status" aria-live="polite" class="sr-only"></div>
-
-      <div class="form-group">
-        <label for="con-name" class="form-label">
-          {t('contact.name')}
-          <span class="form-req" aria-hidden="true">*</span>
-        </label>
-        <input
-          type="text"
-          id="con-name"
-          name="name"
-          class="form-input"
-          required
-          aria-required="true"
-          autocomplete="name"
-          aria-describedby="con-name-error"
-        />
-        <p id="con-name-error" class="form-error" role="alert" aria-live="polite"></p>
+    <!-- Right sidebar: info panel -->
+    <aside class="mail-info-panel" aria-label={l.infoTitle}>
+      <div class="mail-info-header">
+        <span aria-hidden="true">📍</span>
+        {l.infoTitle}
       </div>
 
-      <div class="form-group">
-        <label for="con-email" class="form-label">
-          {t('contact.email')}
-          <span class="form-req" aria-hidden="true">*</span>
-        </label>
-        <input
-          type="email"
-          id="con-email"
-          name="email"
-          class="form-input"
-          required
-          aria-required="true"
-          autocomplete="email"
-          aria-describedby="con-email-error"
-        />
-        <p id="con-email-error" class="form-error" role="alert" aria-live="polite"></p>
+      <div class="mail-info-list">
+        <div class="mail-info-item">
+          <span class="mail-info-item__label">{l.locLabel}</span>
+          <span class="mail-info-item__value">{l.location}</span>
+        </div>
+        <div class="mail-info-item">
+          <span class="mail-info-item__label">{l.dispoLabel}</span>
+          <span class="mail-info-item__value">{l.dispoValue}</span>
+        </div>
+        <div class="mail-info-item">
+          <span class="mail-info-item__label">{l.responseLabel}</span>
+          <span class="mail-info-item__value">{l.responseValue}</span>
+        </div>
+        <div class="mail-info-item">
+          <span class="mail-info-item__label">{l.statusLabel}</span>
+          <span class="mail-info-item__value mail-info-item__value--available">
+            <span aria-hidden="true">🟢</span>
+            {l.statusValue}
+          </span>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="con-subject" class="form-label">{t('contact.subject')}</label>
-        <input
-          type="text"
-          id="con-subject"
-          name="subject"
-          class="form-input"
-          placeholder={t('contact.subject.placeholder')}
-          autocomplete="off"
-        />
+      <div class="mail-info-email">
+        <a
+          href="mailto:contact@albert-lecomte.fr"
+          class="mail-email-link"
+          aria-label="contact@albert-lecomte.fr"
+        >
+          <span aria-hidden="true">✉️</span>
+          contact@albert-lecomte.fr
+        </a>
       </div>
+    </aside>
 
-      <div class="form-group">
-        <label for="con-message" class="form-label">
-          {t('contact.message')}
-          <span class="form-req" aria-hidden="true">*</span>
-        </label>
-        <textarea
-          id="con-message"
-          name="message"
-          class="form-input form-textarea"
-          rows={4}
-          required
-          aria-required="true"
-          placeholder={t('contact.message.placeholder')}
-          aria-describedby="con-message-error"
-        ></textarea>
-        <p id="con-message-error" class="form-error" role="alert" aria-live="polite"></p>
-      </div>
-
-      <button type="submit" id="con-submit" class="con-submit-btn">
-        <span id="con-btn-text">{t('contact.send')}</span>
-        <span id="con-btn-loading" style="display:none" aria-hidden="true">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-          {t('contact.sending')}
-        </span>
-      </button>
-
-      <div id="con-success" class="con-success" style="display:none" role="alert" aria-live="polite">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        {t('contact.success')}
-      </div>
-    </form>
   </div>
 </div>
 
 <style>
-.con-win {
+/* ── Root ──────────────────────────────────────────────────────── */
+.mail-win {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  background: #080A12;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-size: 0.8125rem;
 }
 
-.sr-only {
+.mail-sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -175,231 +282,407 @@ const formId = 'contact-win-form';
   border: 0;
 }
 
-.win-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #F59E0B;
-  display: block;
-  margin-bottom: 0.25rem;
-}
-
-.win-title {
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
-  font-weight: 700;
-  color: #FAF5FF;
-  margin: 0;
-}
-
-.con-win__intro {
-  font-size: 0.875rem;
-  color: #C4B5FD;
-  margin: 0;
-}
-
-.con-win__layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-}
-
-@media (min-width: 520px) {
-  .con-win__layout {
-    grid-template-columns: 1fr 2fr;
-    align-items: start;
-  }
-}
-
-.con-win__info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.con-info-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.875rem;
-  background: rgba(139, 92, 246, 0.06);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 0.625rem;
-}
-
-.con-info-item__icon {
-  width: 2rem;
-  height: 2rem;
-  background: rgba(139, 92, 246, 0.1);
-  border-radius: 0.375rem;
+/* ── Toolbar ───────────────────────────────────────────────────── */
+.mail-toolbar {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  padding: 0.425rem 0.875rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  gap: 0.75rem;
   flex-shrink: 0;
 }
 
-.con-info-item__label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: #A78BFA;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 0.15rem;
-}
-
-.con-info-item__value {
-  font-size: 0.8125rem;
-  color: #FAF5FF;
-  font-weight: 500;
-  margin: 0;
-}
-
-.con-info-item__sub {
-  font-size: 0.75rem;
-  color: #C4B5FD;
-  margin: 0.1rem 0 0;
-}
-
-.con-info-item__link {
-  font-size: 0.8125rem;
-  color: #8B5CF6;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.con-info-item__link:hover {
-  color: #A78BFA;
-}
-
-.con-info-item__link:focus-visible {
-  outline: 2px solid #F59E0B;
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/* Form */
-.con-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.form-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #FAF5FF;
+.mail-toolbar__left {
   display: flex;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.5rem;
 }
 
-.form-req {
-  color: #ef4444;
-}
-
-.form-input {
-  padding: 0.625rem 0.875rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(139, 92, 246, 0.25);
-  background: rgba(139, 92, 246, 0.06);
-  color: #FAF5FF;
+.mail-toolbar__icon {
   font-size: 0.875rem;
+}
+
+.mail-toolbar__title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #C4B5FD;
+  letter-spacing: 0.02em;
+}
+
+.mail-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mail-toolbtn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: transparent;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 0.25rem;
+  color: #94A3B8;
+  font-size: 0.7rem;
+  cursor: pointer;
   font-family: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.15s ease;
+}
+
+.mail-toolbtn:hover {
+  background: rgba(139, 92, 246, 0.12);
+  color: #C4B5FD;
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+.mail-toolbtn:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+}
+
+.mail-toolbtn__label {
+  display: none;
+}
+
+@media (min-width: 480px) {
+  .mail-toolbtn__label { display: inline; }
+}
+
+.mail-status {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  color: #4ade80;
+  font-weight: 600;
+}
+
+/* ── Content area ──────────────────────────────────────────────── */
+.mail-content {
+  display: grid;
+  grid-template-columns: 1fr 28%;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 560px) {
+  .mail-content {
+    grid-template-columns: 1fr;
+  }
+
+  .mail-info-panel {
+    border-top: 1px solid rgba(139, 92, 246, 0.15);
+    border-left: none !important;
+  }
+}
+
+/* ── Compose wrap ──────────────────────────────────────────────── */
+.mail-compose-wrap {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header fields ─────────────────────────────────────────────── */
+.mail-headers {
+  flex-shrink: 0;
+}
+
+.mail-field {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  align-items: center;
+  padding: 0.375rem 0.875rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  gap: 0.5rem;
+}
+
+.mail-field--input {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.mail-field__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8B5CF6;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mail-field__readonly {
+  font-size: 0.75rem;
+  color: #94A3B8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mail-field-sep {
+  height: 0;
+}
+
+/* ── Form ──────────────────────────────────────────────────────── */
+.mail-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.mail-field--input {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  align-items: baseline;
+  padding: 0.25rem 0.875rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  gap: 0.5rem;
+  grid-template-rows: auto auto;
+}
+
+.mail-field--input .mail-field__label {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+.mail-field--input .mail-field__input {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.mail-field--input .mail-field__error {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.mail-field__input {
+  background: transparent;
+  border: none;
+  color: #FAF5FF;
+  font-size: 0.8rem;
+  font-family: inherit;
+  padding: 0.25rem 0;
+  outline: none;
   width: 100%;
 }
 
-.form-input::placeholder {
-  color: rgba(196, 181, 253, 0.4);
+.mail-field__input::placeholder {
+  color: rgba(196, 181, 253, 0.3);
 }
 
-.form-input:focus {
+.mail-field__input:focus {
+  color: #FAF5FF;
+}
+
+.mail-field__input:focus-visible {
   outline: none;
-  border-color: #8B5CF6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 1px 0 #8B5CF6;
 }
 
-.form-input:focus-visible {
-  outline: 2px solid #F59E0B;
-  outline-offset: 2px;
+.mail-field__input[aria-invalid="true"] {
+  color: #ef4444;
+  box-shadow: 0 1px 0 #ef4444;
 }
 
-.form-input[aria-invalid="true"] {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-error {
-  font-size: 0.75rem;
+.mail-field__error {
+  font-size: 0.7rem;
   color: #ef4444;
   margin: 0;
-  min-height: 1.1em;
+  min-height: 1em;
+  padding-bottom: 0.1rem;
 }
 
-.con-submit-btn {
+/* ── Body divider ──────────────────────────────────────────────── */
+.mail-body-divider {
+  height: 1px;
+  background: rgba(139, 92, 246, 0.12);
+  flex-shrink: 0;
+}
+
+/* ── Message body ──────────────────────────────────────────────── */
+.mail-body-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+}
+
+.mail-body {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #FAF5FF;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  line-height: 1.65;
+  resize: none;
+  padding: 0.75rem 0.875rem;
+  outline: none;
+  min-height: 120px;
+}
+
+.mail-body::placeholder {
+  color: rgba(196, 181, 253, 0.25);
+}
+
+.mail-body:focus-visible {
+  outline: none;
+  background: rgba(139, 92, 246, 0.03);
+}
+
+/* ── Send bar ──────────────────────────────────────────────────── */
+.mail-send-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: rgba(139, 92, 246, 0.2);
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  color: #FAF5FF;
-  font-size: 0.875rem;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  background: rgba(139, 92, 246, 0.04);
+  border-top: 1px solid rgba(139, 92, 246, 0.12);
+  flex-shrink: 0;
+}
+
+.mail-send-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.45rem 1.125rem;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #F59E0B;
+  font-size: 0.8rem;
   font-weight: 700;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.2s ease;
-  letter-spacing: 0.03em;
+  transition: all 0.15s ease;
+  letter-spacing: 0.02em;
 }
 
-.con-submit-btn:hover:not(:disabled) {
-  background: rgba(139, 92, 246, 0.35);
-  border-color: #8B5CF6;
+.mail-send-btn:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.28);
+  border-color: #F59E0B;
+  color: #FCD34D;
 }
 
-.con-submit-btn:disabled {
-  opacity: 0.6;
+.mail-send-btn:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
-.con-submit-btn:focus-visible {
+.mail-send-btn:focus-visible {
   outline: 2px solid #F59E0B;
   outline-offset: 2px;
 }
 
-.con-success {
+.mail-success {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 0.875rem;
-  border-radius: 0.5rem;
-  background: rgba(74, 222, 128, 0.08);
-  border: 1px solid rgba(74, 222, 128, 0.2);
+  gap: 0.4rem;
+  font-size: 0.775rem;
   color: #4ade80;
-  font-size: 0.8125rem;
   font-weight: 500;
 }
 
-@keyframes spin {
+/* ── Spin ──────────────────────────────────────────────────────── */
+@keyframes mail-spin {
   to { transform: rotate(360deg); }
 }
 
-.spin {
-  animation: spin 0.8s linear infinite;
+.mail-spin {
+  animation: mail-spin 0.8s linear infinite;
+}
+
+/* ── Info panel ────────────────────────────────────────────────── */
+.mail-info-panel {
+  border-left: 1px solid rgba(139, 92, 246, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.mail-info-header {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8B5CF6;
+  background: rgba(139, 92, 246, 0.06);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.12);
+  flex-shrink: 0;
+}
+
+.mail-info-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0.625rem 0.875rem;
+  gap: 0.625rem;
+  flex: 1;
+}
+
+.mail-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.mail-info-item__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #475569;
+}
+
+.mail-info-item__value {
+  font-size: 0.775rem;
+  color: #C4B5FD;
+  font-weight: 500;
+}
+
+.mail-info-item__value--available {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #4ade80;
+}
+
+.mail-info-email {
+  padding: 0.625rem 0.875rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+  flex-shrink: 0;
+}
+
+.mail-email-link {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.7rem;
+  color: #8B5CF6;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+  word-break: break-all;
+}
+
+.mail-email-link:hover {
+  color: #A78BFA;
+}
+
+.mail-email-link:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 </style>
 
@@ -407,18 +690,18 @@ const formId = 'contact-win-form';
 import { sendContactEmail } from '../../utils/emailjs';
 
 (function () {
-  const form = document.getElementById('contact-win-form') as HTMLFormElement | null;
+  const form        = document.getElementById('contact-win-form') as HTMLFormElement | null;
   if (!form) return;
 
-  const nameInput    = document.getElementById('con-name')    as HTMLInputElement | null;
-  const emailInput   = document.getElementById('con-email')   as HTMLInputElement | null;
-  const messageInput = document.getElementById('con-message') as HTMLTextAreaElement | null;
-  const subjectInput = document.getElementById('con-subject') as HTMLInputElement | null;
-  const submitBtn    = document.getElementById('con-submit')  as HTMLButtonElement | null;
-  const btnText      = document.getElementById('con-btn-text');
-  const btnLoading   = document.getElementById('con-btn-loading');
-  const successMsg   = document.getElementById('con-success');
-  const statusEl     = document.getElementById('con-status');
+  const nameInput    = document.getElementById('mail-name')    as HTMLInputElement | null;
+  const emailInput   = document.getElementById('mail-to')      as HTMLInputElement | null;
+  const messageInput = document.getElementById('mail-body')    as HTMLTextAreaElement | null;
+  const subjectInput = document.getElementById('mail-subject') as HTMLInputElement | null;
+  const submitBtn    = document.getElementById('mail-submit')  as HTMLButtonElement | null;
+  const btnText      = document.getElementById('mail-btn-text');
+  const btnLoading   = document.getElementById('mail-btn-loading');
+  const successMsg   = document.getElementById('mail-success');
+  const statusEl     = document.getElementById('mail-status');
 
   function showError(inputId: string, message: string): void {
     const input = document.getElementById(inputId);
@@ -448,25 +731,25 @@ import { sendContactEmail } from '../../utils/emailjs';
 
     let isValid = true;
 
-    clearError('con-name');
-    clearError('con-email');
-    clearError('con-message');
+    clearError('mail-name');
+    clearError('mail-to');
+    clearError('mail-body');
 
     if (!name) {
-      showError('con-name', 'Ce champ est obligatoire');
+      showError('mail-name', 'Ce champ est obligatoire');
       isValid = false;
     }
 
     if (!email) {
-      showError('con-email', 'Ce champ est obligatoire');
+      showError('mail-to', 'Ce champ est obligatoire');
       isValid = false;
     } else if (!validateEmail(email)) {
-      showError('con-email', 'Email invalide');
+      showError('mail-to', 'Email invalide');
       isValid = false;
     }
 
     if (!message) {
-      showError('con-message', 'Ce champ est obligatoire');
+      showError('mail-body', 'Ce champ est obligatoire');
       isValid = false;
     }
 
