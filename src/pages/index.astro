@@ -11,6 +11,8 @@ import ExperienceWindow from '../components/windows/ExperienceWindow.astro';
 import VolunteerWindow from '../components/windows/VolunteerWindow.astro';
 import HobbiesWindow from '../components/windows/HobbiesWindow.astro';
 import ContactWindow from '../components/windows/ContactWindow.astro';
+import MentionsLegalesWindow from '../components/windows/MentionsLegalesWindow.astro';
+import PolitiqueWindow from '../components/windows/PolitiqueWindow.astro';
 import { getAlternateLangPath } from '../i18n/utils';
 
 const lang = 'fr' as const;
@@ -59,10 +61,18 @@ const alternateLangPath = getAlternateLangPath(Astro.url);
   <Window id="contact" title="Contact" icon="📧" defaultX={160} defaultY={85} defaultWidth={660} defaultHeight={540}>
     <ContactWindow lang={lang} />
   </Window>
+
+  <Window id="mentions-legales" title="Mentions légales" icon="⚖️" defaultX={200} defaultY={100} defaultWidth={580} defaultHeight={480}>
+    <MentionsLegalesWindow lang={lang} />
+  </Window>
+
+  <Window id="politique" title="Politique de confidentialité" icon="🔒" defaultX={240} defaultY={110} defaultWidth={580} defaultHeight={520}>
+    <PolitiqueWindow lang={lang} />
+  </Window>
 </BaseLayout>
 
 <script>
-import { register, close, minimize, maximize, focus } from '../utils/window-manager';
+import { register, open, close, minimize, maximize, focus } from '../utils/window-manager';
 
 // Register all windows with the manager
 const windows = [
@@ -72,7 +82,9 @@ const windows = [
   { id: 'experience', title: 'Expérience',    icon: '💼' },
   { id: 'volunteer',  title: 'Bénévolat',     icon: '🤝' },
   { id: 'hobbies',    title: 'Passions',      icon: '🎮' },
-  { id: 'contact',    title: 'Contact',       icon: '📧' },
+  { id: 'contact',           title: 'Contact',                       icon: '📧' },
+  { id: 'mentions-legales', title: 'Mentions légales',              icon: '⚖️' },
+  { id: 'politique',        title: 'Politique de confidentialité',  icon: '🔒' },
 ] as const;
 
 windows.forEach(w => register(w.id, w.title, w.icon));

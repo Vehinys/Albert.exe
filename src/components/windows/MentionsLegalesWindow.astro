@@ -1,0 +1,131 @@
+---
+import type { Lang } from '../../i18n/utils';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+---
+<div class="legal-win" role="region" aria-label={lang === 'fr' ? 'Mentions légales' : 'Legal notice'}>
+  <div class="legal-win__header">
+    <span aria-hidden="true">⚖️</span>
+    <span>{lang === 'fr' ? 'Mentions légales' : 'Legal notice'}</span>
+    <span class="legal-win__date">{lang === 'fr' ? 'Mise à jour : mars 2026' : 'Updated: March 2026'}</span>
+  </div>
+  <div class="legal-win__body">
+
+    <section>
+      <h2>1. {lang === 'fr' ? 'Éditeur du site' : 'Site editor'}</h2>
+      <address>
+        <strong>Albert Lecomte</strong><br />
+        {lang === 'fr' ? 'Personne physique — Concepteur Designer UI' : 'Individual — UI Designer'}<br />
+        Mulhouse, Alsace, France<br />
+        Email : <a href="mailto:contact@albert-lecomte.fr">contact@albert-lecomte.fr</a>
+      </address>
+      <p>{lang === 'fr'
+        ? "Ce site est un portfolio personnel. Albert Lecomte n'est pas assujetti à la TVA."
+        : "This site is a personal portfolio. Albert Lecomte is not subject to VAT."}</p>
+    </section>
+
+    <section>
+      <h2>2. {lang === 'fr' ? 'Hébergeur' : 'Hosting'}</h2>
+      <address>
+        <strong>Vercel Inc.</strong><br />
+        340 Pine Street, Suite 603, San Francisco, CA 94104<br />
+        <a href="https://vercel.com" target="_blank" rel="noopener noreferrer">vercel.com</a>
+      </address>
+    </section>
+
+    <section>
+      <h2>3. {lang === 'fr' ? 'Propriété intellectuelle' : 'Intellectual property'}</h2>
+      <p>{lang === 'fr'
+        ? "L'ensemble du contenu (textes, images, design) est la propriété exclusive d'Albert Lecomte. Toute reproduction est interdite sans autorisation."
+        : "All content (texts, images, design) is the exclusive property of Albert Lecomte. Any reproduction is prohibited without permission."}</p>
+    </section>
+
+    <section>
+      <h2>4. {lang === 'fr' ? 'Limitation de responsabilité' : 'Limitation of liability'}</h2>
+      <p>{lang === 'fr'
+        ? "Albert Lecomte s'efforce d'assurer l'exactitude des informations mais ne peut en garantir l'exhaustivité."
+        : "Albert Lecomte strives to ensure accuracy of information but cannot guarantee completeness."}</p>
+    </section>
+
+    <section>
+      <h2>5. {lang === 'fr' ? 'Liens hypertextes' : 'Hyperlinks'}</h2>
+      <p>{lang === 'fr'
+        ? "Ce site peut contenir des liens vers des sites tiers. Albert Lecomte n'est pas responsable de leur contenu."
+        : "This site may contain links to third-party sites. Albert Lecomte is not responsible for their content."}</p>
+    </section>
+
+  </div>
+</div>
+
+<style>
+.legal-win {
+  display: flex;
+  flex-direction: column;
+  background: #07060F;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  height: 100%;
+}
+
+.legal-win__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.18);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #C4B5FD;
+  flex-shrink: 0;
+}
+
+.legal-win__date {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #475569;
+}
+
+.legal-win__body {
+  overflow-y: auto;
+  padding: 1.25rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8B5CF6;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+p, address {
+  font-size: 0.8rem;
+  color: #94A3B8;
+  line-height: 1.7;
+  font-style: normal;
+  margin: 0;
+}
+
+a {
+  color: #60A5FA;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover { color: #93C5FD; }
+a:focus-visible { outline: 2px solid #F59E0B; outline-offset: 2px; border-radius: 2px; }
+</style>
