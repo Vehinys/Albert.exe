@@ -1,7 +1,6 @@
 {
   "site.title": "Albert Lecomte — UI Designer",
   "site.description": "UI Designer based in Mulhouse, France. I create modern, accessible and high-performance websites for craftsmen, retailers and businesses in the region.",
-
   "nav.home": "Home",
   "nav.about": "About",
   "nav.skills": "Skills",
@@ -15,7 +14,6 @@
   "nav.lang.switch": "Passer en français",
   "nav.theme.dark": "Switch to dark mode",
   "nav.theme.light": "Switch to light mode",
-
   "hero.greeting": "Hi, I'm",
   "hero.name": "Albert Lecomte",
   "hero.title": "UI Designer & Web Developer",
@@ -25,7 +23,6 @@
   "hero.scroll": "Scroll down",
   "hero.available": "Available for a job",
   "hero.rqth": "RQTH Recognized",
-
   "about.title": "About",
   "about.subtitle": "Passionate about design and the web",
   "about.p1": "WordPress Architect and UI/UX Designer based in Mulhouse, I am currently actively searching for a position within an agency specialized in WordPress or SEO.",
@@ -36,7 +33,6 @@
   "about.projects": "projects delivered",
   "about.clients": "happy clients",
   "about.satisfaction": "satisfaction rate",
-
   "skills.title": "Skills",
   "skills.subtitle": "Technologies & tools I master",
   "skills.design": "Design",
@@ -48,7 +44,6 @@
   "skills.level.3": "Intermediate",
   "skills.level.4": "Advanced",
   "skills.level.5": "Expert",
-
   "projects.title": "Projects",
   "projects.subtitle": "My latest work",
   "projects.filter.all": "All",
@@ -60,19 +55,14 @@
   "projects.view.github": "View code",
   "projects.featured": "Featured",
   "projects.empty": "No projects in this category.",
-
   "experience.title": "Experience",
   "experience.subtitle": "My professional journey",
-
   "volunteer.title": "Volunteering & Passions",
   "volunteer.subtitle": "Engagement and community life",
-
   "hobbies.title": "Passions & Hobbies",
   "hobbies.subtitle": "What drives me daily",
-
   "education.title": "Education",
   "education.subtitle": "My academic background",
-
   "contact.title": "Contact",
   "contact.subtitle": "Let's start your project",
   "contact.intro": "Have a web project in mind? Let's talk! I usually reply within 24 hours.",
@@ -91,29 +81,15 @@
   "contact.location": "Mulhouse, Alsace, France",
   "contact.availability": "Available Monday to Friday",
   "contact.response.time": "Response within 24h",
-
   "footer.rights": "All rights reserved",
   "footer.legal": "Legal notice",
   "footer.privacy": "Privacy policy",
-  "footer.accessibility": "Accessibility statement",
   "footer.made.with": "Made with",
   "footer.and": "and",
   "footer.in": "in Mulhouse",
-
   "a11y.skip_to_main": "Skip to main content",
-  "a11y.panel.title": "Accessibility settings",
-  "a11y.panel.open": "Open accessibility settings",
-  "a11y.font.decrease": "Decrease text size",
-  "a11y.font.reset": "Reset text size",
-  "a11y.font.increase": "Increase text size",
-  "a11y.contrast": "High contrast",
-  "a11y.line.height": "Line spacing",
-  "a11y.motion": "Reduce animations",
-
   "legal.title": "Legal notice",
   "privacy.title": "Privacy policy",
-  "accessibility.declaration.title": "Accessibility statement",
-
   "os.icon.about": "About",
   "os.icon.projects": "Projects",
   "os.icon.skills": "Skills",
