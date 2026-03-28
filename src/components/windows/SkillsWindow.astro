@@ -44,13 +44,6 @@ function getStatus(level: number): { dot: string; label: string } {
   return { dot: 'grey', label: lang === 'fr' ? 'Inactif' : 'Inactive' };
 }
 
-// Compute avg for each category (for Performances tab)
-function avg(cat: Category): number {
-  const catSkills = skills.filter(s => s.category === cat);
-  if (catSkills.length === 0) return 0;
-  return Math.round(catSkills.reduce((sum, s) => sum + s.level, 0) / catSkills.length * 20);
-}
-
 const processCount = skills.length;
 
 const labels = {
@@ -62,8 +55,6 @@ const labels = {
     colLevel:        'Version',
     colStatus:       'Statut',
     footer:          `CPU Albert.exe\u00a0: Actif\u00a0| Processus\u00a0: ${processCount}\u00a0| Démarré\u00a0: 2021`,
-    perfTitle:       (cat: string) => `Catégorie\u00a0: ${cat}`,
-    perfScore:       (n: number) => `BENCHMARK\u00a0: ${n} pts`,
   },
   en: {
     tabProcesses:    'Processes',
@@ -73,8 +64,6 @@ const labels = {
     colLevel:        'Version',
     colStatus:       'Status',
     footer:          `CPU Albert.exe: Active | Processes: ${processCount} | Started: 2021`,
-    perfTitle:       (cat: string) => `Category: ${cat}`,
-    perfScore:       (n: number) => `BENCHMARK: ${n} pts`,
   },
 } as const;
 
@@ -176,45 +165,22 @@ const l = labels[lang];
     aria-labelledby="tab-perf"
     tabindex="0"
   >
-    <div class="taskmgr-perf-grid">
+    <div class="taskmgr-perf-list">
       {categories.map(cat => {
         const meta = catMeta[cat];
-        const score = avg(cat);
+        const catSkills = skills.filter(s => s.category === cat);
         const catLabel = lang === 'fr' ? meta.labelFr : meta.labelEn;
         return (
-          <div class="taskmgr-perf-card">
-            <div class="taskmgr-perf-card__header">
-              <span class="taskmgr-perf-card__icon" aria-hidden="true">{meta.icon}</span>
-              <span class="taskmgr-perf-card__title">{catLabel}</span>
+          <div class="taskmgr-perf-row">
+            <div class="taskmgr-perf-row__header">
+              <span aria-hidden="true">{meta.icon}</span>
+              <span class="taskmgr-perf-row__name">{catLabel}</span>
             </div>
-            <div
-              class="taskmgr-perf-ring"
-              role="progressbar"
-              aria-valuenow={score}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={`${catLabel}: ${score}/100`}
-              style={`--score: ${score}`}
-            >
-              <svg viewBox="0 0 36 36" class="taskmgr-perf-svg" aria-hidden="true">
-                <circle
-                  class="taskmgr-perf-svg__track"
-                  cx="18" cy="18" r="15.915"
-                  fill="none"
-                  stroke-width="3"
-                />
-                <circle
-                  class="taskmgr-perf-svg__fill"
-                  cx="18" cy="18" r="15.915"
-                  fill="none"
-                  stroke-width="3"
-                  stroke-dasharray={`${score}, 100`}
-                  stroke-linecap="round"
-                />
-              </svg>
-              <span class="taskmgr-perf-ring__label">{score}</span>
-            </div>
-            <p class="taskmgr-perf-card__score">{l.perfScore(score)}</p>
+            <ul class="taskmgr-perf-tags" aria-label={catLabel}>
+              {catSkills.map(s => (
+                <li class="taskmgr-perf-tag">{s.name}</li>
+              ))}
+            </ul>
           </div>
         );
       })}
@@ -417,88 +383,57 @@ const l = labels[lang];
 .taskmgr-dot--grey   { background: #475569; }
 
 /* ── Perf panel ────────────────────────────────────────────────── */
-.taskmgr-perf-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  padding: 1rem;
-}
-
-@media (max-width: 400px) {
-  .taskmgr-perf-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.taskmgr-perf-card {
+.taskmgr-perf-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: rgba(139, 92, 246, 0.06);
-  border: 1px solid rgba(139, 92, 246, 0.18);
-  border-radius: 0.5rem;
+  gap: 0;
+  padding: 0.875rem;
 }
 
-.taskmgr-perf-card__header {
+.taskmgr-perf-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+}
+
+.taskmgr-perf-row:last-child {
+  border-bottom: none;
+}
+
+.taskmgr-perf-row__header {
   display: flex;
   align-items: center;
+  gap: 0.4rem;
+}
+
+.taskmgr-perf-row__name {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8B5CF6;
+}
+
+/* Tags */
+.taskmgr-perf-tags {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.375rem;
 }
 
-.taskmgr-perf-card__icon {
-  font-size: 1rem;
-}
-
-.taskmgr-perf-card__title {
-  font-size: 0.8rem;
-  font-weight: 700;
+.taskmgr-perf-tag {
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.22);
   color: #C4B5FD;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.taskmgr-perf-ring {
-  position: relative;
-  width: 80px;
-  height: 80px;
-}
-
-.taskmgr-perf-svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.taskmgr-perf-svg__track {
-  stroke: rgba(139, 92, 246, 0.12);
-}
-
-.taskmgr-perf-svg__fill {
-  stroke: #8B5CF6;
-  transition: stroke-dasharray 1s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .taskmgr-perf-svg__fill { transition: none; }
-}
-
-.taskmgr-perf-ring__label {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #FAF5FF;
-}
-
-.taskmgr-perf-card__score {
-  font-size: 0.7rem;
-  color: #94A3B8;
-  margin: 0;
 }
 
 /* ── Footer ────────────────────────────────────────────────────── */
