@@ -32,6 +32,14 @@ const labels = {
     filterLabel: 'Filtrer par catégorie',
     gridLabel: 'Vue en grille',
     listLabel: 'Vue en liste',
+    previewTitle: 'Aperçu',
+    previewCat: 'Catégorie',
+    previewDesc: 'Description',
+    previewTags: 'Technologies',
+    previewClose: 'Fermer le panneau',
+    previewNone: 'Cliquez sur un projet pour voir ses détails',
+    previewLive: 'Voir le site ↗',
+    previewCode: 'Voir le code </>',
   },
   en: {
     addressBarBase: 'Albert.exe > Projects',
@@ -49,6 +57,14 @@ const labels = {
     filterLabel: 'Filter by category',
     gridLabel: 'Grid view',
     listLabel: 'List view',
+    previewTitle: 'Preview',
+    previewCat: 'Category',
+    previewDesc: 'Description',
+    previewTags: 'Technologies',
+    previewClose: 'Close panel',
+    previewNone: 'Click a project to see its details',
+    previewLive: 'View site ↗',
+    previewCode: 'View code </>',
   },
 } as const;
 
@@ -126,13 +142,21 @@ const folders = [
     </nav>
 
     <!-- Content area -->
-    <div class="xplr-content" role="main">
+    <div class="xplr-content" role="main" id="xplr-content">
       <ul class="xplr-grid" id="xplr-grid" role="list" aria-label={lang === 'fr' ? 'Projets' : 'Projects'}>
         {projects.map(project => (
           <li
             class="xplr-file"
             data-category={project.category}
+            data-title={project.title}
+            data-description={lang === 'en' ? project.descriptionEn : project.description}
+            data-cat-label={labels[lang][project.category] ?? project.category}
+            data-tags={project.tags.join('|')}
+            data-url={project.url ?? ''}
+            data-github={project.github ?? ''}
+            data-image={project.image}
             role="listitem"
+            tabindex="0"
           >
             <div class="xplr-file__thumb">
               <img
@@ -211,6 +235,40 @@ const folders = [
         ))}
       </ul>
     </div>
+
+    <!-- Preview panel -->
+    <aside
+      class="xplr-preview"
+      id="xplr-preview"
+      aria-label={l.previewTitle}
+      data-hidden
+    >
+      <div class="xplr-preview__header">
+        <span class="xplr-preview__label" aria-hidden="true">📄</span>
+        <span class="xplr-preview__name" id="xplr-preview-name">—</span>
+        <button
+          class="xplr-preview__close"
+          id="xplr-preview-close"
+          type="button"
+          aria-label={l.previewClose}
+        >×</button>
+      </div>
+      <div class="xplr-preview__body" hidden>
+        <div class="xplr-preview__img-wrap">
+          <img class="xplr-preview__img" id="xplr-preview-img" src="" alt="" loading="lazy" />
+        </div>
+        <dl class="xplr-preview__props">
+          <dt>{l.previewCat}</dt>
+          <dd id="xplr-preview-cat">—</dd>
+          <dt>{l.previewDesc}</dt>
+          <dd id="xplr-preview-desc">—</dd>
+          <dt>{l.previewTags}</dt>
+          <dd id="xplr-preview-tags" class="xplr-preview__tags"></dd>
+        </dl>
+        <div class="xplr-preview__actions" id="xplr-preview-actions"></div>
+      </div>
+      <p class="xplr-preview__empty" id="xplr-preview-empty">{l.previewNone}</p>
+    </aside>
 
   </div>
 
@@ -355,13 +413,23 @@ const folders = [
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  transition: grid-template-columns 0.2s ease;
+}
+
+.xplr-main--preview {
+  grid-template-columns: 160px 1fr 220px;
 }
 
 @media (max-width: 480px) {
-  .xplr-main {
+  .xplr-main,
+  .xplr-main--preview {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto 1fr auto;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xplr-main { transition: none; }
 }
 
 /* ── Sidebar ───────────────────────────────────────────────────── */
@@ -622,6 +690,199 @@ const folders = [
   max-width: 60%;
 }
 
+/* ── Selected state ────────────────────────────────────────────── */
+.xplr-file--selected .xplr-file__thumb {
+  border-color: #8B5CF6;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.35);
+}
+
+.xplr-file--selected .xplr-file__name {
+  color: #C4B5FD;
+}
+
+/* ── Preview panel ─────────────────────────────────────────────── */
+.xplr-preview {
+  border-left: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.xplr-preview[data-hidden] {
+  display: none;
+}
+
+.xplr-preview__header {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.625rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.xplr-preview__label {
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.xplr-preview__name {
+  flex: 1;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #FAF5FF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.xplr-preview__close {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.2rem;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.xplr-preview__close:hover {
+  color: #FAF5FF;
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.xplr-preview__close:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+}
+
+.xplr-preview__body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.xplr-preview__empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #475569;
+  padding: 1rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.xplr-preview__img-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(10, 8, 20, 0.6);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.12);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.xplr-preview__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.xplr-preview__props {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 0.7rem;
+}
+
+.xplr-preview__props dt {
+  padding: 0.45rem 0.625rem;
+  color: #8B5CF6;
+  font-weight: 700;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.07);
+  white-space: nowrap;
+}
+
+.xplr-preview__props dd {
+  padding: 0.45rem 0.625rem;
+  color: #C4B5FD;
+  line-height: 1.5;
+  margin: 0;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.07);
+  min-width: 0;
+  word-break: break-word;
+}
+
+.xplr-preview__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding-top: 0.4rem !important;
+  padding-bottom: 0.4rem !important;
+}
+
+.xplr-preview__tag {
+  display: inline-block;
+  padding: 0.1rem 0.35rem;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 0.2rem;
+  color: #A78BFA;
+  font-size: 0.6rem;
+  font-weight: 600;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.xplr-preview__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.625rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.12);
+  flex-shrink: 0;
+}
+
+.xplr-preview__action {
+  display: block;
+  padding: 0.35rem 0.5rem;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.25rem;
+  color: #C4B5FD;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.xplr-preview__action:hover {
+  background: rgba(139, 92, 246, 0.3);
+  color: #FAF5FF;
+}
+
+.xplr-preview__action:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+}
+
 /* ── Status bar ────────────────────────────────────────────────── */
 .xplr-statusbar {
   display: flex;
@@ -713,5 +974,103 @@ const folders = [
 
   btnGrid?.addEventListener('click', () => setView('grid'));
   btnList?.addEventListener('click', () => setView('list'));
+
+  // ── Preview panel ──────────────────────────────────────────────
+  const mainEl       = win.querySelector<HTMLElement>('.xplr-main');
+  const previewPanel = win.querySelector<HTMLElement>('#xplr-preview');
+  const previewClose = win.querySelector<HTMLButtonElement>('#xplr-preview-close');
+  const previewName  = win.querySelector<HTMLElement>('#xplr-preview-name');
+  const previewImg   = win.querySelector<HTMLImageElement>('#xplr-preview-img');
+  const previewCat   = win.querySelector<HTMLElement>('#xplr-preview-cat');
+  const previewDesc  = win.querySelector<HTMLElement>('#xplr-preview-desc');
+  const previewTags  = win.querySelector<HTMLElement>('#xplr-preview-tags');
+  const previewActs  = win.querySelector<HTMLElement>('#xplr-preview-actions');
+  const previewEmpty = win.querySelector<HTMLElement>('#xplr-preview-empty');
+  const statusRight  = win.querySelector<HTMLElement>('#xplr-status-right');
+
+  function openPreview(card: HTMLElement): void {
+    const title    = card.dataset['title'] ?? '';
+    const desc     = card.dataset['description'] ?? '';
+    const catLabel = card.dataset['catLabel'] ?? '';
+    const tags     = (card.dataset['tags'] ?? '').split('|').filter(Boolean);
+    const url      = card.dataset['url'] ?? '';
+    const github   = card.dataset['github'] ?? '';
+    const image    = card.dataset['image'] ?? '';
+
+    // Highlight selected
+    cards.forEach(c => c.classList.remove('xplr-file--selected'));
+    card.classList.add('xplr-file--selected');
+
+    // Populate
+    if (previewName)  previewName.textContent = title;
+    if (previewImg)   { previewImg.src = image; previewImg.alt = title; }
+    if (previewCat)   previewCat.textContent = catLabel;
+    if (previewDesc)  previewDesc.textContent = desc;
+
+    if (previewTags) {
+      previewTags.innerHTML = '';
+      tags.forEach(tag => {
+        const span = document.createElement('span');
+        span.className = 'xplr-preview__tag';
+        span.textContent = tag;
+        previewTags.appendChild(span);
+      });
+    }
+
+    if (previewActs) {
+      previewActs.innerHTML = '';
+      if (url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'xplr-preview__action';
+        a.textContent = isEn ? 'View site ↗' : 'Voir le site ↗';
+        previewActs.appendChild(a);
+      }
+      if (github) {
+        const a = document.createElement('a');
+        a.href = github;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'xplr-preview__action';
+        a.textContent = isEn ? 'View code </>' : 'Voir le code </>';
+        previewActs.appendChild(a);
+      }
+    }
+
+    // Show/hide body vs empty message
+    const body = previewPanel?.querySelector<HTMLElement>('.xplr-preview__body');
+    if (body)         body.hidden = false;
+    if (previewEmpty) previewEmpty.hidden = true;
+
+    // Show panel
+    previewPanel?.removeAttribute('data-hidden');
+    mainEl?.classList.add('xplr-main--preview');
+
+    // Status bar
+    if (statusRight) statusRight.textContent = title;
+  }
+
+  function closePreview(): void {
+    cards.forEach(c => c.classList.remove('xplr-file--selected'));
+    previewPanel?.setAttribute('data-hidden', '');
+    mainEl?.classList.remove('xplr-main--preview');
+    const base = isEn ? '1 selected' : '1 sélectionné';
+    if (statusRight) statusRight.textContent = base;
+  }
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => openPreview(card));
+    card.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openPreview(card);
+      }
+    });
+    card.style.cursor = 'pointer';
+  });
+
+  previewClose?.addEventListener('click', closePreview);
 })();
 </script>
