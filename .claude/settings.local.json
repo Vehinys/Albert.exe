@@ -30,7 +30,13 @@
       "Bash(mv \"LA DELICIEUSE.png\" \"la-delicieuse.png\")",
       "Bash(cwebp -version)",
       "Bash(magick -version)",
-      "Bash(ffmpeg -version)"
+      "Bash(ffmpeg -version)",
+      "Bash(node scripts/convert-to-webp.js)",
+      "Bash(sed -i 's|/images/halloween\\\\.png|/images/halloween.webp|g' src/content/projects/halloween-spooky.json)",
+      "Bash(sed -i 's|/images/kucra-hero\\\\.png|/images/kucra-hero.webp|g' src/content/projects/kucra-agency.json)",
+      "Bash(sed -i 's|/images/capture-photoshop-maquette-1\\\\.png|/images/capture-photoshop-maquette-1.webp|g' src/content/projects/maquettes-photoshop.json)",
+      "Bash(sed -i 's|/images/cactus\\\\.png|/images/cactus.webp|g' src/content/projects/neon-cactus.json)",
+      "Bash(sed -i 's|/images/Albert\\\\.png|/images/Albert.webp|g' src/content/projects/portfolio-interactif.json)"
     ]
   }
 }
