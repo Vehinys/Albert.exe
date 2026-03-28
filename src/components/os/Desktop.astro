@@ -66,6 +66,17 @@ const icons: DesktopIcon[] = [
   </ul>
 </div>
 
+<!-- Trash icon — desktop only (≥1024px), resets icon positions -->
+<button
+  id="desktop-trash"
+  class="desktop-trash"
+  type="button"
+  aria-label="Remettre les icônes à leur position initiale"
+>
+  <span class="desktop-trash__emoji" aria-hidden="true">🗑️</span>
+  <span class="desktop-trash__label">{lang === 'fr' ? 'Corbeille' : 'Trash'}</span>
+</button>
+
 <style>
 .desktop {
   position: fixed;
@@ -136,6 +147,60 @@ const icons: DesktopIcon[] = [
   color: rgba(250, 245, 255, 0.85);
   word-break: break-word;
   max-width: 4.5rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Trash / reset button — desktop only ──────────────────────────────── */
+.desktop-trash {
+  display: none; /* hidden by default — shown only on hover-capable ≥1024px */
+  position: fixed;
+  right: 1rem;
+  bottom: 60px;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  width: 5rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #FAF5FF;
+  z-index: 50;
+  transition: background 0.2s ease;
+}
+
+@media (min-width: 1024px) and (hover: hover) {
+  .desktop-trash {
+    display: flex;
+  }
+}
+
+.desktop-trash:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.desktop-trash:hover .desktop-trash__emoji {
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.5));
+}
+
+.desktop-trash:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+}
+
+.desktop-trash__emoji {
+  font-size: 2.25rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0));
+  transition: filter 0.2s ease;
+}
+
+.desktop-trash__label {
+  font-size: 0.6875rem;
+  text-align: center;
+  line-height: 1.2;
+  color: rgba(250, 245, 255, 0.85);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
@@ -463,6 +528,22 @@ const icons: DesktopIcon[] = [
     cvLink?.addEventListener('click', (e) => {
       if (recentlyDragged.has('cv')) e.preventDefault();
     });
+
+    // Trash button — show and wire reset
+    const trashBtn = document.getElementById('desktop-trash') as HTMLButtonElement | null;
+    if (trashBtn) {
+      trashBtn.addEventListener('click', () => {
+        iconPositions = { ...DEFAULT_POSITIONS };
+        iconItems.forEach((li) => {
+          const iconId = li.dataset['iconId'];
+          if (!iconId) return;
+          const pos = DEFAULT_POSITIONS[iconId] ?? { x: 16, y: 16 };
+          li.style.left = `${pos.x}px`;
+          li.style.top  = `${pos.y}px`;
+        });
+        try { localStorage.removeItem(ICON_STORAGE_KEY); } catch { /* ignore */ }
+      });
+    }
   }
 })();
 </script>

@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   site: 'https://lecomte-albert-cv.vercel.app',
+  devToolbar: { enabled: false },
   integrations: [
     sitemap({
       i18n: {
