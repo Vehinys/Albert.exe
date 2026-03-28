@@ -39,7 +39,8 @@
       "Bash(sed -i 's|/images/Albert\\\\.png|/images/Albert.webp|g' src/content/projects/portfolio-interactif.json)",
       "Bash(rm *.png *.jpg)",
       "Bash(ls *.webp)",
-      "Bash(ls public/images/*.jpg)"
+      "Bash(ls public/images/*.jpg)",
+      "Bash(cd:*)"
     ]
   }
 }
