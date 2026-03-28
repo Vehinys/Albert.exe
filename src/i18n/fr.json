@@ -1,7 +1,6 @@
 {
   "site.title": "Albert Lecomte — Concepteur Designer UI",
   "site.description": "Concepteur Designer UI basé à Mulhouse. Je crée des sites web modernes, accessibles et performants pour les artisans, commerçants et entreprises de la région.",
-
   "nav.home": "Accueil",
   "nav.about": "À propos",
   "nav.skills": "Compétences",
@@ -15,7 +14,6 @@
   "nav.lang.switch": "Switch to English",
   "nav.theme.dark": "Passer en mode sombre",
   "nav.theme.light": "Passer en mode clair",
-
   "hero.greeting": "Bonjour, je suis",
   "hero.name": "Albert Lecomte",
   "hero.title": "Concepteur Designer UI",
@@ -25,7 +23,6 @@
   "hero.scroll": "Défiler vers le bas",
   "hero.available": "Disponible pour un poste",
   "hero.rqth": "Reconnu RQTH",
-
   "about.title": "À propos",
   "about.subtitle": "Passionné par le design et le web",
   "about.p1": "Concepteur WordPress et Designer UI/UX basé à Mulhouse, je suis actuellement en recherche active d'un poste au sein d'une agence spécialisée en WordPress ou en SEO.",
@@ -36,7 +33,6 @@
   "about.projects": "projets livrés",
   "about.clients": "clients satisfaits",
   "about.satisfaction": "taux de satisfaction",
-
   "skills.title": "Compétences",
   "skills.subtitle": "Technologies et outils maîtrisés",
   "skills.design": "Design",
@@ -48,7 +44,6 @@
   "skills.level.3": "Intermédiaire",
   "skills.level.4": "Avancé",
   "skills.level.5": "Expert",
-
   "projects.title": "Projets",
   "projects.subtitle": "Mes dernières réalisations",
   "projects.filter.all": "Tous",
@@ -60,19 +55,14 @@
   "projects.view.github": "Voir le code",
   "projects.featured": "À la une",
   "projects.empty": "Aucun projet dans cette catégorie.",
-
   "experience.title": "Expérience",
   "experience.subtitle": "Mon parcours professionnel",
-
   "volunteer.title": "Bénévolat & Passions",
   "volunteer.subtitle": "Engagement et vie associative",
-
   "hobbies.title": "Passions & Hobbies",
   "hobbies.subtitle": "Ce qui m'anime au quotidien",
-
   "education.title": "Formation",
   "education.subtitle": "Mon parcours académique",
-
   "contact.title": "Contact",
   "contact.subtitle": "Démarrons votre projet",
   "contact.intro": "Vous avez un projet web ? Discutons-en ! Je réponds généralement sous 24h.",
@@ -91,29 +81,15 @@
   "contact.location": "Mulhouse, Alsace, France",
   "contact.availability": "Disponible du lundi au vendredi",
   "contact.response.time": "Réponse sous 24h",
-
   "footer.rights": "Tous droits réservés",
   "footer.legal": "Mentions légales",
   "footer.privacy": "Politique de confidentialité",
-  "footer.accessibility": "Déclaration d'accessibilité",
   "footer.made.with": "Fait avec",
   "footer.and": "et",
   "footer.in": "à Mulhouse",
-
   "a11y.skip_to_main": "Aller au contenu principal",
-  "a11y.panel.title": "Paramètres d'accessibilité",
-  "a11y.panel.open": "Ouvrir les paramètres d'accessibilité",
-  "a11y.font.decrease": "Réduire la taille du texte",
-  "a11y.font.reset": "Taille de texte normale",
-  "a11y.font.increase": "Augmenter la taille du texte",
-  "a11y.contrast": "Contraste renforcé",
-  "a11y.line.height": "Espacement lignes",
-  "a11y.motion": "Réduire les animations",
-
   "legal.title": "Mentions légales",
   "privacy.title": "Politique de confidentialité",
-  "accessibility.declaration.title": "Déclaration d'accessibilité",
-
   "os.icon.about": "À propos",
   "os.icon.projects": "Projets",
   "os.icon.skills": "Compétences",
