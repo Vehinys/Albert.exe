@@ -11,6 +11,8 @@ import ExperienceWindow from '../../components/windows/ExperienceWindow.astro';
 import VolunteerWindow from '../../components/windows/VolunteerWindow.astro';
 import HobbiesWindow from '../../components/windows/HobbiesWindow.astro';
 import ContactWindow from '../../components/windows/ContactWindow.astro';
+import MentionsLegalesWindow from '../../components/windows/MentionsLegalesWindow.astro';
+import PolitiqueWindow from '../../components/windows/PolitiqueWindow.astro';
 import { getAlternateLangPath } from '../../i18n/utils';
 
 const lang = 'en' as const;
@@ -59,10 +61,18 @@ const alternateLangPath = getAlternateLangPath(Astro.url);
   <Window id="contact" title="Contact" icon="📧" defaultX={160} defaultY={85} defaultWidth={660} defaultHeight={540}>
     <ContactWindow lang={lang} />
   </Window>
+
+  <Window id="mentions-legales" title="Legal notice" icon="⚖️" defaultX={200} defaultY={100} defaultWidth={580} defaultHeight={480}>
+    <MentionsLegalesWindow lang={lang} />
+  </Window>
+
+  <Window id="politique" title="Privacy policy" icon="🔒" defaultX={240} defaultY={110} defaultWidth={580} defaultHeight={520}>
+    <PolitiqueWindow lang={lang} />
+  </Window>
 </BaseLayout>
 
 <script>
-import { register, close, minimize, maximize, focus } from '../../utils/window-manager';
+import { register, open, close, minimize, maximize, focus } from '../../utils/window-manager';
 
 // Register all windows with the manager
 const windows = [
@@ -72,7 +82,9 @@ const windows = [
   { id: 'experience', title: 'Experience', icon: '💼' },
   { id: 'volunteer',  title: 'Volunteer',  icon: '🤝' },
   { id: 'hobbies',    title: 'Hobbies',    icon: '🎮' },
-  { id: 'contact',    title: 'Contact',    icon: '📧' },
+  { id: 'contact',           title: 'Contact',       icon: '📧' },
+  { id: 'mentions-legales', title: 'Legal notice',  icon: '⚖️' },
+  { id: 'politique',        title: 'Privacy policy', icon: '🔒' },
 ] as const;
 
 windows.forEach(w => register(w.id, w.title, w.icon));
@@ -88,6 +100,14 @@ document.addEventListener('click', (e) => {
   if (action === 'close')         close(id);
   else if (action === 'minimize') minimize(id);
   else if (action === 'maximize') maximize(id);
+});
+
+// Open window from any data-open-window button (e.g. About → Contact)
+document.addEventListener('click', (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-open-window]');
+  if (!btn) return;
+  const id = btn.dataset['openWindow'];
+  if (id) open(id);
 });
 
 // Focus window on mousedown

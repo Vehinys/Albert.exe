@@ -66,29 +66,18 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
       {lang === 'fr' ? 'Informations légales' : 'Legal'}
     </li>
     <li>
-      <a class="start-menu__item start-menu__item--legal" href="/mentions-legales">
+      <button class="start-menu__item start-menu__item--legal" type="button" data-start-open="mentions-legales">
         <span class="start-menu__item-icon" aria-hidden="true">⚖️</span>
         <span>{lang === 'fr' ? 'Mentions légales' : 'Legal notice'}</span>
-      </a>
+      </button>
     </li>
     <li>
-      <a class="start-menu__item start-menu__item--legal" href="/politique-confidentialite">
+      <button class="start-menu__item start-menu__item--legal" type="button" data-start-open="politique">
         <span class="start-menu__item-icon" aria-hidden="true">🔒</span>
         <span>{lang === 'fr' ? 'Politique de confidentialité' : 'Privacy policy'}</span>
-      </a>
-    </li>
-    <li>
-      <a class="start-menu__item start-menu__item--legal" href="/declaration-accessibilite">
-        <span class="start-menu__item-icon" aria-hidden="true">♿</span>
-        <span>{lang === 'fr' ? 'Accessibilité' : 'Accessibility'}</span>
-      </a>
+      </button>
     </li>
   </ul>
-
-  <div class="start-menu__footer">
-    <span aria-hidden="true">🌐</span>
-    lecomte-albert-cv.vercel.app
-  </div>
 </div>
 
 <nav class="taskbar" role="navigation" aria-label={lang === 'fr' ? 'Barre des tâches' : 'Taskbar'}>
@@ -262,18 +251,6 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
   margin: 0;
 }
 
-.start-menu__footer {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  font-size: 0.6rem;
-  color: #475569;
-  background: rgba(0, 0, 0, 0.2);
-  border-top: 1px solid rgba(139, 92, 246, 0.1);
-  font-family: 'Consolas', monospace;
-}
-
 /* ── Taskbar ───────────────────────────────────────────────────── */
 .taskbar {
   position: fixed;
@@ -403,8 +380,11 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
 
   function openMenu(): void {
     startMenu.hidden = false;
+    // Force animation replay on subsequent opens
+    startMenu.style.animation = 'none';
+    void startMenu.offsetHeight; // reflow
+    startMenu.style.animation = '';
     startBtn!.setAttribute('aria-expanded', 'true');
-    // Focus first item
     const first = startMenu.querySelector<HTMLElement>('.start-menu__item');
     first?.focus();
   }
@@ -414,13 +394,14 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
     startBtn!.setAttribute('aria-expanded', 'false');
   }
 
-  startBtn.addEventListener('click', () => {
+  startBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // empêche le document listener de fermer immédiatement
     if (startMenu.hidden) openMenu(); else closeMenu();
   });
 
-  // Close on outside click
+  // Close on outside click (ignore clicks inside menu ou sur le bouton)
   document.addEventListener('click', (e) => {
-    if (!startMenu.hidden && !startMenu.contains(e.target as Node) && e.target !== startBtn) {
+    if (!startMenu.hidden && !startMenu.contains(e.target as Node)) {
       closeMenu();
     }
   });

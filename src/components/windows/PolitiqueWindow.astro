@@ -1,0 +1,155 @@
+---
+import type { Lang } from '../../i18n/utils';
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+---
+<div class="legal-win" role="region" aria-label={lang === 'fr' ? 'Politique de confidentialité' : 'Privacy policy'}>
+  <div class="legal-win__header">
+    <span aria-hidden="true">🔒</span>
+    <span>{lang === 'fr' ? 'Politique de confidentialité' : 'Privacy policy'}</span>
+    <span class="legal-win__date">{lang === 'fr' ? 'Mise à jour : mars 2026' : 'Updated: March 2026'}</span>
+  </div>
+  <div class="legal-win__body">
+
+    <section>
+      <h2>1. {lang === 'fr' ? 'Responsable du traitement' : 'Data controller'}</h2>
+      <address>
+        <strong>Albert Lecomte</strong> — Mulhouse, Alsace, France<br />
+        <a href="mailto:contact@albert-lecomte.fr">contact@albert-lecomte.fr</a>
+      </address>
+    </section>
+
+    <section>
+      <h2>2. {lang === 'fr' ? 'Données collectées' : 'Data collected'}</h2>
+      <p>{lang === 'fr' ? 'Uniquement via le formulaire de contact :' : 'Only via the contact form:'}</p>
+      <ul>
+        <li>{lang === 'fr' ? 'Nom et prénom' : 'Full name'}</li>
+        <li>{lang === 'fr' ? 'Adresse email' : 'Email address'}</li>
+        <li>{lang === 'fr' ? 'Contenu du message' : 'Message content'}</li>
+        <li>{lang === 'fr' ? 'Sujet (optionnel)' : 'Subject (optional)'}</li>
+      </ul>
+      <p>{lang === 'fr'
+        ? 'Aucun cookie de tracking, aucun profilage.'
+        : 'No tracking cookies, no profiling.'}</p>
+    </section>
+
+    <section>
+      <h2>3. {lang === 'fr' ? 'Finalités' : 'Purposes'}</h2>
+      <ul>
+        <li>{lang === 'fr' ? 'Répondre aux demandes de contact' : 'Responding to contact requests'}</li>
+        <li>{lang === 'fr' ? 'Maintenir une relation commerciale' : 'Maintaining a business relationship'}</li>
+      </ul>
+      <p><strong>{lang === 'fr' ? 'Base légale :' : 'Legal basis:'}</strong> {lang === 'fr' ? 'intérêt légitime.' : 'legitimate interest.'}</p>
+    </section>
+
+    <section>
+      <h2>4. {lang === 'fr' ? 'Traitement' : 'Processing'}</h2>
+      <p>{lang === 'fr'
+        ? 'Les messages sont transmis via EmailJS à la boîte email personnelle. Aucune donnée n\'est revendue.'
+        : 'Messages are transmitted via EmailJS to the personal email inbox. No data is resold.'}</p>
+    </section>
+
+    <section>
+      <h2>5. {lang === 'fr' ? 'Conservation' : 'Retention'}</h2>
+      <p>{lang === 'fr'
+        ? 'Données conservées 3 ans maximum à compter du dernier contact (recommandation CNIL).'
+        : 'Data retained for a maximum of 3 years from the last contact (CNIL recommendation).'}</p>
+    </section>
+
+    <section>
+      <h2>6. Analytics — Plausible</h2>
+      <ul>
+        <li>{lang === 'fr' ? 'Aucun cookie déposé' : 'No cookies'}</li>
+        <li>{lang === 'fr' ? 'Données anonymisées et agrégées' : 'Anonymized and aggregated data'}</li>
+        <li>{lang === 'fr' ? 'Conforme CNIL sans bannière' : 'CNIL compliant, no consent banner'}</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>7. {lang === 'fr' ? 'Vos droits (RGPD)' : 'Your rights (GDPR)'}</h2>
+      <ul>
+        <li>{lang === 'fr' ? 'Accès, rectification, effacement' : 'Access, rectification, erasure'}</li>
+        <li>{lang === 'fr' ? 'Limitation, portabilité' : 'Restriction, portability'}</li>
+      </ul>
+      <p>{lang === 'fr' ? 'Contact : ' : 'Contact: '}<a href="mailto:contact@albert-lecomte.fr">contact@albert-lecomte.fr</a></p>
+      <p>{lang === 'fr'
+        ? 'Réclamation non résolue : '
+        : 'Unresolved complaint: '}<a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">cnil.fr</a></p>
+    </section>
+
+  </div>
+</div>
+
+<style>
+.legal-win {
+  display: flex;
+  flex-direction: column;
+  background: #07060F;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  height: 100%;
+}
+
+.legal-win__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: rgba(139, 92, 246, 0.08);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.18);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #C4B5FD;
+  flex-shrink: 0;
+}
+
+.legal-win__date {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #475569;
+}
+
+.legal-win__body {
+  overflow-y: auto;
+  padding: 1.25rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+section { display: flex; flex-direction: column; gap: 0.5rem; }
+
+h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #8B5CF6;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+p, address {
+  font-size: 0.8rem;
+  color: #94A3B8;
+  line-height: 1.7;
+  font-style: normal;
+  margin: 0;
+}
+
+ul {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: 0;
+}
+
+li { font-size: 0.8rem; color: #94A3B8; line-height: 1.6; }
+
+a { color: #60A5FA; text-decoration: underline; text-underline-offset: 2px; }
+a:hover { color: #93C5FD; }
+a:focus-visible { outline: 2px solid #F59E0B; outline-offset: 2px; border-radius: 2px; }
+</style>
