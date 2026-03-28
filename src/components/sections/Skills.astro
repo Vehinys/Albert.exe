@@ -3,181 +3,652 @@ import { getCollection } from 'astro:content';
 import type { Lang } from '../../i18n/utils';
 import { useTranslations } from '../../i18n/utils';
 
-interface Props {
-  lang: Lang;
-}
+interface Props { lang: Lang; }
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
+// Design skills from content collection
 const allSkillEntries = await getCollection('skills');
-// skills.json is a single entry with an array as data
-const skills = (allSkillEntries[0]?.data ?? []).sort((a, b) => a.order - b.order);
+const designSkills = (allSkillEntries[0]?.data ?? [])
+  .filter(s => s.category === 'design')
+  .sort((a, b) => a.order - b.order);
 
-const categories = ['design', 'frontend', 'backend', 'tools'] as const;
+const versionLabels: Record<number, string> = {
+  1: 'v0.1 alpha',
+  2: 'v1.0 beta',
+  3: 'v2.0 stable',
+  4: 'v3.0 LTS',
+  5: 'v5.0 PROD',
+};
+
+const processStates: Record<number, { text: string; cls: string }> = {
+  1: { text: 'SUSPENDED', cls: 'grey'   },
+  2: { text: 'IDLE',      cls: 'grey'   },
+  3: { text: 'SLEEPING',  cls: 'yellow' },
+  4: { text: 'RUNNING',   cls: 'green'  },
+  5: { text: 'RUNNING',   cls: 'green'  },
+};
+
+const codeItems = [
+  { name: 'Windows 11',      catFr: 'Système',         catEn: 'System'       },
+  { name: 'VS Code',         catFr: 'Éditeur',         catEn: 'Editor'       },
+  { name: 'Antigravity',     catFr: 'Éditeur',         catEn: 'Editor'       },
+  { name: 'Claude Code',     catFr: 'IA / Coding',     catEn: 'AI / Coding'  },
+  { name: 'Chrome',          catFr: 'Navigateur',      catEn: 'Browser'      },
+  { name: 'Laragon',         catFr: 'Serveur local',   catEn: 'Local server' },
+  { name: 'HTML5',           catFr: 'Structure',       catEn: 'Markup'       },
+  { name: 'CSS3',            catFr: 'Frontend',        catEn: 'Frontend'     },
+  { name: 'JavaScript',      catFr: 'Langage',         catEn: 'Language'     },
+  { name: 'Tailwind CSS',    catFr: 'CSS Framework',   catEn: 'CSS Framework'},
+  { name: 'PHP / Symfony',   catFr: 'Backend',         catEn: 'Backend'      },
+  { name: 'MySQL',           catFr: 'Base de données', catEn: 'Database'     },
+  { name: 'npm / Node.js',   catFr: 'Paquets',         catEn: 'Packages'     },
+  { name: 'Git / GitHub',    catFr: 'Dépôts',          catEn: 'Repos'        },
+  { name: 'Vercel',          catFr: 'Déploiement',     catEn: 'Deploy'       },
+  { name: 'FileZilla',       catFr: 'FTP',             catEn: 'FTP'          },
+  { name: 'SEO Naturel',     catFr: 'SEO',             catEn: 'SEO'          },
+  { name: 'Accessibilité',   catFr: 'Standards web',   catEn: 'Web standards'},
+] as const;
+
+const wpItems = [
+  { name: 'WordPress',       catFr: 'CMS',            catEn: 'CMS'           },
+  { name: 'Elementor',       catFr: 'Page builder',   catEn: 'Page builder'  },
+  { name: 'Divi',            catFr: 'Page builder',   catEn: 'Page builder'  },
+  { name: 'Gutenberg',       catFr: 'Éditeur WP',     catEn: 'WP Editor'     },
+  { name: 'WooCommerce',     catFr: 'E-commerce',     catEn: 'E-commerce'    },
+  { name: 'ACF',             catFr: 'Champs custom',  catEn: 'Custom fields' },
+  { name: 'WPForms',         catFr: 'Formulaires',    catEn: 'Forms'         },
+  { name: 'WP Rocket',       catFr: 'Performance',    catEn: 'Performance'   },
+  { name: 'Wordfence',       catFr: 'Sécurité',       catEn: 'Security'      },
+  { name: 'UpdraftPlus',     catFr: 'Sauvegarde',     catEn: 'Backup'        },
+  { name: 'Polylang',        catFr: 'Multilingue',    catEn: 'Multilingual'  },
+  { name: 'Astra',           catFr: 'Thème',          catEn: 'Theme'         },
+  { name: 'Rank Math SEO',   catFr: 'SEO',            catEn: 'SEO'           },
+  { name: 'Yoast SEO',       catFr: 'SEO',            catEn: 'SEO'           },
+] as const;
+
+const venteItems = [
+  { name: 'Conseil client',              catFr: 'Relation client',    catEn: 'Customer care'  },
+  { name: 'Accueil & Écoute active',     catFr: 'Relation client',    catEn: 'Customer care'  },
+  { name: 'Argumentation commerciale',   catFr: 'Persuasion',         catEn: 'Persuasion'     },
+  { name: 'Gestion des objections',      catFr: 'Négociation',        catEn: 'Negotiation'    },
+  { name: 'Upselling',                   catFr: 'Montée en gamme',    catEn: 'Upselling'      },
+  { name: 'Vente additionnelle',         catFr: 'Vente additionnelle',catEn: 'Cross-selling'  },
+  { name: 'Fidélisation client',         catFr: 'Fidélisation',       catEn: 'Loyalty'        },
+  { name: 'Analyse des besoins',         catFr: 'Diagnostic',         catEn: 'Diagnosis'      },
+  { name: 'Atteinte des objectifs',      catFr: 'Performance',        catEn: 'Performance'    },
+  { name: 'Merchandising',              catFr: 'Mise en scène',      catEn: 'Display'        },
+  { name: 'Gestion de caisse',           catFr: 'Encaissements',      catEn: 'Cash desk'      },
+  { name: 'Gestion des stocks',          catFr: 'Logistique',         catEn: 'Logistics'      },
+  { name: 'Responsabilité magasin',      catFr: 'Management',         catEn: 'Management'     },
+] as const;
+
+const labels = {
+  fr: {
+    sectionLabel: 'Compétences',
+    sectionTitle: 'Gestionnaire des tâches',
+    tabProcesses: 'Processus',
+    tabCode:      'Environnement',
+    tabWp:        'CMS',
+    tabVente:     'Vente',
+    colProcess:   'Processus',
+    colUsage:     'Utilisation',
+    colLevel:     'Version',
+    colStatus:    'Statut',
+    codeTitle:    'Environnement code',
+    wpTitle:      'Environnement WordPress',
+    venteTitle:   'Compétences commerciales',
+    footer:       `CPU Albert.exe\u00a0: Actif\u00a0| Design\u00a0: ${designSkills.length} proc.\u00a0| Démarré\u00a0: 2021`,
+  },
+  en: {
+    sectionLabel: 'Skills',
+    sectionTitle: 'Task Manager',
+    tabProcesses: 'Processes',
+    tabCode:      'Environment',
+    tabWp:        'CMS',
+    tabVente:     'Sales',
+    colProcess:   'Process',
+    colUsage:     'Usage',
+    colLevel:     'Version',
+    colStatus:    'Status',
+    codeTitle:    'Code environment',
+    wpTitle:      'WordPress environment',
+    venteTitle:   'Sales skills',
+    footer:       `CPU Albert.exe: Active | Design: ${designSkills.length} proc. | Started: 2021`,
+  },
+} as const;
+
+const l = labels[lang];
 ---
 
 <section id="skills" class="skills section-padding" aria-labelledby="skills-title">
   <div class="skills__container">
+
+    <!-- Header -->
     <div class="skills__header">
-      <p class="section-label">{t('skills.title')}</p>
-      <h2 id="skills-title" class="section-title">{t('skills.subtitle')}</h2>
+      <p class="skills__label"><span aria-hidden="true">// </span>{l.sectionLabel}</p>
+      <h2 id="skills-title" class="skills__title">{l.sectionTitle}</h2>
     </div>
 
-    <div class="skills__grid">
-      {categories.map(cat => {
-        const catSkills = skills.filter(s => s.category === cat);
-        if (catSkills.length === 0) return null;
-        return (
-          <div class="skills__category glass-card">
-            <h3 class="skills__cat-title">{t(`skills.${cat}`)}</h3>
-            <ul class="skills__list" role="list">
-              {catSkills.map(skill => (
-                <li class="skill-item">
-                  <div class="skill-item__header">
-                    <span class="skill-item__name">{skill.name}</span>
-                    <span class="skill-item__level sr-only">{t(`skills.level.${skill.level}`)}</span>
-                    <span class="skill-item__dots" aria-hidden="true">
-                      {Array.from({ length: 5 }, (_, i) => (
-                        <span class={`skill-dot ${i < skill.level ? 'skill-dot--active' : ''}`}></span>
-                      ))}
-                    </span>
-                  </div>
-                  <div
-                    class="skill-bar"
-                    role="progressbar"
-                    aria-valuenow={skill.level * 20}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label={`${skill.name}: ${t(`skills.level.${skill.level}`)}`}
-                  >
-                    <div class="skill-bar__fill" style={`width: ${skill.level * 20}%`}></div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+    <!-- Task manager panel -->
+    <div class="taskmgr" role="region" aria-label={l.sectionTitle}>
+
+      <!-- Tabs -->
+      <div class="taskmgr__tabs" role="tablist" aria-label={lang === 'fr' ? 'Onglets compétences' : 'Skills tabs'}>
+        <button class="taskmgr__tab taskmgr__tab--active" role="tab" id="cls-tab-processes" aria-selected="true"  aria-controls="cls-panel-processes" type="button">{l.tabProcesses}</button>
+        <button class="taskmgr__tab"                      role="tab" id="cls-tab-code"      aria-selected="false" aria-controls="cls-panel-code"      type="button">{l.tabCode}</button>
+        <button class="taskmgr__tab"                      role="tab" id="cls-tab-wp"        aria-selected="false" aria-controls="cls-panel-wp"        type="button">{l.tabWp}</button>
+        <button class="taskmgr__tab"                      role="tab" id="cls-tab-vente"     aria-selected="false" aria-controls="cls-panel-vente"     type="button">{l.tabVente}</button>
+      </div>
+
+      <!-- Panel: Processus (Design) -->
+      <div class="taskmgr__panel" id="cls-panel-processes" role="tabpanel" aria-labelledby="cls-tab-processes" tabindex="0">
+        <div class="taskmgr__table-wrap">
+          <table class="taskmgr__table" aria-label={lang === 'fr' ? 'Compétences Design' : 'Design Skills'}>
+            <thead>
+              <tr class="taskmgr__thead-row">
+                <th scope="col" class="taskmgr__th taskmgr__th--name">{l.colProcess}</th>
+                <th scope="col" class="taskmgr__th taskmgr__th--bar">{l.colUsage}</th>
+                <th scope="col" class="taskmgr__th taskmgr__th--level">{l.colLevel}</th>
+                <th scope="col" class="taskmgr__th taskmgr__th--status">{l.colStatus}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {designSkills.map((skill, idx) => {
+                const state   = processStates[skill.level] ?? { text: 'UNKNOWN', cls: 'grey' };
+                const ver     = versionLabels[skill.level] ?? 'v?';
+                const dotCls  = skill.level >= 4 ? 'green' : skill.level === 3 ? 'yellow' : 'grey';
+                const dotLabel = skill.level >= 4
+                  ? (lang === 'fr' ? 'Actif' : 'Active')
+                  : skill.level === 3 ? 'Stable'
+                  : (lang === 'fr' ? 'Inactif' : 'Inactive');
+                return (
+                  <tr class={`taskmgr__row${idx % 2 !== 0 ? ' taskmgr__row--alt' : ''}`}>
+                    <td class="taskmgr__td taskmgr__td--name">{skill.name}</td>
+                    <td class="taskmgr__td taskmgr__td--bar">
+                      <span
+                        class={`taskmgr__state taskmgr__state--${state.cls}`}
+                        aria-label={`${skill.name}: ${state.text}`}
+                      >
+                        {state.cls === 'green' ? (
+                          <>
+                            {state.text}
+                            <span class="taskmgr__dots" aria-hidden="true">
+                              <span>.</span><span>.</span><span>.</span>
+                            </span>
+                          </>
+                        ) : state.text}
+                      </span>
+                    </td>
+                    <td class="taskmgr__td taskmgr__td--level">{ver}</td>
+                    <td class="taskmgr__td taskmgr__td--status">
+                      <span class={`taskmgr__dot taskmgr__dot--${dotCls}`} aria-label={dotLabel}>●</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Panel: Environnement -->
+      <div class="taskmgr__panel taskmgr__panel--hidden" id="cls-panel-code" role="tabpanel" aria-labelledby="cls-tab-code" tabindex="0">
+        <div class="taskmgr__cmd" aria-label={l.codeTitle}>
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--prompt">
+            <span class="taskmgr__prompt">C:\albert-exe&gt;</span>
+            <span class="taskmgr__input">list-env --code</span>
           </div>
-        );
-      })}
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--info">
+            {lang === 'fr' ? '// Environnement code — albert-exe v2026' : '// Code environment — albert-exe v2026'}
+          </div>
+          <div class="taskmgr__sep" aria-hidden="true"></div>
+          <ul class="taskmgr__entries" aria-label={l.codeTitle}>
+            {codeItems.map((item, i) => (
+              <li class="taskmgr__entry">
+                <span class="taskmgr__idx" aria-hidden="true">[{String(i + 1).padStart(2, '0')}]</span>
+                <span class="taskmgr__entry-name">{item.name}</span>
+                <span class="taskmgr__running" aria-hidden="true">
+                  RUNNING<span class="taskmgr__dots"><span>.</span><span>.</span><span>.</span></span>
+                </span>
+                <span class="taskmgr__arrow" aria-hidden="true">→</span>
+                <span class="taskmgr__tag">{lang === 'fr' ? item.catFr : item.catEn}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="taskmgr__sep" aria-hidden="true"></div>
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--ok">
+            {lang === 'fr' ? `✓  ${codeItems.length} entrées chargées` : `✓  ${codeItems.length} entries loaded`}
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: CMS / WordPress -->
+      <div class="taskmgr__panel taskmgr__panel--hidden" id="cls-panel-wp" role="tabpanel" aria-labelledby="cls-tab-wp" tabindex="0">
+        <div class="taskmgr__cmd" aria-label={l.wpTitle}>
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--prompt">
+            <span class="taskmgr__prompt">C:\albert-exe&gt;</span>
+            <span class="taskmgr__input">list-env --wordpress</span>
+          </div>
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--info">
+            {lang === 'fr' ? '// Environnement WordPress — albert-exe v2026' : '// WordPress environment — albert-exe v2026'}
+          </div>
+          <div class="taskmgr__sep" aria-hidden="true"></div>
+          <ul class="taskmgr__entries" aria-label={l.wpTitle}>
+            {wpItems.map((item, i) => (
+              <li class="taskmgr__entry">
+                <span class="taskmgr__idx" aria-hidden="true">[{String(i + 1).padStart(2, '0')}]</span>
+                <span class="taskmgr__entry-name">{item.name}</span>
+                <span class="taskmgr__running" aria-hidden="true">
+                  RUNNING<span class="taskmgr__dots"><span>.</span><span>.</span><span>.</span></span>
+                </span>
+                <span class="taskmgr__arrow" aria-hidden="true">→</span>
+                <span class="taskmgr__tag">{lang === 'fr' ? item.catFr : item.catEn}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="taskmgr__sep" aria-hidden="true"></div>
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--ok">
+            {lang === 'fr' ? `✓  ${wpItems.length} entrées chargées` : `✓  ${wpItems.length} entries loaded`}
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel: Vente -->
+      <div class="taskmgr__panel taskmgr__panel--hidden" id="cls-panel-vente" role="tabpanel" aria-labelledby="cls-tab-vente" tabindex="0">
+        <div class="taskmgr__cmd" aria-label={l.venteTitle}>
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--prompt">
+            <span class="taskmgr__prompt">C:\albert-exe&gt;</span>
+            <span class="taskmgr__input">list-env --vente</span>
+          </div>
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--info">
+            {lang === 'fr' ? '// Compétences commerciales — albert-exe v2026' : '// Sales skills — albert-exe v2026'}
+          </div>
+          <div class="taskmgr__sep" aria-hidden="true"></div>
+          <ul class="taskmgr__entries" aria-label={l.venteTitle}>
+            {venteItems.map((item, i) => (
+              <li class="taskmgr__entry">
+                <span class="taskmgr__idx" aria-hidden="true">[{String(i + 1).padStart(2, '0')}]</span>
+                <span class="taskmgr__entry-name">{item.name}</span>
+                <span class="taskmgr__running" aria-hidden="true">
+                  RUNNING<span class="taskmgr__dots"><span>.</span><span>.</span><span>.</span></span>
+                </span>
+                <span class="taskmgr__arrow" aria-hidden="true">→</span>
+                <span class="taskmgr__tag">{lang === 'fr' ? item.catFr : item.catEn}</span>
+              </li>
+            ))}
+          </ul>
+          <div class="taskmgr__sep" aria-hidden="true"></div>
+          <div class="taskmgr__cmd-line taskmgr__cmd-line--ok">
+            {lang === 'fr' ? `✓  ${venteItems.length} entrées chargées` : `✓  ${venteItems.length} entries loaded`}
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="taskmgr__footer" aria-label={lang === 'fr' ? 'Informations système' : 'System info'}>
+        <span class="taskmgr__footer-text">{l.footer}</span>
+      </div>
+
     </div>
   </div>
 </section>
 
 <style>
+/* ── Section header ────────────────────────────────────────────── */
 .skills__container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 2.5rem;
 }
 
 .skills__header {
   text-align: center;
 }
 
-.section-label {
-  font-size: 0.875rem;
-  font-weight: 600;
+.skills__label {
+  font-size: 0.8125rem;
+  font-weight: 700;
   color: var(--color-acid-green);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.75rem;
+  letter-spacing: 0.12em;
+  font-family: var(--font-family-mono);
+  margin-bottom: 0.625rem;
 }
 
-.section-title {
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
+.skills__title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--color-text);
 }
 
-.skills__grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-}
-
-@media (min-width: 640px) {
-  .skills__grid { grid-template-columns: 1fr 1fr; }
-}
-
-@media (min-width: 1024px) {
-  .skills__grid { grid-template-columns: repeat(4, 1fr); }
-}
-
-.skills__category {
-  padding: 1.5rem;
+/* ── Panel ─────────────────────────────────────────────────────── */
+.taskmgr {
+  background: #080613;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 0.75rem;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
 }
 
-.skills__cat-title {
-  font-size: 0.8rem;
+/* ── Tabs ──────────────────────────────────────────────────────── */
+.taskmgr__tabs {
+  display: flex;
+  background: rgba(139, 92, 246, 0.06);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.taskmgr__tab {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #94A3B8;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-family-mono);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.taskmgr__tab:hover {
+  color: #C4B5FD;
+}
+
+.taskmgr__tab--active {
+  color: #A78BFA;
+  border-bottom-color: #8B5CF6;
+}
+
+.taskmgr__tab:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: -2px;
+}
+
+/* ── Panels ────────────────────────────────────────────────────── */
+.taskmgr__panel {
+  flex: 1;
+  overflow: auto;
+  min-height: 320px;
+}
+
+.taskmgr__panel--hidden {
+  display: none;
+}
+
+/* ── Process table ─────────────────────────────────────────────── */
+.taskmgr__table-wrap {
+  overflow-x: auto;
+}
+
+.taskmgr__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.taskmgr__thead-row {
+  background: rgba(139, 92, 246, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.taskmgr__th {
+  padding: 0.5rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--color-acid-green);
-  margin: 0;
+  letter-spacing: 0.07em;
+  color: #8B5CF6;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  white-space: nowrap;
+  font-family: var(--font-family-mono);
 }
 
-.skills__list {
+.taskmgr__th--bar    { width: 35%; }
+.taskmgr__th--level  { width: 18%; }
+.taskmgr__th--status { width: 12%; text-align: center; }
+
+.taskmgr__row {
+  border-bottom: 1px solid rgba(139, 92, 246, 0.06);
+  transition: background 0.1s ease;
+}
+
+.taskmgr__row:hover {
+  background: rgba(139, 92, 246, 0.06);
+}
+
+.taskmgr__row--alt {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.taskmgr__row--alt:hover {
+  background: rgba(139, 92, 246, 0.06);
+}
+
+.taskmgr__td {
+  padding: 0.45rem 1rem;
+  vertical-align: middle;
+}
+
+.taskmgr__td--name {
+  color: #FAF5FF;
+  font-size: 0.875rem;
+  font-family: var(--font-family-mono);
+}
+
+.taskmgr__td--bar { vertical-align: middle; }
+
+.taskmgr__state {
+  font-family: var(--font-family-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.taskmgr__state--green  { color: #4ade80; }
+.taskmgr__state--yellow { color: #F59E0B; }
+.taskmgr__state--grey   { color: #475569; }
+
+.taskmgr__dots {
+  display: inline-flex;
+  gap: 0.02em;
+  font-family: var(--font-family-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  margin-left: 0.2em;
+  vertical-align: middle;
+}
+
+.taskmgr__dots span {
+  opacity: 0;
+  animation: dot-seq 1.2s infinite both;
+}
+.taskmgr__dots span:nth-child(1) { animation-delay: 0s;   }
+.taskmgr__dots span:nth-child(2) { animation-delay: 0.2s; }
+.taskmgr__dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-seq {
+  0%,  60%, 100% { opacity: 0; }
+  20%, 40%       { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taskmgr__dots span { animation: none; opacity: 1; }
+}
+
+.taskmgr__td--level {
+  font-size: 0.75rem;
+  color: #C4B5FD;
+  font-family: var(--font-family-mono);
+  white-space: nowrap;
+}
+
+.taskmgr__td--status { text-align: center; }
+
+.taskmgr__dot {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.taskmgr__dot--green  { color: #4ade80; text-shadow: 0 0 6px #4ade80; }
+.taskmgr__dot--yellow { color: #F59E0B; text-shadow: 0 0 4px rgba(245,158,11,0.6); }
+.taskmgr__dot--grey   { color: #475569; }
+
+/* ── CMD panels ────────────────────────────────────────────────── */
+.taskmgr__cmd {
+  padding: 1rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.25rem;
+  font-family: var(--font-family-mono);
+  font-size: 0.875rem;
+}
+
+.taskmgr__cmd-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.1rem 0;
+}
+
+.taskmgr__prompt {
+  color: #4ade80;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.taskmgr__input { color: #FAF5FF; }
+
+.taskmgr__cmd-line--info {
+  color: #475569;
+  font-size: 0.8125rem;
+  padding-left: 0.25rem;
+}
+
+.taskmgr__cmd-line--ok {
+  color: #4ade80;
+  font-size: 0.8125rem;
+  margin-top: 0.1rem;
+}
+
+.taskmgr__sep {
+  height: 1px;
+  background: rgba(139, 92, 246, 0.12);
+  margin: 0.4rem 0;
+}
+
+.taskmgr__entries {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.skill-item {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.1rem;
 }
 
-.skill-item__header {
+.taskmgr__entry {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.625rem;
+  padding: 0.25rem 0.375rem;
+  border-radius: 0.25rem;
+  transition: background 0.1s ease;
 }
 
-.skill-item__name {
+.taskmgr__entry:hover {
+  background: rgba(139, 92, 246, 0.07);
+}
+
+.taskmgr__idx {
+  color: #475569;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  min-width: 2.25rem;
+}
+
+.taskmgr__entry-name {
+  color: #FAF5FF;
+  flex: 1;
   font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text);
 }
 
-.skill-item__dots {
+.taskmgr__running {
+  color: #4ade80;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   display: flex;
-  gap: 3px;
+  align-items: center;
+  flex-shrink: 0;
 }
 
-.skill-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--glass-border);
-  transition: background 0.3s ease;
+.taskmgr__arrow {
+  color: #8B5CF6;
+  flex-shrink: 0;
 }
 
-.skill-dot--active {
-  background: var(--color-acid-green);
+.taskmgr__tag {
+  color: #A78BFA;
+  font-size: 0.75rem;
+  min-width: 8rem;
+  text-align: right;
 }
 
-.skill-bar {
-  height: 4px;
-  border-radius: 999px;
-  background: var(--glass-border);
-  overflow: hidden;
+/* ── Footer ────────────────────────────────────────────────────── */
+.taskmgr__footer {
+  padding: 0.4rem 1rem;
+  background: rgba(139, 92, 246, 0.05);
+  border-top: 1px solid rgba(139, 92, 246, 0.15);
+  flex-shrink: 0;
 }
 
-.skill-bar__fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--color-acid-green);
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+.taskmgr__footer-text {
+  font-size: 0.75rem;
+  color: #475569;
+  font-family: var(--font-family-mono);
 }
 </style>
+
+<script>
+(function () {
+  const panel = document.querySelector<HTMLElement>('#skills');
+  if (!panel) return;
+
+  const tabs   = panel.querySelectorAll<HTMLButtonElement>('.taskmgr__tab');
+  const panels = panel.querySelectorAll<HTMLElement>('.taskmgr__panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetId = tab.getAttribute('aria-controls');
+      if (!targetId) return;
+
+      tabs.forEach(t => {
+        t.classList.remove('taskmgr__tab--active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      panels.forEach(p => p.classList.add('taskmgr__panel--hidden'));
+
+      tab.classList.add('taskmgr__tab--active');
+      tab.setAttribute('aria-selected', 'true');
+
+      panel.querySelector<HTMLElement>(`#${targetId}`)
+        ?.classList.remove('taskmgr__panel--hidden');
+    });
+  });
+})();
+</script>
