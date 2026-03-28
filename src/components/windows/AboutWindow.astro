@@ -30,7 +30,7 @@ const labels = {
     langValue: 'Français (natif)',
     specCpu: 'OVERCLOCKED 🔥',
     specRam: '4 modules ✨',
-    specGpu: 'WordPress — bientôt 🔧',
+    specGpu: 'Refonte + SEO 🔧',
     specPerf: 'NO LAG ⚡',
   },
   en: {
@@ -55,7 +55,7 @@ const labels = {
     langValue: 'French (native)',
     specCpu: 'OVERCLOCKED 🔥',
     specRam: '4 modules ✨',
-    specGpu: 'WordPress — coming soon 🔧',
+    specGpu: 'Redesign + SEO 🔧',
     specPerf: 'NO LAG ⚡',
   },
 } as const;
@@ -71,11 +71,43 @@ const tableRows = [
   { key: l.languages,      value: l.langValue },
 ];
 
-const specs = [
-  { label: l.cpu,  value: l.specCpu  },
-  { label: l.ram,  value: l.specRam  },
-  { label: l.gpu,  value: l.specGpu  },
-  { label: l.perf, value: l.specPerf },
+interface SpecItem { label: string; value: string; id?: string; }
+
+const ramModules = [
+  {
+    title: lang === 'fr' ? 'Concepteur Designer UI (Niv. 6)' : 'UI Designer Conceptor (L. 6)',
+    school: 'GRETA Alsace Sud',
+    period: '2025 — 2026',
+    status: lang === 'fr' ? 'EN COURS' : 'IN PROGRESS',
+    done: false,
+  },
+  {
+    title: lang === 'fr' ? 'Développeur Web & Mobile (Niv. 5)' : 'Web & Mobile Developer (L. 5)',
+    school: 'Elan Formation',
+    period: '2024',
+    status: 'ACQUIS ✓',
+    done: true,
+  },
+  {
+    title: lang === 'fr' ? 'Infographiste Metteur en Page (Niv. 4)' : 'Graphic Designer Page Setter (L. 4)',
+    school: 'GRETA Sud Alsace',
+    period: '2022 — 2023',
+    status: 'ACQUIS ✓',
+    done: true,
+  },
+  {
+    title: lang === 'fr' ? 'Titre Pro. Vendeur Conseil (Niv. 4)' : 'Sales Advisor Certificate (L. 4)',
+    school: 'CEFA Saint-Anne (Belgique)',
+    period: '2006',
+    status: 'ACQUIS ✓',
+    done: true,
+  },
+];
+
+const specs: SpecItem[] = [
+  { label: l.cpu, value: l.specCpu             },
+  { label: l.gpu, value: l.specGpu             },
+  { label: l.ram, value: l.specRam, id: 'ram'  },
 ];
 ---
 
@@ -140,9 +172,41 @@ const specs = [
           {specs.map(spec => (
             <div class="sysinfo-spec">
               <span class="sysinfo-spec__label">{spec.label}</span>
-              <span class="sysinfo-spec__value">{spec.value}</span>
+              {spec.id === 'ram' ? (
+                <button
+                  class="sysinfo-spec__value sysinfo-ram-btn"
+                  type="button"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                >
+                  {spec.value}<span class="sysinfo-ram-arrow" aria-hidden="true"> ▾</span>
+                </button>
+              ) : (
+                <span class="sysinfo-spec__value">{spec.value}</span>
+              )}
             </div>
           ))}
+
+          <!-- RAM modules popup -->
+          <ul
+            class="sysinfo-ram-popup"
+            hidden
+            role="listbox"
+            aria-label={lang === 'fr' ? 'Formations diplômantes' : 'Degrees'}
+          >
+            {ramModules.map(m => (
+              <li class="sysinfo-ram-item" role="option" aria-selected="false">
+                <span class="sysinfo-ram-item__icon" aria-hidden="true">{m.done ? '✅' : '⏳'}</span>
+                <div class="sysinfo-ram-item__info">
+                  <p class="sysinfo-ram-item__title">{m.title}</p>
+                  <p class="sysinfo-ram-item__meta">{m.school} · {m.period}</p>
+                </div>
+                <span class={`sysinfo-ram-item__badge ${m.done ? 'sysinfo-ram-item__badge--done' : 'sysinfo-ram-item__badge--wip'}`}>
+                  {m.status}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -383,6 +447,106 @@ const specs = [
   align-items: center;
 }
 
+/* RAM expandable button */
+.sysinfo-ram-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #F59E0B;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.sysinfo-ram-btn:hover { color: #FCD34D; }
+
+.sysinfo-ram-btn:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.sysinfo-ram-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.sysinfo-ram-btn[aria-expanded="true"] .sysinfo-ram-arrow {
+  transform: rotate(180deg);
+}
+
+/* RAM popup list */
+.sysinfo-ram-popup {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0.375rem;
+  background: rgba(4, 2, 14, 0.97);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 0.375rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.sysinfo-ram-popup[hidden] { display: none; }
+
+.sysinfo-ram-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+}
+
+.sysinfo-ram-item__icon { font-size: 0.875rem; flex-shrink: 0; }
+
+.sysinfo-ram-item__info { flex: 1; min-width: 0; }
+
+.sysinfo-ram-item__title {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #FAF5FF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sysinfo-ram-item__meta {
+  margin: 0.1rem 0 0;
+  font-size: 0.6rem;
+  color: #94A3B8;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+
+.sysinfo-ram-item__badge {
+  flex-shrink: 0;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.sysinfo-ram-item__badge--done {
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: #4ade80;
+}
+
+.sysinfo-ram-item__badge--wip {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #F59E0B;
+}
+
 /* ── Action buttons ────────────────────────────────────────────── */
 .sysinfo-actions {
   display: flex;
@@ -436,10 +600,38 @@ const specs = [
 
 <script>
 (function () {
-  const btn = document.querySelector<HTMLButtonElement>('[data-open-window="contact"]');
-  btn?.addEventListener('click', async () => {
+  // ── Contact button ───────────────────────────────────────────────────────
+  const contactBtn = document.querySelector<HTMLButtonElement>('[data-open-window="contact"]');
+  contactBtn?.addEventListener('click', async () => {
     const { open } = await import('../../utils/window-manager');
     open('contact');
+  });
+
+  // ── RAM modules popup ────────────────────────────────────────────────────
+  const ramBtn  = document.querySelector<HTMLButtonElement>('.sysinfo-ram-btn');
+  const ramList = document.querySelector<HTMLElement>('.sysinfo-ram-popup');
+  if (!ramBtn || !ramList) return;
+
+  ramBtn.addEventListener('click', () => {
+    const isOpen = ramBtn.getAttribute('aria-expanded') === 'true';
+    ramBtn.setAttribute('aria-expanded', String(!isOpen));
+    ramList.hidden = isOpen;
+  });
+
+  // Close on Escape or outside click
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !ramList.hidden) {
+      ramList.hidden = true;
+      ramBtn.setAttribute('aria-expanded', 'false');
+      ramBtn.focus();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!ramList.hidden && !ramBtn.contains(e.target as Node) && !ramList.contains(e.target as Node)) {
+      ramList.hidden = true;
+      ramBtn.setAttribute('aria-expanded', 'false');
+    }
   });
 })();
 </script>
