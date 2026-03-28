@@ -247,3 +247,74 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+/* ================================================
+   SKIP LINK — RGAA obligatoire
+   ================================================ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 9999;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-acid-green);
+  color: #050505;
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border-radius: 0 0 0.5rem 0;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #050505;
+  outline-offset: 2px;
+}
+
+/* ================================================
+   LIGHT MODE — [data-theme="light"]
+   ================================================ */
+[data-theme="light"] {
+  --color-bg:           #F0F4FF;
+  --color-surface:      rgba(0, 0, 0, 0.04);
+  --color-surface-2:    rgba(0, 0, 0, 0.06);
+  --color-text:         #0F172A;
+  --color-text-subtle:  #475569;
+  --color-text-muted:   #94A3B8;
+  --color-border:       rgba(0, 0, 0, 0.1);
+  --color-focus:        #5B21B6;
+
+  /* Glassmorphism light */
+  --glass-bg:           rgba(255, 255, 255, 0.6);
+  --glass-bg-hover:     rgba(255, 255, 255, 0.8);
+  --glass-border:       rgba(59, 130, 246, 0.2);
+  --glass-border-hover: #3B82F6;
+  --glass-shadow:       0 8px 32px rgba(0, 0, 0, 0.1);
+  --glass-shadow-hover: 0 0 20px rgba(59, 130, 246, 0.2);
+}
+
+[data-theme="light"] body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+[data-theme="light"] a {
+  color: #1D4ED8;
+}
+
+[data-theme="light"] a:hover {
+  text-shadow: 0 0 8px rgba(29, 78, 216, 0.3);
+}
+
+/* Focus global — RGAA AAA */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
