@@ -614,12 +614,14 @@ html[data-theme="light"] .about-btn {
    ================================================ */
 html[data-theme="light"] .taskbar__mode-btn,
 html[data-theme="light"] .taskbar__theme-btn,
-html[data-theme="light"] .taskbar__clock {
+html[data-theme="light"] .taskbar__clock,
+html[data-theme="light"] .boot__skip {
   color: rgba(250, 245, 255, 0.85);
 }
 
 html[data-theme="light"] .taskbar__mode-btn:hover,
-html[data-theme="light"] .taskbar__theme-btn:hover {
+html[data-theme="light"] .taskbar__theme-btn:hover,
+html[data-theme="light"] .boot__skip:hover {
   color: #FAF5FF;
 }
 
