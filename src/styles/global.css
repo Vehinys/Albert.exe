@@ -608,6 +608,22 @@ html[data-theme="light"] .about-btn {
 }
 
 /* ================================================
+   TASKBAR — toujours sombre, texte toujours clair
+   Les éléments de chrome OS ont un fond fixe #080414
+   → les vars --color-text-* ne doivent pas s'y appliquer
+   ================================================ */
+html[data-theme="light"] .taskbar__mode-btn,
+html[data-theme="light"] .taskbar__theme-btn,
+html[data-theme="light"] .taskbar__clock {
+  color: rgba(250, 245, 255, 0.85);
+}
+
+html[data-theme="light"] .taskbar__mode-btn:hover,
+html[data-theme="light"] .taskbar__theme-btn:hover {
+  color: #FAF5FF;
+}
+
+/* ================================================
    PORTFOLIO MODE SWITCHER
    ================================================ */
 html[data-portfolio-mode="classic"] body {
