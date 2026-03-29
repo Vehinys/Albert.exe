@@ -107,7 +107,7 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
     aria-label={lang === 'fr' ? 'Fenêtres ouvertes' : 'Open windows'}
   ></div>
 
-  <!-- Right: Mode toggle + Lang + Clock -->
+  <!-- Right: Mode toggle + Theme + Lang + Clock -->
   <div class="taskbar__right">
     <button
       id="mode-toggle-btn"
@@ -120,6 +120,27 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
         <path d="M3 9h18M9 21V9"/>
       </svg>
       <span>{lang === 'fr' ? 'Mode classique' : 'Classic'}</span>
+    </button>
+
+    <button
+      id="taskbar-theme-toggle"
+      class="taskbar__theme-btn"
+      type="button"
+      aria-label={lang === 'fr' ? 'Changer le thème' : 'Toggle theme'}
+      aria-pressed="false"
+    >
+      <!-- Moon (dark mode active) -->
+      <svg id="taskbar-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <!-- Sun (light mode active) -->
+      <svg id="taskbar-icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="display:none">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
     </button>
 
     <a
@@ -370,6 +391,32 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
   outline-offset: 2px;
 }
 
+.taskbar__theme-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  color: var(--color-text-subtle);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.taskbar__theme-btn:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #FAF5FF;
+}
+
+.taskbar__theme-btn:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+}
+
 .taskbar__lang {
   font-size: 0.75rem;
   font-weight: 700;
@@ -470,6 +517,31 @@ const startLabel = lang === 'fr' ? 'Albert.exe — Menu principal' : 'Albert.exe
     closeMenu();
     const { open } = await import('../../utils/window-manager');
     open(id);
+  });
+
+  // ── Theme toggle ──────────────────────────────────────────────────────────────
+  const themeBtn  = document.getElementById('taskbar-theme-toggle') as HTMLButtonElement | null;
+  const iconMoon  = document.getElementById('taskbar-icon-moon');
+  const iconSun   = document.getElementById('taskbar-icon-sun');
+
+  function applyTheme(theme: string): void {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    if (iconMoon && iconSun && themeBtn) {
+      const isDark = theme === 'dark';
+      iconMoon.style.display = isDark ? '' : 'none';
+      iconSun.style.display  = isDark ? 'none' : '';
+      themeBtn.setAttribute('aria-pressed', isDark ? 'false' : 'true');
+    }
+  }
+
+  // Sync initial icon state
+  const currentTheme = document.documentElement.getAttribute('data-theme') ?? 'dark';
+  applyTheme(currentTheme);
+
+  themeBtn?.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
   });
 })();
 </script>
