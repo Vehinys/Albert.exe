@@ -44,7 +44,11 @@
       "Bash(node:*)",
       "Bash(for file:*)",
       "Bash(do echo:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(git config *)",
+      "Bash(git -C \"D:\\\\PROJET PERSONNEL\\\\ALBERT-EXE\\\\Albert.exe\" log --oneline -10)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
