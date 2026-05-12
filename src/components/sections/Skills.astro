@@ -1,4 +1,4 @@
----
+﻿---
 import { getCollection } from 'astro:content';
 import type { Lang } from '../../i18n/utils';
 
@@ -92,7 +92,8 @@ const labels = {
   fr: {
     sectionLabel: 'Compétences',
     sectionTitle: 'Gestionnaire des tâches',
-    tabProcesses: 'Processus',
+    tabInfra:     'Infrastructure',
+    tabProcesses: 'Dev & Design',
     tabCode:      'Environnement',
     tabWp:        'CMS',
     tabVente:     'Vente',
@@ -102,13 +103,15 @@ const labels = {
     colStatus:    'Statut',
     codeTitle:    'Environnement code',
     wpTitle:      'Environnement WordPress',
+    infraTitle:   'Compétences Infrastructure',
     venteTitle:   'Compétences commerciales',
     footer:       `CPU Albert.exe\u00a0: Actif\u00a0| Design\u00a0: ${designSkills.length} proc.\u00a0| Démarré\u00a0: 2021`,
   },
   en: {
     sectionLabel: 'Skills',
     sectionTitle: 'Task Manager',
-    tabProcesses: 'Processes',
+    tabInfra:     'Infrastructure',
+    tabProcesses: 'Dev & Design',
     tabCode:      'Environment',
     tabWp:        'CMS',
     tabVente:     'Sales',
@@ -118,8 +121,9 @@ const labels = {
     colStatus:    'Status',
     codeTitle:    'Code environment',
     wpTitle:      'WordPress environment',
+    infraTitle:   'Infrastructure Skills',
     venteTitle:   'Sales skills',
-    footer:       `CPU Albert.exe: Active | Design: ${designSkills.length} proc. | Started: 2021`,
+    footer:       `CPU Albert.exe: Active | Infra: ${infraSkills.length} proc. | Design: ${designSkills.length} proc. | Started: 2021`,
   },
 } as const;
 
@@ -140,14 +144,66 @@ const l = labels[lang];
 
       <!-- Tabs -->
       <div class="taskmgr__tabs" role="tablist" aria-label={lang === 'fr' ? 'Onglets compétences' : 'Skills tabs'}>
-        <button class="taskmgr__tab taskmgr__tab--active" role="tab" id="cls-tab-processes" aria-selected="true"  aria-controls="cls-panel-processes" type="button">{l.tabProcesses}</button>
+        <button class="taskmgr__tab taskmgr__tab--active" role="tab" id="cls-tab-infra"     aria-selected="true"  aria-controls="cls-panel-infra"     type="button">{l.tabInfra}</button>
+        <button class="taskmgr__tab"                      role="tab" id="cls-tab-processes" aria-selected="false" aria-controls="cls-panel-processes" type="button">{l.tabProcesses}</button>
         <button class="taskmgr__tab"                      role="tab" id="cls-tab-code"      aria-selected="false" aria-controls="cls-panel-code"      type="button">{l.tabCode}</button>
         <button class="taskmgr__tab"                      role="tab" id="cls-tab-wp"        aria-selected="false" aria-controls="cls-panel-wp"        type="button">{l.tabWp}</button>
         <button class="taskmgr__tab"                      role="tab" id="cls-tab-vente"     aria-selected="false" aria-controls="cls-panel-vente"     type="button">{l.tabVente}</button>
       </div>
 
+      <!-- Panel: Infrastructure -->
+      <div class="taskmgr__panel" id="cls-panel-infra" role="tabpanel" aria-labelledby="cls-tab-infra" tabindex="0">
+        <div class="taskmgr__table-wrap">
+          <table class="taskmgr__table" aria-label={lang === 'fr' ? 'Compétences Infrastructure' : 'Infrastructure Skills'}>
+            <thead>
+              <tr class="taskmgr__thead-row">
+                <th scope="col" class="taskmgr__th taskmgr__th--name">{l.colProcess}</th>
+                <th scope="col" class="taskmgr__th taskmgr__th--bar">{l.colUsage}</th>
+                <th scope="col" class="taskmgr__th taskmgr__th--level">{l.colLevel}</th>
+                <th scope="col" class="taskmgr__th taskmgr__th--status">{l.colStatus}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {infraSkills.map((skill, idx) => {
+                const state   = processStates[skill.level] ?? { text: 'UNKNOWN', cls: 'grey' };
+                const ver     = versionLabels[skill.level] ?? 'v?';
+                const dotCls  = skill.level >= 4 ? 'green' : skill.level === 3 ? 'yellow' : 'grey';
+                const dotLabel = skill.level >= 4
+                  ? (lang === 'fr' ? 'Actif' : 'Active')
+                  : skill.level === 3 ? 'Stable'
+                  : (lang === 'fr' ? 'Inactif' : 'Inactive');
+                return (
+                  <tr class={`taskmgr__row${idx % 2 !== 0 ? ' taskmgr__row--alt' : ''}`}>
+                    <td class="taskmgr__td taskmgr__td--name">{skill.name}</td>
+                    <td class="taskmgr__td taskmgr__td--bar">
+                      <span
+                        class={`taskmgr__state taskmgr__state--${state.cls}`}
+                        aria-label={`${skill.name}: ${state.text}`}
+                      >
+                        {state.cls === 'green' ? (
+                          <>
+                            {state.text}
+                            <span class="taskmgr__dots" aria-hidden="true">
+                              <span>.</span><span>.</span><span>.</span>
+                            </span>
+                          </>
+                        ) : state.text}
+                      </span>
+                    </td>
+                    <td class="taskmgr__td taskmgr__td--level">{ver}</td>
+                    <td class="taskmgr__td taskmgr__td--status">
+                      <span class={`taskmgr__dot taskmgr__dot--${dotCls}`} aria-label={dotLabel}>●</span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Panel: Processus (Design) -->
-      <div class="taskmgr__panel" id="cls-panel-processes" role="tabpanel" aria-labelledby="cls-tab-processes" tabindex="0">
+      <div class="taskmgr__panel taskmgr__panel--hidden" id="cls-panel-processes" role="tabpanel" aria-labelledby="cls-tab-processes" tabindex="0">
         <div class="taskmgr__table-wrap">
           <table class="taskmgr__table" aria-label={lang === 'fr' ? 'Compétences Design' : 'Design Skills'}>
             <thead>
