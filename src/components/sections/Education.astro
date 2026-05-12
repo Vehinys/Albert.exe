@@ -20,9 +20,29 @@ interface EduEntry {
   description: Record<'fr' | 'en', string>;
   tags: string[];
   wip?: boolean;
+  branch?: string;
 }
 
 const education: EduEntry[] = [
+  {
+    hash: 'c7a19f3',
+    prefix: 'feat(edu)',
+    period: 'Rentrée 2026',
+    title: {
+      fr: 'Administration d\'Infrastructures Sécurisées — Niveau 5',
+      en: 'Secure Infrastructure Administration — Level 5',
+    },
+    company: 'GRETA CFA Alsace — Colmar',
+    url: 'https://www.greta-cfa-alsace.fr',
+    location: 'Colmar',
+    description: {
+      fr: 'Admis. Formation en alternance : Linux/Debian, Windows Server, virtualisation VMware, réseaux TCP/IP, Active Directory, sécurité systèmes.',
+      en: 'Admitted. Work-study program: Linux/Debian, Windows Server, VMware virtualization, TCP/IP networking, Active Directory, system security.',
+    },
+    tags: ['Linux', 'Windows Server', 'VMware', 'Réseaux', 'Active Directory'],
+    wip: true,
+    branch: 'ais-colmar',
+  },
   {
     hash: 'f15d8b0',
     prefix: 'feat(edu)',
@@ -32,11 +52,10 @@ const education: EduEntry[] = [
     url: 'https://www.greta-cfa-alsace.fr/reseau/greta-alsace-sud/',
     location: 'Mulhouse',
     description: {
-      fr: 'En cours. Conception pour WordPress & UI/UX Design. Suite Adobe (Photoshop, Illustrator, XD). Intégration HTML5/CSS3 et Framework Symfony.',
-      en: 'In progress. Design for WordPress & UI/UX. Adobe Suite (Photoshop, Illustrator, XD). HTML5/CSS3 and Symfony Framework.',
+      fr: 'Diplôme acquis. WordPress & UI/UX Design. Suite Adobe (Photoshop, Illustrator, XD). HTML5/CSS3, Symfony. Module infra : serveur VMware Debian 13, SSH, MariaDB.',
+      en: 'Degree acquired. WordPress & UI/UX Design. Adobe Suite (Photoshop, Illustrator, XD). HTML5/CSS3, Symfony. Infrastructure module: VMware Debian 13 server, SSH, MariaDB.',
     },
-    tags: ['Adobe Suite', 'Symfony', 'WordPress'],
-    wip: true,
+    tags: ['Adobe Suite', 'Symfony', 'WordPress', 'VMware', 'Debian 13', 'MariaDB'],
   },
   {
     hash: '9e3a71c',
@@ -140,7 +159,7 @@ const schoolKey  = lang === 'fr' ? 'École' : 'School';
                   <span class="edu-hash">{item.hash}</span>
                   {item.wip && (
                     <span class="edu-wip-badge">
-                      {'(HEAD → edu/niveau-6, '}
+                      {`(HEAD → edu/${item.branch ?? 'formation'}, `}
                       <span class="edu-wip-badge__text">⏳ {wipLabel}</span>
                       {')'}
                     </span>

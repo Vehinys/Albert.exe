@@ -1,6 +1,6 @@
 # Albert.exe — Portfolio d'Albert Lecomte
 
-Portfolio personnel interactif au design **OS-style** (interface Windows-like) pour Albert Lecomte, Concepteur Designer UI basé à Mulhouse.
+Portfolio personnel interactif au design **OS-style** (interface Windows-like) pour Albert Lecomte, en reconversion vers l'**Administration d'Infrastructures Sécurisées** — admis en formation AIS au GRETA Colmar, alternance recherchée dans le Haut-Rhin.
 
 🔗 **En ligne :** [lecomte-albert-cv.vercel.app](https://lecomte-albert-cv.vercel.app/)
 
@@ -8,7 +8,7 @@ Portfolio personnel interactif au design **OS-style** (interface Windows-like) p
 
 ## Aperçu
 
-Portfolio bilingue (FR / EN) bâti comme un système d'exploitation simulé : barre des tâches, menu Démarrer, fenêtres déplaçables, et expérience immersive en glassmorphism. Pensé pour mettre en valeur des projets de design UI auprès de clients web et patrons WordPress.
+Portfolio bilingue (FR / EN) bâti comme un système d'exploitation simulé : barre des tâches, menu Démarrer, fenêtres déplaçables, et expérience immersive en glassmorphism. Conçu pour refléter la transition de l'UI/web design vers l'administration d'infrastructures et systèmes sécurisés.
 
 ## Stack technique
 

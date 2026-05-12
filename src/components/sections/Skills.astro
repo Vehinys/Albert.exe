@@ -6,9 +6,15 @@ interface Props { lang: Lang; }
 
 const { lang } = Astro.props;
 
-// Design skills from content collection
+// Skills from content collection
 const allSkillEntries = await getCollection('skills');
-const designSkills = (allSkillEntries[0]?.data ?? [])
+const allSkillData = allSkillEntries[0]?.data ?? [];
+
+const infraSkills = allSkillData
+  .filter(s => s.category === 'infrastructure')
+  .sort((a, b) => a.order - b.order);
+
+const designSkills = allSkillData
   .filter(s => s.category === 'design')
   .sort((a, b) => a.order - b.order);
 
