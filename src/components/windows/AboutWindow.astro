@@ -18,7 +18,7 @@ const labels = {
     rqth: 'Certification RQTH',
     languages: 'Langues',
     hwSpecs: 'Spécifications matérielles',
-    cpu: 'CPU : WordPress, UI & SEO',
+    cpu: 'CPU : Linux, VMware & AIS',
     ram: 'RAM : Formations diplômantes',
     gpu: 'GPU : Stage Businet',
     perf: 'PERF : Expérience',
@@ -26,10 +26,10 @@ const labels = {
     contact: 'Contact',
     location: 'Mulhouse, Alsace',
     available: 'Disponible',
-    versionValue: 'En recherche active (CDI)',
+    versionValue: 'Alternance AIS recherchée',
     langValue: 'Français (natif) · Anglais (compréhension écrite)',
     specCpu: 'OVERCLOCKED 🔥',
-    specRam: '4 modules ✨',
+    specRam: '5 modules ✨',
     specGpu: 'Refonte + SEO 🔧',
     specPerf: 'NO LAG ⚡',
   },
@@ -43,7 +43,7 @@ const labels = {
     rqth: 'RQTH Certification',
     languages: 'Languages',
     hwSpecs: 'Hardware Specifications',
-    cpu: 'CPU: WordPress, UI & SEO',
+    cpu: 'CPU: Linux, VMware & AIS',
     ram: 'RAM: Degrees obtained',
     gpu: 'GPU: Businet Internship',
     perf: 'PERF: Experience',
@@ -51,10 +51,10 @@ const labels = {
     contact: 'Contact',
     location: 'Mulhouse, Alsace',
     available: 'Available',
-    versionValue: 'Actively seeking (CDI)',
+    versionValue: 'Seeking AIS apprenticeship',
     langValue: 'French (native) · English (reading comprehension)',
     specCpu: 'OVERCLOCKED 🔥',
-    specRam: '4 modules ✨',
+    specRam: '5 modules ✨',
     specGpu: 'Redesign + SEO 🔧',
     specPerf: 'NO LAG ⚡',
   },
@@ -64,9 +64,9 @@ const l = labels[lang];
 
 const tableRows = [
   { key: l.fullName,       value: 'Albert Lecomte' },
-  { key: l.jobTitle,       value: lang === 'fr' ? 'Concepteur Designer UI' : 'UI Designer Conceptor' },
+  { key: l.jobTitle,       value: lang === 'fr' ? 'En reconversion AIS' : 'Transitioning to AIS' },
   { key: l.version,        value: l.versionValue },
-  { key: l.specialization, value: lang === 'fr' ? 'WordPress · UI/UX Design · SEO' : 'WordPress · UI/UX Design · SEO' },
+  { key: l.specialization, value: 'Linux · VMware · SSH · MariaDB' },
   { key: l.rqth,           value: lang === 'fr' ? 'Reconnu' : 'Recognized' },
   { key: l.languages,      value: l.langValue },
 ];
@@ -75,11 +75,18 @@ interface SpecItem { label: string; value: string; id?: string; }
 
 const ramModules = [
   {
+    title: lang === 'fr' ? 'Administration d\'Infrastructures Sécurisées (Niv. 5)' : 'Secure Infrastructure Administration (L. 5)',
+    school: 'GRETA CFA Alsace — Colmar',
+    period: 'Rentrée 2026',
+    status: lang === 'fr' ? 'EN COURS' : 'IN PROGRESS',
+    done: false,
+  },
+  {
     title: lang === 'fr' ? 'Concepteur Designer UI (Niv. 6)' : 'UI Designer Conceptor (L. 6)',
     school: 'GRETA Alsace Sud',
     period: '2025 — 2026',
-    status: lang === 'fr' ? 'EN COURS' : 'IN PROGRESS',
-    done: false,
+    status: 'ACQUIS ✓',
+    done: true,
   },
   {
     title: lang === 'fr' ? 'Développeur Web & Mobile (Niv. 5)' : 'Web & Mobile Developer (L. 5)',
@@ -129,7 +136,7 @@ const specs: SpecItem[] = [
       </div>
       <p class="sysinfo-identity__name">Albert Lecomte</p>
       <p class="sysinfo-identity__title">
-        {lang === 'fr' ? 'Concepteur Designer UI' : 'UI Designer Conceptor'}
+        {lang === 'fr' ? 'En reconversion AIS' : 'Transitioning to AIS'}
       </p>
       <div class="sysinfo-badges">
         <span class="sysinfo-badge sysinfo-badge--location">

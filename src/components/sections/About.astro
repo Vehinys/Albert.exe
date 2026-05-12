@@ -16,15 +16,15 @@ const tableRows = [
   },
   {
     key: lang === 'fr' ? 'Titre'              : 'Title',
-    val: lang === 'fr' ? 'Concepteur Designer UI' : 'UI Designer Conceptor',
+    val: lang === 'fr' ? 'En reconversion AIS' : 'Transitioning to AIS',
   },
   {
     key: lang === 'fr' ? 'Version'            : 'Version',
-    val: lang === 'fr' ? 'En recherche active (CDI)' : 'Actively seeking (CDI)',
+    val: lang === 'fr' ? 'Alternance recherchée (AIS)' : 'Seeking AIS apprenticeship',
   },
   {
     key: lang === 'fr' ? 'Spécialisation'     : 'Specialization',
-    val: 'WordPress · UI/UX Design · SEO',
+    val: 'Linux · VMware · SSH · MariaDB',
   },
   {
     key: lang === 'fr' ? 'Certification RQTH' : 'RQTH Certification',
@@ -40,11 +40,18 @@ const tableRows = [
 
 const ramModules = [
   {
+    title:  lang === 'fr' ? 'Administration d\'Infrastructures Sécurisées (Niv. 5)' : 'Secure Infrastructure Administration (L. 5)',
+    school: 'GRETA CFA Alsace — Colmar',
+    period: 'Rentrée 2026',
+    status: lang === 'fr' ? 'EN COURS' : 'IN PROGRESS',
+    done: false,
+  },
+  {
     title:  lang === 'fr' ? 'Concepteur Designer UI (Niv. 6)'        : 'UI Designer Conceptor (L. 6)',
     school: 'GRETA Alsace Sud',
     period: '2025 — 2026',
-    status: lang === 'fr' ? 'EN COURS' : 'IN PROGRESS',
-    done: false,
+    status: 'ACQUIS ✓',
+    done: true,
   },
   {
     title:  lang === 'fr' ? 'Développeur Web & Mobile (Niv. 5)'      : 'Web & Mobile Developer (L. 5)',
@@ -105,7 +112,7 @@ const ramLabel   = lang === 'fr' ? 'Formations diplômantes'               : 'De
           </div>
           <p class="about-identity__name">Albert Lecomte</p>
           <p class="about-identity__job">
-            {lang === 'fr' ? 'Concepteur Designer UI' : 'UI Designer Conceptor'}
+            {lang === 'fr' ? 'En reconversion AIS' : 'Transitioning to AIS'}
           </p>
           <div class="about-badges">
             <span class="about-badge about-badge--location">
