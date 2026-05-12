@@ -1,4 +1,4 @@
----
+﻿---
 import type { Lang } from '../../i18n/utils';
 
 interface Props {
@@ -250,14 +250,14 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
   // ── Fake filesystem ───────────────────────────────────────────────────
   const fs: Record<string, string> = {
     'about.txt': t(
-      `Albert Lecomte — Concepteur Designer UI\nMulhouse, Alsace, France\nReconnu RQTH · disponible immédiatement\n\nDu prototypage Figma à l'intégration WordPress complète,\nje couvre toute la chaîne front-end avec un focus sur\nl'accessibilité (RGAA AAA) et la performance (Core Web Vitals).`,
+      `Albert Lecomte — Concepteur Designer UI\nMulhouse, Alsace, France\nReconnu RQTH · disponible immédiatement\n\nVenu du web et du design UI, un module infra a tout changé : VMware, Debian, SSH, MariaDB.\nAdmis en formation AIS au GRETA Colmar, je cherche une alternance\ndans le Haut-Rhin. Atout : je comprends le code ET les systèmes.`,
       `Albert Lecomte — UI Designer\nMulhouse, Alsace, France\nRQTH-recognised · available now\n\nFrom Figma prototyping to full WordPress integration,\nI cover the entire front-end chain with a focus on\naccessibility (WCAG AA) and performance (Core Web Vitals).`
     ),
     'contact.txt': t(
       `Email   : albert.lecomte1989@gmail.com\nLieu    : Mulhouse, Alsace\nLangues : FR (natif), EN (pro)\nDispo   : du lundi au vendredi, réponse < 24h\n\nUtilise la commande "contact" pour ouvrir le formulaire.`,
       `Email     : albert.lecomte1989@gmail.com\nLocation  : Mulhouse, Alsace\nLanguages : FR (native), EN (pro)\nAvailable : Mon-Fri, reply < 24h\n\nUse "contact" command to open the form.`
     ),
-    'stack.txt': `Frontend : Astro 5 · TypeScript · Tailwind CSS v4 · WordPress\nBackend  : PHP / Symfony · MySQL · Node.js\nDesign   : Figma · Adobe XD · Photoshop · Illustrator\nTooling  : Git · Vercel · Plausible · EmailJS\nA11y     : RGAA 4.1 · WCAG 2.2 · axe-core`,
+    'stack.txt': `Infra    : Linux/Debian · VMware · SSH · MariaDB · Windows Server · Docker\nFrontend : Astro 5 · TypeScript · Tailwind CSS v4 · WordPress\nBackend  : PHP / Symfony · MySQL · Node.js\nDesign   : Figma · Adobe XD · Photoshop · Illustrator\nTooling  : Git · Vercel · Plausible · EmailJS\nA11y     : RGAA 4.1 · WCAG 2.2 · axe-core`,
     'cv.pdf': '[binary] — utilise la commande "cv" pour télécharger.',
   };
 
@@ -322,7 +322,7 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
     pwd: () => printLine('/home/albert'),
 
     whoami: () => {
-      print(`<span class="l-accent">albert</span> — ${escapeHtml(t('Concepteur Designer UI', 'UI Designer'))}`);
+      print(`<span class="l-accent">albert</span> — ${escapeHtml(t('En reconversion AIS', 'Transitioning to AIS'))}`);
       print(`<span class="l-info">${escapeHtml(t('Mulhouse, Alsace · RQTH · disponible', 'Mulhouse, Alsace · RQTH · available'))}</span>`);
     },
 
