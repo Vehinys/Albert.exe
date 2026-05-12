@@ -196,9 +196,15 @@ const {
 .window__content {
   flex: 1;
   overflow-y: auto;
-  padding: 1.5rem;
+  overflow-x: hidden;
+  padding: 0.875rem;
   min-height: 0;
+  min-width: 0;
   color: #FAF5FF;
+}
+
+@media (min-width: 640px) {
+  .window__content { padding: 1.5rem; }
 }
 
 /* Custom scrollbar inside windows */

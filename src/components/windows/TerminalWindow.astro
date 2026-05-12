@@ -1,0 +1,631 @@
+---
+import type { Lang } from '../../i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+---
+
+<div class="term" data-lang={lang} role="region" aria-label={lang === 'fr' ? 'Terminal Albert.exe' : 'Albert.exe terminal'}>
+  <div class="term__output" id="term-output" aria-live="polite" aria-atomic="false"></div>
+  <form class="term__input-line" id="term-form" autocomplete="off">
+    <span class="term__prompt" id="term-prompt">albert@portfolio:~$</span>
+    <input
+      class="term__input"
+      id="term-input"
+      type="text"
+      spellcheck="false"
+      autocomplete="off"
+      autocapitalize="off"
+      aria-label={lang === 'fr' ? 'Ligne de commande' : 'Command line'}
+    />
+    <span class="term__cursor" aria-hidden="true">▊</span>
+  </form>
+</div>
+
+<style>
+.term {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #050409;
+  color: #4ade80;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  position: relative;
+  cursor: text;
+}
+
+/* CRT scanline effect (subtle) */
+.term::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.4;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term::before { display: none; }
+}
+
+.term__output {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.875rem 1rem 0.5rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  position: relative;
+  z-index: 2;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(74, 222, 128, 0.3) transparent;
+}
+
+.term__output::-webkit-scrollbar { width: 6px; }
+.term__output::-webkit-scrollbar-track { background: transparent; }
+.term__output::-webkit-scrollbar-thumb { background: rgba(74, 222, 128, 0.3); border-radius: 3px; }
+
+.term__input-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.875rem;
+  position: relative;
+  z-index: 2;
+  margin: 0;
+}
+
+.term__prompt {
+  color: #4ade80;
+  font-weight: 700;
+  flex-shrink: 0;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+}
+
+.term__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #FAF5FF;
+  font-family: inherit;
+  font-size: inherit;
+  caret-color: transparent;
+  padding: 0;
+  min-width: 0;
+}
+
+.term__cursor {
+  color: #4ade80;
+  font-weight: 700;
+  margin-left: -0.4rem;
+  pointer-events: none;
+  animation: term-blink 1s step-end infinite;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+}
+
+@keyframes term-blink {
+  0%, 50%   { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term__cursor { animation: none; }
+}
+
+/* Output line variants */
+.term__output :global(.l-prompt)   { color: #4ade80; font-weight: 700; }
+.term__output :global(.l-cmd)      { color: #FAF5FF; }
+.term__output :global(.l-info)     { color: #94a3b8; }
+.term__output :global(.l-ok)       { color: #4ade80; }
+.term__output :global(.l-warn)     { color: #F59E0B; }
+.term__output :global(.l-err)      { color: #ef4444; }
+.term__output :global(.l-accent)   { color: #A78BFA; }
+.term__output :global(.l-link)     {
+  color: #60A5FA;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.term__output :global(.l-link:hover) { color: #93C5FD; }
+.term__output :global(.banner)     {
+  color: #A78BFA;
+  text-shadow: 0 0 12px rgba(167, 139, 250, 0.5);
+  display: block;
+}
+.term__output :global(.kbd)        {
+  background: rgba(167, 139, 250, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  border-radius: 0.25rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.7rem;
+  color: #C4B5FD;
+}
+
+/* Konami flash effect */
+.term.konami { animation: term-konami 0.6s ease; }
+
+@keyframes term-konami {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50%      { filter: hue-rotate(180deg) saturate(2); }
+}
+
+@media (max-width: 640px) {
+  .term { font-size: 0.75rem; }
+  .term__output { padding: 0.625rem 0.75rem 0.4rem; }
+  .term__input-line { padding: 0.4rem 0.75rem 0.625rem; }
+}
+</style>
+
+<script>
+import { open as openWindow, close as closeWindow } from '../../utils/window-manager';
+
+(function () {
+  const root = document.querySelector<HTMLElement>('.term');
+  if (!root) return;
+  const output = document.getElementById('term-output') as HTMLDivElement | null;
+  const input  = document.getElementById('term-input') as HTMLInputElement | null;
+  const form   = document.getElementById('term-form') as HTMLFormElement | null;
+  const prompt = document.getElementById('term-prompt') as HTMLSpanElement | null;
+  if (!output || !input || !form || !prompt) return;
+
+  const lang = (root.dataset['lang'] === 'en' ? 'en' : 'fr') as 'fr' | 'en';
+  const t = (fr: string, en: string): string => (lang === 'fr' ? fr : en);
+
+  const history: string[] = [];
+  let histIdx = -1;
+
+  // ── State machine for multi-step commands (quote) ─────────────────────
+  type Mode = { kind: 'idle' } | {
+    kind: 'quote';
+    step: number;
+    data: Partial<{ type: string; pages: number; multilang: boolean; rush: boolean }>;
+  };
+  let mode: Mode = { kind: 'idle' };
+
+  // ── Output helpers ────────────────────────────────────────────────────
+  function escapeHtml(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c] ?? c));
+  }
+
+  function print(html: string, cls = ''): void {
+    const div = document.createElement('div');
+    if (cls) div.className = cls;
+    div.innerHTML = html;
+    output!.appendChild(div);
+    output!.scrollTop = output!.scrollHeight;
+  }
+
+  function printLine(text: string, cls = ''): void {
+    print(escapeHtml(text), cls);
+  }
+
+  function printPromptCmd(cmd: string): void {
+    print(`<span class="l-prompt">${prompt!.textContent}</span> <span class="l-cmd">${escapeHtml(cmd)}</span>`);
+  }
+
+  function clearOutput(): void {
+    output!.innerHTML = '';
+  }
+
+  // ── Banner ────────────────────────────────────────────────────────────
+  const BANNER = `
+   ╔═══════════════════════════════════════════════╗
+   ║                                               ║
+   ║      █████╗ ██╗     ██████╗ ███████╗██████╗   ║
+   ║     ██╔══██╗██║     ██╔══██╗██╔════╝██╔══██╗  ║
+   ║     ███████║██║     ██████╔╝█████╗  ██████╔╝  ║
+   ║     ██╔══██║██║     ██╔══██╗██╔══╝  ██╔══██╗  ║
+   ║     ██║  ██║███████╗██████╔╝███████╗██║  ██║  ║
+   ║     ╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝  ║
+   ║                                               ║
+   ║          .exe v2026 — Mulhouse, FR            ║
+   ╚═══════════════════════════════════════════════╝`;
+
+  function showBanner(): void {
+    print(`<span class="banner">${escapeHtml(BANNER)}</span>`);
+    print(
+      t(
+        `\nBienvenue sur le terminal d'Albert. Tape <span class="l-accent">help</span> pour la liste des commandes.\nAstuce&nbsp;: <span class="kbd">↑</span>/<span class="kbd">↓</span> pour l'historique, <span class="kbd">Tab</span> pour l'autocomplétion.\n`,
+        `\nWelcome to Albert's terminal. Type <span class="l-accent">help</span> for the command list.\nTip&nbsp;: <span class="kbd">↑</span>/<span class="kbd">↓</span> for history, <span class="kbd">Tab</span> for autocomplete.\n`,
+      ),
+      'l-info'
+    );
+  }
+
+  // ── Fake filesystem ───────────────────────────────────────────────────
+  const fs: Record<string, string> = {
+    'about.txt': t(
+      `Albert Lecomte — Concepteur Designer UI\nMulhouse, Alsace, France\nReconnu RQTH · disponible immédiatement\n\nDu prototypage Figma à l'intégration WordPress complète,\nje couvre toute la chaîne front-end avec un focus sur\nl'accessibilité (RGAA AAA) et la performance (Core Web Vitals).`,
+      `Albert Lecomte — UI Designer\nMulhouse, Alsace, France\nRQTH-recognised · available now\n\nFrom Figma prototyping to full WordPress integration,\nI cover the entire front-end chain with a focus on\naccessibility (WCAG AA) and performance (Core Web Vitals).`
+    ),
+    'contact.txt': t(
+      `Email   : albert.lecomte1989@gmail.com\nLieu    : Mulhouse, Alsace\nLangues : FR (natif), EN (pro)\nDispo   : du lundi au vendredi, réponse < 24h\n\nUtilise la commande "contact" pour ouvrir le formulaire.`,
+      `Email     : albert.lecomte1989@gmail.com\nLocation  : Mulhouse, Alsace\nLanguages : FR (native), EN (pro)\nAvailable : Mon-Fri, reply < 24h\n\nUse "contact" command to open the form.`
+    ),
+    'stack.txt': `Frontend : Astro 5 · TypeScript · Tailwind CSS v4 · WordPress\nBackend  : PHP / Symfony · MySQL · Node.js\nDesign   : Figma · Adobe XD · Photoshop · Illustrator\nTooling  : Git · Vercel · Plausible · EmailJS\nA11y     : RGAA 4.1 · WCAG 2.2 · axe-core`,
+    'cv.pdf': '[binary] — utilise la commande "cv" pour télécharger.',
+  };
+
+  // ── Commands ──────────────────────────────────────────────────────────
+  type CmdResult = void | Promise<void>;
+  const commands: Record<string, (args: string[]) => CmdResult> = {
+    help: () => {
+      const rows = [
+        ['help',                t('Affiche cette aide',                    'Show this help')],
+        ['ls [-la]',            t('Liste les fichiers',                    'List files')],
+        ['cat <fichier>',       t('Affiche un fichier',                    'Display a file')],
+        ['pwd',                 t('Répertoire courant',                    'Current directory')],
+        ['whoami',              t('Identité',                              'Identity')],
+        ['date',                t('Date et heure',                         'Date and time')],
+        ['echo <texte>',        t('Affiche le texte',                      'Print text')],
+        ['history',             t('Historique des commandes',              'Command history')],
+        ['clear / cls',         t('Efface l\'écran',                       'Clear screen')],
+        ['—',                   '—'],
+        ['projects [--filter]', t('Liste / ouvre les projets',             'List / open projects')],
+        ['skills',              t('Ouvre les compétences',                 'Open skills')],
+        ['experience',          t('Ouvre le parcours',                     'Open experience')],
+        ['contact',             t('Ouvre le formulaire de contact',        'Open contact form')],
+        ['cv',                  t('Télécharger le CV',                     'Download CV')],
+        ['hire',                t('Disponibilité d\'embauche',             'Hiring availability')],
+        ['quote',               t('Devis instantané (interactif)',         'Instant quote (interactive)')],
+        ['theme <nom>',         t('Change de thème (dark|light)',          'Switch theme (dark|light)')],
+        ['—',                   '—'],
+        ['konami',              '???'],
+        ['sudo …',              '???'],
+        ['exit / close',        t('Ferme le terminal',                     'Close the terminal')],
+      ];
+      for (const [cmd, desc] of rows) {
+        if (cmd === '—') { print(`<span class="l-info">${'─'.repeat(48)}</span>`); continue; }
+        print(`<span class="l-accent">${(cmd ?? '').padEnd(22)}</span><span class="l-info">${escapeHtml(desc ?? '')}</span>`);
+      }
+    },
+
+    ls: (args) => {
+      const long = args.includes('-la') || args.includes('-l') || args.includes('-a');
+      const files = ['about.txt', 'contact.txt', 'stack.txt', 'cv.pdf', 'projects/', 'skills/', 'experience/'];
+      if (long) {
+        print(`<span class="l-info">total ${files.length}</span>`);
+        for (const f of files) {
+          const isDir = f.endsWith('/');
+          const perm  = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
+          const size  = isDir ? '4096'       : Math.floor(Math.random() * 4000 + 200).toString();
+          print(`<span class="l-info">${perm}  albert albert  ${size.padStart(5)} 2026-05-06  </span><span class="${isDir ? 'l-accent' : ''}">${f}</span>`);
+        }
+      } else {
+        print(files.map(f => f.endsWith('/') ? `<span class="l-accent">${f}</span>` : f).join('  '));
+      }
+    },
+
+    cat: (args) => {
+      const file = args[0];
+      if (!file) return printLine(t('Usage : cat <fichier>', 'Usage: cat <file>'), 'l-err');
+      const content = fs[file];
+      if (content === undefined) return printLine(t(`cat : ${file} : fichier introuvable`, `cat: ${file}: no such file`), 'l-err');
+      printLine(content);
+    },
+
+    pwd: () => printLine('/home/albert'),
+
+    whoami: () => {
+      print(`<span class="l-accent">albert</span> — ${escapeHtml(t('Concepteur Designer UI', 'UI Designer'))}`);
+      print(`<span class="l-info">${escapeHtml(t('Mulhouse, Alsace · RQTH · disponible', 'Mulhouse, Alsace · RQTH · available'))}</span>`);
+    },
+
+    date: () => {
+      const d = new Date();
+      printLine(d.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US', { dateStyle: 'full', timeStyle: 'medium' }));
+    },
+
+    echo: (args) => printLine(args.join(' ')),
+
+    history: () => {
+      if (history.length === 0) return printLine(t('(aucun)', '(empty)'), 'l-info');
+      history.forEach((h, i) => print(`<span class="l-info">${String(i + 1).padStart(4)}</span>  ${escapeHtml(h)}`));
+    },
+
+    clear: () => clearOutput(),
+    cls:   () => clearOutput(),
+
+    projects: (args) => {
+      const filterIdx = args.indexOf('--filter');
+      const filter = filterIdx >= 0 ? args[filterIdx + 1] : undefined;
+      if (!filter) {
+        print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture de la fenêtre Projets…', 'Opening Projects window…'))}`);
+        setTimeout(() => openWindow('projects'), 250);
+        return;
+      }
+      print(`<span class="l-info">${escapeHtml(t(`Filtre actif : ${filter}`, `Active filter: ${filter}`))}</span>`);
+      print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture des projets filtrés…', 'Opening filtered projects…'))}`);
+      setTimeout(() => openWindow('projects'), 250);
+    },
+
+    skills:     () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture des compétences…', 'Opening skills…'))}`); setTimeout(() => openWindow('skills'), 250); },
+    experience: () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture du parcours…',     'Opening experience…'))}`); setTimeout(() => openWindow('experience'), 250); },
+    contact:    () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture du formulaire…',   'Opening contact form…'))}`); setTimeout(() => openWindow('contact'), 250); },
+
+    cv: () => {
+      print(`<span class="l-ok">↓</span> ${escapeHtml(t('Téléchargement du CV…', 'Downloading CV…'))}`);
+      const a = document.createElement('a');
+      a.href = '/cv/albert-lecomte-cv.pdf';
+      a.download = 'albert-lecomte-cv.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    },
+
+    hire: () => {
+      print(`<span class="l-ok">●</span> <span class="l-ok">${escapeHtml(t('Statut : DISPONIBLE', 'Status: AVAILABLE'))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Type recherché : agence WordPress / SEO, CDD, CDI, freelance', 'Looking for: WordPress / SEO agency, contract, full-time, freelance'))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Réponse sous 24h — tape "contact" pour m\'écrire.', 'Reply < 24h — type "contact" to message me.'))}</span>`);
+    },
+
+    theme: (args) => {
+      const t0 = args[0];
+      if (!t0) return printLine(t('Usage : theme <dark|light>', 'Usage: theme <dark|light>'), 'l-err');
+      if (t0 !== 'dark' && t0 !== 'light') return printLine(t(`Thème inconnu : ${t0}`, `Unknown theme: ${t0}`), 'l-err');
+      document.documentElement.setAttribute('data-theme', t0);
+      try { localStorage.setItem('theme', t0); } catch { /* ignore */ }
+      print(`<span class="l-ok">✓</span> ${escapeHtml(t(`Thème ${t0} appliqué.`, `Theme ${t0} applied.`))}`);
+    },
+
+    quote: () => {
+      mode = { kind: 'quote', step: 0, data: {} };
+      print(`<span class="l-accent">┌─ ${escapeHtml(t('Devis instantané', 'Instant quote'))} ─────────────────────────┐</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Tape "cancel" à tout moment pour annuler.', 'Type "cancel" anytime to cancel.'))}</span>`);
+      askQuoteStep();
+    },
+
+    sudo: () => {
+      print(`<span class="l-err">[sudo] ${escapeHtml(t('mot de passe pour albert :', 'password for albert:'))}</span>`);
+      print(`<span class="l-warn">${escapeHtml(t('Permission refusée. Albert n\'est pas root, c\'est un designer.', "Permission denied. Albert isn't root, he's a designer."))}</span>`);
+    },
+
+    konami: () => {
+      root!.classList.add('konami');
+      setTimeout(() => root!.classList.remove('konami'), 600);
+      print(`<span class="l-accent">${escapeHtml(t('↑ ↑ ↓ ↓ ← → ← → B A — Code Konami activé !', '↑ ↑ ↓ ↓ ← → ← → B A — Konami code activated!'))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('+99 vies. Bonne navigation.', '+99 lives. Have fun.'))}</span>`);
+    },
+
+    exit:  () => closeWindow('terminal'),
+    close: () => closeWindow('terminal'),
+
+    man: (args) => {
+      const c = args[0];
+      if (!c) return printLine(t('Quelle commande ?', 'Which command?'), 'l-err');
+      if (!commands[c]) return printLine(t(`Aucune entrée man pour ${c}`, `No manual entry for ${c}`), 'l-err');
+      print(`<span class="l-accent">NAME</span>\n  ${escapeHtml(c)} — ${escapeHtml(t('commande Albert.exe', 'Albert.exe command'))}\n\n<span class="l-accent">DESCRIPTION</span>\n  ${escapeHtml(t('Tape "help" pour la liste complète.', 'Type "help" for the full list.'))}\n`);
+    },
+
+    albert: () => commands['whoami']!([]),
+  };
+
+  // ── Quote flow ────────────────────────────────────────────────────────
+  const QUOTE_QUESTIONS = [
+    {
+      q: t('Type de projet ? (vitrine / ecommerce / wordpress / refonte / app)', 'Project type? (showcase / ecommerce / wordpress / rework / app)'),
+      validate: (v: string) => /^(vitrine|ecommerce|wordpress|wp|refonte|app|showcase|rework)$/i.test(v),
+      assign: (data: any, v: string) => { data.type = v.toLowerCase(); },
+    },
+    {
+      q: t('Nombre de pages ? (1-50)', 'Page count? (1-50)'),
+      validate: (v: string) => /^\d+$/.test(v) && +v >= 1 && +v <= 50,
+      assign: (data: any, v: string) => { data.pages = +v; },
+    },
+    {
+      q: t('Multi-langue ? (oui/non)', 'Multi-language? (yes/no)'),
+      validate: (v: string) => /^(oui|non|yes|no|y|n|o)$/i.test(v),
+      assign: (data: any, v: string) => { data.multilang = /^(oui|yes|y|o)$/i.test(v); },
+    },
+    {
+      q: t('Délai serré (< 4 semaines) ? (oui/non)', 'Rush (< 4 weeks)? (yes/no)'),
+      validate: (v: string) => /^(oui|non|yes|no|y|n|o)$/i.test(v),
+      assign: (data: any, v: string) => { data.rush = /^(oui|yes|y|o)$/i.test(v); },
+    },
+  ];
+
+  function askQuoteStep(): void {
+    if (mode.kind !== 'quote') return;
+    const q = QUOTE_QUESTIONS[mode.step];
+    if (!q) return finishQuote();
+    print(`<span class="l-accent">[${mode.step + 1}/${QUOTE_QUESTIONS.length}]</span> <span class="l-info">${escapeHtml(q.q)}</span>`);
+    prompt!.textContent = '?>';
+  }
+
+  function finishQuote(): void {
+    if (mode.kind !== 'quote') return;
+    const { type = '', pages = 1, multilang = false, rush = false } = mode.data;
+    const base: Record<string, [number, number]> = {
+      vitrine:   [1200, 2200],
+      showcase:  [1200, 2200],
+      wordpress: [1500, 3000],
+      wp:        [1500, 3000],
+      ecommerce: [3500, 7500],
+      refonte:   [1800, 3500],
+      rework:    [1800, 3500],
+      app:       [4500, 9000],
+    };
+    const range = base[type] ?? [2000, 4000];
+    const perPage = 150;
+    const extraPages = Math.max(0, pages - 5);
+    const langCoef = multilang ? 1.25 : 1;
+    const rushCoef = rush ? 1.30 : 1;
+    const min = Math.round(((range[0] ?? 0) + extraPages * perPage) * langCoef * rushCoef);
+    const max = Math.round(((range[1] ?? 0) + extraPages * perPage * 1.5) * langCoef * rushCoef);
+    const weeks = rush ? '3-4' : (pages <= 5 ? '4-6' : pages <= 15 ? '6-8' : '8-12');
+
+    print(`<span class="l-accent">└──────────────────────────────────────────────┘</span>`);
+    print('');
+    print(`<span class="l-ok">${escapeHtml(t('✓ Estimation calculée', '✓ Quote calculated'))}</span>`);
+    print('');
+    print(`  <span class="l-info">${escapeHtml(t('Type        :', 'Type        :'))}</span> ${escapeHtml(type)}`);
+    print(`  <span class="l-info">${escapeHtml(t('Pages       :', 'Pages       :'))}</span> ${pages}`);
+    print(`  <span class="l-info">${escapeHtml(t('Multi-langue:', 'Multi-lang  :'))}</span> ${multilang ? t('oui', 'yes') : t('non', 'no')}`);
+    print(`  <span class="l-info">${escapeHtml(t('Délai serré :', 'Rush        :'))}</span> ${rush ? t('oui (+30%)', 'yes (+30%)') : t('non', 'no')}`);
+    print('');
+    const fmt = (n: number) => n.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US');
+    print(`  <span class="l-accent">${escapeHtml(t('Estimation  :', 'Estimate    :'))}</span> <span class="l-ok">${fmt(min)} € — ${fmt(max)} €</span>`);
+    print(`  <span class="l-accent">${escapeHtml(t('Délai       :', 'Timeline    :'))}</span> ${weeks} ${escapeHtml(t('semaines', 'weeks'))}`);
+    print('');
+    print(`<span class="l-info">${escapeHtml(t('Estimation indicative — tape "contact" pour discuter.', 'Indicative — type "contact" to discuss.'))}</span>`);
+    print('');
+
+    mode = { kind: 'idle' };
+    prompt!.textContent = 'albert@portfolio:~$';
+  }
+
+  // ── Tab autocomplete ──────────────────────────────────────────────────
+  function autocomplete(value: string): string {
+    const trimmed = value.trimStart();
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 1) {
+      const matches = Object.keys(commands).filter(k => k.startsWith(parts[0] ?? ''));
+      if (matches.length === 1) return (matches[0] ?? '') + ' ';
+      if (matches.length > 1) {
+        print(`<span class="l-info">${matches.join('  ')}</span>`);
+        return value;
+      }
+      return value;
+    }
+    if (parts[0] === 'cat') {
+      const last = parts[parts.length - 1] ?? '';
+      const fileMatches = Object.keys(fs).filter(f => f.startsWith(last));
+      if (fileMatches.length === 1) {
+        parts[parts.length - 1] = fileMatches[0] ?? '';
+        return parts.join(' ');
+      }
+      if (fileMatches.length > 1) {
+        print(`<span class="l-info">${fileMatches.join('  ')}</span>`);
+      }
+    }
+    return value;
+  }
+
+  // ── Input handling ────────────────────────────────────────────────────
+  function handleSubmit(raw: string): void {
+    const value = raw.trim();
+    printPromptCmd(raw);
+
+    if (mode.kind === 'quote') {
+      if (value.toLowerCase() === 'cancel') {
+        print(`<span class="l-warn">${escapeHtml(t('Devis annulé.', 'Quote cancelled.'))}</span>`);
+        mode = { kind: 'idle' };
+        prompt!.textContent = 'albert@portfolio:~$';
+        return;
+      }
+      const q = QUOTE_QUESTIONS[mode.step];
+      if (!q) return finishQuote();
+      if (!q.validate(value)) {
+        print(`<span class="l-err">${escapeHtml(t('Réponse invalide. Réessaie.', 'Invalid answer. Try again.'))}</span>`);
+        askQuoteStep();
+        return;
+      }
+      q.assign(mode.data, value);
+      mode.step += 1;
+      askQuoteStep();
+      return;
+    }
+
+    if (!value) return;
+    history.push(value);
+    histIdx = history.length;
+
+    const [name, ...args] = value.split(/\s+/);
+    const cmd = (name ?? '').toLowerCase();
+    if (!cmd) return;
+
+    const fn = commands[cmd];
+    if (!fn) {
+      print(`<span class="l-err">${escapeHtml(t(`Commande inconnue : ${cmd}`, `Unknown command: ${cmd}`))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Tape "help" pour la liste.', 'Type "help" for the list.'))}</span>`);
+      return;
+    }
+    void fn(args);
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = input.value;
+    input.value = '';
+    handleSubmit(v);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') {
+      if (history.length === 0) return;
+      e.preventDefault();
+      histIdx = Math.max(0, histIdx - 1);
+      input.value = history[histIdx] ?? '';
+      requestAnimationFrame(() => input.setSelectionRange(input.value.length, input.value.length));
+    } else if (e.key === 'ArrowDown') {
+      if (history.length === 0) return;
+      e.preventDefault();
+      histIdx = Math.min(history.length, histIdx + 1);
+      input.value = history[histIdx] ?? '';
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      input.value = autocomplete(input.value);
+    } else if (e.key === 'l' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      clearOutput();
+    } else if (e.key === 'c' && e.ctrlKey) {
+      // Ctrl+C : cancel current input or quote
+      if (mode.kind === 'quote') {
+        e.preventDefault();
+        print(`<span class="l-warn">^C — ${escapeHtml(t('annulé', 'cancelled'))}</span>`);
+        mode = { kind: 'idle' };
+        prompt!.textContent = 'albert@portfolio:~$';
+        input.value = '';
+      } else if (input.value) {
+        e.preventDefault();
+        printPromptCmd(input.value + '^C');
+        input.value = '';
+      }
+    }
+  });
+
+  // Click anywhere in terminal → focus input
+  root.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('.l-link')) return;
+    input.focus();
+  });
+
+  // Show banner when window opens for the first time
+  let booted = false;
+  function bootIfNeeded(): void {
+    if (booted) return;
+    booted = true;
+    showBanner();
+  }
+
+  // Detect when terminal window is opened (its container goes from closed → open)
+  const winEl = document.getElementById('window-terminal');
+  if (winEl) {
+    const observer = new MutationObserver(() => {
+      if (!winEl.classList.contains('window--closed') && !winEl.classList.contains('window--minimized')) {
+        bootIfNeeded();
+        setTimeout(() => input.focus(), 80);
+      }
+    });
+    observer.observe(winEl, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // Boot immediately if window already visible
+  if (winEl && !winEl.classList.contains('window--closed')) bootIfNeeded();
+})();
+</script>

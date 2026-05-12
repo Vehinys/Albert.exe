@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import BootScreen from '../components/os/BootScreen.astro';
 import Desktop from '../components/os/Desktop.astro';
 import Taskbar from '../components/os/Taskbar.astro';
+import Spotlight from '../components/os/Spotlight.astro';
 import Window from '../components/os/Window.astro';
 import AboutWindow from '../components/windows/AboutWindow.astro';
 import ProjectsWindow from '../components/windows/ProjectsWindow.astro';
@@ -11,6 +12,7 @@ import ExperienceWindow from '../components/windows/ExperienceWindow.astro';
 import VolunteerWindow from '../components/windows/VolunteerWindow.astro';
 import HobbiesWindow from '../components/windows/HobbiesWindow.astro';
 import ContactWindow from '../components/windows/ContactWindow.astro';
+import TerminalWindow from '../components/windows/TerminalWindow.astro';
 import MentionsLegalesWindow from '../components/windows/MentionsLegalesWindow.astro';
 import PolitiqueWindow from '../components/windows/PolitiqueWindow.astro';
 import Header from '../components/layout/Header.astro';
@@ -45,6 +47,9 @@ const alternateLangPath = getAlternateLangPath(Astro.url);
     <!-- Taskbar at bottom -->
     <Taskbar lang={lang} alternateLangPath={alternateLangPath} />
 
+    <!-- Spotlight (Ctrl+K) -->
+    <Spotlight lang={lang} />
+
     <!-- All windows in DOM, hidden by default -->
     <Window id="about" title="À propos" icon="👤" defaultX={120} defaultY={80} defaultWidth={680} defaultHeight={520}>
       <AboutWindow lang={lang} />
@@ -72,6 +77,10 @@ const alternateLangPath = getAlternateLangPath(Astro.url);
 
     <Window id="contact" title="Contact" icon="📧" defaultX={160} defaultY={85} defaultWidth={660} defaultHeight={540}>
       <ContactWindow lang={lang} />
+    </Window>
+
+    <Window id="terminal" title="Terminal" icon="💻" defaultX={240} defaultY={120} defaultWidth={760} defaultHeight={520}>
+      <TerminalWindow lang={lang} />
     </Window>
 
     <Window id="mentions-legales" title="Mentions légales" icon="⚖️" defaultX={200} defaultY={100} defaultWidth={580} defaultHeight={480}>
@@ -112,6 +121,7 @@ const windows = [
   { id: 'volunteer',  title: 'Bénévolat',     icon: '🤝' },
   { id: 'hobbies',    title: 'Passions',      icon: '🎮' },
   { id: 'contact',           title: 'Contact',                       icon: '📧' },
+  { id: 'terminal',          title: 'Terminal',                      icon: '💻' },
   { id: 'mentions-legales', title: 'Mentions légales',              icon: '⚖️' },
   { id: 'politique',        title: 'Politique de confidentialité',  icon: '🔒' },
 ] as const;

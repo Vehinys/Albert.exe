@@ -1,0 +1,567 @@
+---
+import { getCollection } from 'astro:content';
+import type { Lang } from '../../i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+// ── Build search index at build time ────────────────────────────────────────
+type SearchItem = {
+  id: string;
+  type: 'window' | 'project' | 'skill' | 'action';
+  title: string;
+  subtitle: string;
+  icon: string;
+  /** Action — one of: open:<windowId> | download:cv | theme:<name> | url:<href> */
+  action: string;
+  keywords: string;
+};
+
+const projects = await getCollection('projects');
+const skillsData = (await getCollection('skills'))[0]?.data ?? [];
+
+const windowItems: SearchItem[] = [
+  { id: 'w-about',      type: 'window', title: lang === 'fr' ? 'À propos'   : 'About',      subtitle: lang === 'fr' ? 'Présentation, parcours rapide' : 'Bio, quick overview',      icon: '👤',  action: 'open:about',      keywords: 'about bio profile presentation albert' },
+  { id: 'w-projects',   type: 'window', title: lang === 'fr' ? 'Projets'    : 'Projects',   subtitle: lang === 'fr' ? 'Mes dernières réalisations'    : 'My latest work',             icon: '📁',  action: 'open:projects',   keywords: 'projects realisations work portfolio' },
+  { id: 'w-skills',     type: 'window', title: lang === 'fr' ? 'Compétences': 'Skills',     subtitle: lang === 'fr' ? 'Stack technique et outils'      : 'Tech stack and tools',       icon: '🛠️',  action: 'open:skills',     keywords: 'skills stack competences tools tech' },
+  { id: 'w-experience', type: 'window', title: lang === 'fr' ? 'Expérience' : 'Experience', subtitle: lang === 'fr' ? 'Parcours professionnel'         : 'Professional journey',       icon: '💼',  action: 'open:experience', keywords: 'experience parcours work history cv' },
+  { id: 'w-volunteer',  type: 'window', title: lang === 'fr' ? 'Bénévolat'  : 'Volunteer',  subtitle: lang === 'fr' ? 'Engagement associatif'          : 'Community involvement',      icon: '🤝',  action: 'open:volunteer',  keywords: 'volunteer benevolat engagement community' },
+  { id: 'w-hobbies',    type: 'window', title: lang === 'fr' ? 'Passions'   : 'Hobbies',    subtitle: lang === 'fr' ? 'Centres d\'intérêt'             : 'Personal interests',         icon: '🎮',  action: 'open:hobbies',    keywords: 'hobbies passions interests' },
+  { id: 'w-contact',    type: 'window', title: 'Contact',                                    subtitle: lang === 'fr' ? 'Formulaire de contact'          : 'Contact form',               icon: '📧',  action: 'open:contact',    keywords: 'contact email message form' },
+  { id: 'w-terminal',   type: 'window', title: 'Terminal',                                   subtitle: lang === 'fr' ? 'Mode interactif'                : 'Interactive shell',          icon: '💻',  action: 'open:terminal',   keywords: 'terminal shell cli console' },
+];
+
+const projectItems: SearchItem[] = projects
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((p) => ({
+    id: `p-${p.id}`,
+    type: 'project' as const,
+    title: p.data.title,
+    subtitle: lang === 'fr' ? p.data.description : p.data.descriptionEn,
+    icon: '📦',
+    action: 'open:projects',
+    keywords: `${p.data.title} ${p.data.tags.join(' ')} ${p.data.category} project`,
+  }));
+
+const skillItems: SearchItem[] = skillsData.map((s) => ({
+  id: `s-${s.name}`,
+  type: 'skill' as const,
+  title: s.name,
+  subtitle: lang === 'fr' ? `Compétence Design — niveau ${s.level}/5` : `Design skill — level ${s.level}/5`,
+  icon: s.icon || '✨',
+  action: 'open:skills',
+  keywords: `${s.name} skill design`,
+}));
+
+const actionItems: SearchItem[] = [
+  { id: 'a-cv',           type: 'action', title: lang === 'fr' ? 'Télécharger le CV'      : 'Download CV',          subtitle: 'PDF · 1 page',                                                              icon: '📄', action: 'download:cv',     keywords: 'cv download resume pdf' },
+  { id: 'a-theme-dark',   type: 'action', title: lang === 'fr' ? 'Thème sombre'           : 'Dark theme',           subtitle: lang === 'fr' ? 'Activer l\'apparence sombre' : 'Switch to dark appearance', icon: '🌙', action: 'theme:dark',      keywords: 'dark theme night sombre' },
+  { id: 'a-theme-light',  type: 'action', title: lang === 'fr' ? 'Thème clair'            : 'Light theme',          subtitle: lang === 'fr' ? 'Activer l\'apparence claire' : 'Switch to light appearance', icon: '☀️', action: 'theme:light',     keywords: 'light theme day clair' },
+  { id: 'a-mentions',     type: 'action', title: lang === 'fr' ? 'Mentions légales'       : 'Legal notice',         subtitle: lang === 'fr' ? 'Informations éditeur'       : 'Publisher information',     icon: '⚖️',  action: 'open:mentions-legales', keywords: 'legal mentions notice' },
+  { id: 'a-privacy',      type: 'action', title: lang === 'fr' ? 'Politique de confidentialité' : 'Privacy policy', subtitle: lang === 'fr' ? 'Données personnelles'        : 'Personal data',              icon: '🔒', action: 'open:politique',  keywords: 'privacy policy rgpd gdpr' },
+  { id: 'a-lang',         type: 'action', title: lang === 'fr' ? 'Switch to English'      : 'Passer en français',   subtitle: lang === 'fr' ? 'Change la langue du site'   : 'Change site language',      icon: '🌐', action: lang === 'fr' ? 'url:/en' : 'url:/', keywords: 'language lang fr en' },
+];
+
+const allItems: SearchItem[] = [...windowItems, ...projectItems, ...skillItems, ...actionItems];
+
+const placeholder  = lang === 'fr' ? 'Rechercher fenêtres, projets, compétences…' : 'Search windows, projects, skills…';
+const ariaLabel    = lang === 'fr' ? 'Recherche rapide'                            : 'Quick search';
+const emptyHint    = lang === 'fr' ? 'Aucun résultat'                              : 'No results';
+const openHint     = lang === 'fr' ? 'pour ouvrir'                                 : 'to open';
+const navigateHint = lang === 'fr' ? 'pour naviguer'                                : 'to navigate';
+const closeHint    = lang === 'fr' ? 'pour fermer'                                  : 'to close';
+---
+
+<div
+  id="spotlight"
+  class="spotlight"
+  role="dialog"
+  aria-label={ariaLabel}
+  aria-modal="true"
+  hidden
+>
+  <div class="spotlight__backdrop" data-spotlight-close></div>
+
+  <div class="spotlight__panel" role="combobox" aria-haspopup="listbox" aria-expanded="true" aria-controls="spotlight-results">
+    <div class="spotlight__searchbar">
+      <span class="spotlight__icon" aria-hidden="true">⌕</span>
+      <input
+        id="spotlight-input"
+        class="spotlight__input"
+        type="text"
+        placeholder={placeholder}
+        aria-label={placeholder}
+        aria-autocomplete="list"
+        aria-controls="spotlight-results"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <kbd class="spotlight__esc" aria-hidden="true">esc</kbd>
+    </div>
+
+    <ul
+      id="spotlight-results"
+      class="spotlight__results"
+      role="listbox"
+      aria-label={ariaLabel}
+    ></ul>
+
+    <div class="spotlight__hints" aria-hidden="true">
+      <span><kbd>↑↓</kbd> {navigateHint}</span>
+      <span><kbd>↵</kbd> {openHint}</span>
+      <span><kbd>esc</kbd> {closeHint}</span>
+    </div>
+  </div>
+</div>
+
+<script id="spotlight-data" type="application/json" set:html={JSON.stringify(allItems)} />
+
+<style>
+.spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+}
+
+.spotlight[hidden] { display: none; }
+
+.spotlight__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 4, 9, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: spot-fade 0.15s ease;
+}
+
+.spotlight__panel {
+  position: relative;
+  width: min(640px, calc(100vw - 2rem));
+  background: rgba(12, 8, 24, 0.96);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.875rem;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(139, 92, 246, 0.08);
+  overflow: hidden;
+  animation: spot-pop 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  max-height: min(72vh, 560px);
+}
+
+@keyframes spot-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes spot-pop  {
+  from { opacity: 0; transform: translateY(-8px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight__backdrop, .spotlight__panel { animation: none; }
+}
+
+.spotlight__searchbar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.spotlight__icon {
+  font-size: 1.25rem;
+  color: #A78BFA;
+  flex-shrink: 0;
+}
+
+.spotlight__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #FAF5FF;
+  font-size: 1rem;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.spotlight__input::placeholder { color: rgba(250, 245, 255, 0.4); }
+
+.spotlight__esc {
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 0.65rem;
+  color: rgba(250, 245, 255, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.4rem;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.spotlight__results {
+  list-style: none;
+  margin: 0;
+  padding: 0.375rem;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+}
+
+.spotlight__results::-webkit-scrollbar { width: 6px; }
+.spotlight__results::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 3px; }
+
+.spotlight__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.1s ease;
+  min-width: 0;
+}
+
+.spotlight__item:hover,
+.spotlight__item--active {
+  background: rgba(139, 92, 246, 0.18);
+}
+
+.spotlight__item--active {
+  outline: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.spotlight__item-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  width: 1.75rem;
+  text-align: center;
+}
+
+.spotlight__item-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.spotlight__item-title {
+  color: #FAF5FF;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotlight__item-sub {
+  color: rgba(250, 245, 255, 0.5);
+  font-size: 0.75rem;
+  margin: 0.1rem 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotlight__item-type {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+  color: #A78BFA;
+  background: rgba(139, 92, 246, 0.12);
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+.spotlight__item-type[data-type="project"] { color: #4ade80; background: rgba(74, 222, 128, 0.12); }
+.spotlight__item-type[data-type="skill"]   { color: #F59E0B; background: rgba(245, 158, 11, 0.12); }
+.spotlight__item-type[data-type="action"]  { color: #60A5FA; background: rgba(96, 165, 250, 0.12); }
+
+.spotlight__empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: rgba(250, 245, 255, 0.4);
+  font-size: 0.8125rem;
+}
+
+.spotlight__hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-top: 1px solid rgba(139, 92, 246, 0.12);
+  font-size: 0.7rem;
+  color: rgba(250, 245, 255, 0.45);
+}
+
+.spotlight__hints kbd {
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 0.65rem;
+  color: rgba(250, 245, 255, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 0.2rem;
+  padding: 0.05rem 0.35rem;
+  margin-right: 0.25rem;
+}
+
+@media (max-width: 480px) {
+  .spotlight { padding-top: 6vh; }
+  .spotlight__panel { width: calc(100vw - 1rem); }
+  .spotlight__hints { display: none; }
+  .spotlight__item-type { display: none; }
+  .spotlight__item-sub { display: none; }
+}
+
+/* First-visit hint toast */
+.spotlight-toast {
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1400;
+  background: rgba(12, 8, 24, 0.95);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.625rem 1rem;
+  color: #FAF5FF;
+  font-size: 0.8125rem;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: spot-toast-in 0.4s ease, spot-toast-out 0.4s ease 5s forwards;
+}
+
+.spotlight-toast kbd {
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 0.7rem;
+  color: #C4B5FD;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.4rem;
+}
+
+@keyframes spot-toast-in  { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes spot-toast-out { to { opacity: 0; transform: translate(-50%, 12px); pointer-events: none; } }
+</style>
+
+<script>
+import { open as openWindow } from '../../utils/window-manager';
+
+(function () {
+  const spotlight = document.getElementById('spotlight') as HTMLElement | null;
+  const input     = document.getElementById('spotlight-input') as HTMLInputElement | null;
+  const results   = document.getElementById('spotlight-results') as HTMLUListElement | null;
+  const dataEl    = document.getElementById('spotlight-data') as HTMLScriptElement | null;
+  if (!spotlight || !input || !results || !dataEl) return;
+
+  type Item = {
+    id: string;
+    type: 'window' | 'project' | 'skill' | 'action';
+    title: string;
+    subtitle: string;
+    icon: string;
+    action: string;
+    keywords: string;
+  };
+
+  let items: Item[] = [];
+  try { items = JSON.parse(dataEl.textContent ?? '[]') as Item[]; }
+  catch { items = []; }
+
+  let active = 0;
+  let filtered: Item[] = [...items];
+
+  // ── Open / close ─────────────────────────────────────────────────────
+  function openSpotlight(): void {
+    spotlight.hidden = false;
+    input.value = '';
+    filtered = [...items];
+    active = 0;
+    render();
+    requestAnimationFrame(() => input.focus());
+  }
+
+  function closeSpotlight(): void {
+    spotlight.hidden = true;
+  }
+
+  // ── Search (substring + simple scoring) ───────────────────────────────
+  function normalize(s: string): string {
+    return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
+  function search(query: string): void {
+    const q = normalize(query.trim());
+    if (!q) {
+      filtered = [...items];
+    } else {
+      const tokens = q.split(/\s+/);
+      const scored = items
+        .map((it) => {
+          const hay = normalize(`${it.title} ${it.subtitle} ${it.keywords}`);
+          let score = 0;
+          for (const tok of tokens) {
+            if (!hay.includes(tok)) return null;
+            // Bonus if token starts the title
+            if (normalize(it.title).startsWith(tok)) score += 10;
+            // Bonus if word boundary
+            if (new RegExp(`\\b${tok}`).test(hay)) score += 5;
+            score += 1;
+          }
+          return { it, score };
+        })
+        .filter((x): x is { it: Item; score: number } => x !== null)
+        .sort((a, b) => b.score - a.score);
+      filtered = scored.map((s) => s.it);
+    }
+    active = 0;
+    render();
+  }
+
+  // ── Render ───────────────────────────────────────────────────────────
+  function escape(s: string): string {
+    return s.replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c] ?? c));
+  }
+
+  function render(): void {
+    if (filtered.length === 0) {
+      results!.innerHTML = `<li class="spotlight__empty" role="option" aria-selected="false">${input!.value ? 'Aucun résultat' : '…'}</li>`;
+      return;
+    }
+    results!.innerHTML = filtered.slice(0, 50).map((it, i) => `
+      <li
+        class="spotlight__item${i === active ? ' spotlight__item--active' : ''}"
+        role="option"
+        aria-selected="${i === active}"
+        data-idx="${i}"
+      >
+        <span class="spotlight__item-icon" aria-hidden="true">${escape(it.icon)}</span>
+        <div class="spotlight__item-text">
+          <p class="spotlight__item-title">${escape(it.title)}</p>
+          <p class="spotlight__item-sub">${escape(it.subtitle)}</p>
+        </div>
+        <span class="spotlight__item-type" data-type="${it.type}">${it.type}</span>
+      </li>
+    `).join('');
+  }
+
+  // ── Activation ───────────────────────────────────────────────────────
+  function activate(item: Item): void {
+    closeSpotlight();
+    const [verb, arg] = item.action.split(':');
+    if (verb === 'open' && arg) {
+      openWindow(arg);
+    } else if (verb === 'download' && arg === 'cv') {
+      const a = document.createElement('a');
+      a.href = '/cv/albert-lecomte-cv.pdf';
+      a.download = 'albert-lecomte-cv.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else if (verb === 'theme' && arg) {
+      document.documentElement.setAttribute('data-theme', arg);
+      try { localStorage.setItem('theme', arg); } catch { /* ignore */ }
+    } else if (verb === 'url' && arg) {
+      window.location.href = arg;
+    }
+  }
+
+  // ── Events ───────────────────────────────────────────────────────────
+  input.addEventListener('input', () => search(input.value));
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      active = Math.min(filtered.length - 1, active + 1);
+      render();
+      scrollActiveIntoView();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      active = Math.max(0, active - 1);
+      render();
+      scrollActiveIntoView();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const item = filtered[active];
+      if (item) activate(item);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSpotlight();
+    }
+  });
+
+  results.addEventListener('click', (e) => {
+    const li = (e.target as HTMLElement).closest<HTMLElement>('.spotlight__item');
+    if (!li) return;
+    const idx = Number(li.dataset['idx']);
+    const item = filtered[idx];
+    if (item) activate(item);
+  });
+
+  results.addEventListener('mousemove', (e) => {
+    const li = (e.target as HTMLElement).closest<HTMLElement>('.spotlight__item');
+    if (!li) return;
+    const idx = Number(li.dataset['idx']);
+    if (idx !== active) {
+      active = idx;
+      render();
+    }
+  });
+
+  spotlight.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    if (t.dataset['spotlightClose'] !== undefined || t.classList.contains('spotlight__backdrop')) {
+      closeSpotlight();
+    }
+  });
+
+  function scrollActiveIntoView(): void {
+    const el = results!.querySelector<HTMLElement>('.spotlight__item--active');
+    el?.scrollIntoView({ block: 'nearest' });
+  }
+
+  // ── Global hotkey ────────────────────────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    const isMeta = e.metaKey || e.ctrlKey;
+    if (isMeta && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      if (spotlight.hidden) openSpotlight(); else closeSpotlight();
+      return;
+    }
+    if (e.key === '/' && !spotlight.hidden) return;
+    if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+      // Slash to open (only if not typing somewhere)
+      e.preventDefault();
+      openSpotlight();
+    }
+  });
+
+  // ── First-visit toast ────────────────────────────────────────────────
+  const TOAST_KEY = 'spotlight-hint-shown-v1';
+  let toastShown = false;
+  try { toastShown = localStorage.getItem(TOAST_KEY) === '1'; } catch { /* ignore */ }
+
+  if (!toastShown) {
+    setTimeout(() => {
+      const isMac = /Mac|iPhone|iPad/i.test(navigator.platform);
+      const toast = document.createElement('div');
+      toast.className = 'spotlight-toast';
+      toast.setAttribute('role', 'status');
+      toast.innerHTML = `<span aria-hidden="true">🔍</span> <span>Appuie sur <kbd>${isMac ? '⌘' : 'Ctrl'}</kbd> <kbd>K</kbd> pour la recherche rapide</span>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5500);
+      try { localStorage.setItem(TOAST_KEY, '1'); } catch { /* ignore */ }
+    }, 4500);
+  }
+})();
+</script>
