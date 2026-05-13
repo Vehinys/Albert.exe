@@ -1,0 +1,11 @@
+{
+  "title": "Refonte site web — Businet.org",
+  "category": "wordpress",
+  "image": "/images/Albert.webp",
+  "description": "Refonte complète du site web de Businet.org dans le cadre d'un stage chez NAPOCOM. Restructuration de l'architecture de navigation, optimisation de l'expérience utilisateur et de l'interface, configuration avancée de WordPress.",
+  "descriptionEn": "Complete redesign of the Businet.org website during an internship at NAPOCOM. Navigation architecture restructuring, UX and interface optimization, advanced WordPress configuration.",
+  "tags": ["WordPress", "CSS", "UX/UI"],
+  "url": "https://www.businet.org",
+  "featured": true,
+  "order": 1
+}

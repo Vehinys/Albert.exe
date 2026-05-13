@@ -495,6 +495,28 @@ const ramLabel   = lang === 'fr' ? 'Formations diplômantes'               : 'De
   margin: 0;
 }
 
+/* Curseur terminal clignotant sur la dernière ligne de bio */
+.about-desc__body p:last-child::after {
+  content: '_';
+  color: var(--color-acid-green);
+  font-family: var(--font-family-mono);
+  font-weight: 700;
+  margin-left: 1px;
+  animation: about-cursor 1s step-end infinite;
+}
+
+@keyframes about-cursor {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-desc__body p:last-child::after {
+    animation: none;
+    content: '';
+  }
+}
+
 /* ── Hardware specs ────────────────────────────────────────────── */
 .about-specs {
   display: flex;

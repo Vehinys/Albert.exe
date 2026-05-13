@@ -92,10 +92,10 @@
 
   --section-padding: clamp(4rem, 8vw, 8rem);
 
-  /* === PALETTE NEON (sections classiques) === */
-  --color-acid-green:    #CCFF00;
+  /* === PALETTE TERMINAL / INFRA === */
+  --color-acid-green:    #22d3ee;   /* cyan terminal */
   --color-neon-pink:     #FF0099;
-  --color-electric-cyan: #00E5FF;
+  --color-electric-cyan: #4ade80;   /* vert terminal */
 
   /* === ANIMATIONS CUSTOM PROPERTIES === */
   --animate-float:    float 8s ease-in-out infinite;
@@ -143,10 +143,10 @@
   --glass-border-hover: #5B21B6;
   --glass-shadow:       0 8px 32px rgba(46, 16, 101, 0.12);
 
-  /* === NEON ADAPTÉ — lisibles sur fond clair === */
-  --color-acid-green:    #3D7A00;
+  /* === TERMINAL / INFRA — lisibles sur fond clair === */
+  --color-acid-green:    #0e7490;   /* cyan foncé AAA */
   --color-neon-pink:     #9D0060;
-  --color-electric-cyan: #006B7A;
+  --color-electric-cyan: #166534;   /* vert foncé AAA */
 }
 
 /* ================================================

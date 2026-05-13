@@ -1,4 +1,4 @@
-﻿---
+---
 import type { Lang } from '../../i18n/utils';
 
 interface Props {
@@ -32,7 +32,7 @@ const { lang } = Astro.props;
   height: 100%;
   background: #050409;
   color: #4ade80;
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', Courier, monospace;
   font-size: 0.8125rem;
   line-height: 1.55;
   overflow: hidden;
@@ -141,9 +141,13 @@ const { lang } = Astro.props;
 }
 .term__output :global(.l-link:hover) { color: #93C5FD; }
 .term__output :global(.banner)     {
-  color: #A78BFA;
-  text-shadow: 0 0 12px rgba(167, 139, 250, 0.5);
+  /* Police robuste pour l'ASCII art — compatibilite Chrome/Firefox */
+  font-family: 'Courier New', Courier, 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  color: #4ade80;
+  text-shadow: 0 0 12px rgba(74, 222, 128, 0.45);
   display: block;
+  white-space: pre;
+  line-height: 1.4;
 }
 .term__output :global(.kbd)        {
   background: rgba(167, 139, 250, 0.15);
@@ -222,92 +226,150 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
     output!.innerHTML = '';
   }
 
-  // ── Banner ────────────────────────────────────────────────────────────
-  const BANNER = `
-   ╔═══════════════════════════════════════════════╗
-   ║                                               ║
-   ║      █████╗ ██╗     ██████╗ ███████╗██████╗   ║
-   ║     ██╔══██╗██║     ██╔══██╗██╔════╝██╔══██╗  ║
-   ║     ███████║██║     ██████╔╝█████╗  ██████╔╝  ║
-   ║     ██╔══██║██║     ██╔══██╗██╔══╝  ██╔══██╗  ║
-   ║     ██║  ██║███████╗██████╔╝███████╗██║  ██║  ║
-   ║     ╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝╚═╝  ╚═╝  ║
-   ║                                               ║
-   ║          .exe v2026 — Mulhouse, FR            ║
-   ╚═══════════════════════════════════════════════╝`;
+  // ── ASCII Banner — pur ASCII, compatible Chrome/Firefox ──────────────
+  const BANNER = `+------------------------------------------------------+
+|                                                      |
+|   ###    ##      ######   #######  ######  #######   |
+|  ## ##   ##      ##   ##  ##       ##   ##   ##      |
+| ##   ##  ##      ##   ##  ##       ##   ##   ##      |
+| #######  ##      ######   #####    ######    ##      |
+| ##   ##  ##      ##  ##   ##       ##  ##    ##      |
+| ##   ##  #####   ######   #######  ##   ##   ##      |
+|                                                      |
+|        .exe v2026  --  Mulhouse, FR                  |
++------------------------------------------------------+`;
 
   function showBanner(): void {
     print(`<span class="banner">${escapeHtml(BANNER)}</span>`);
     print(
       t(
-        `\nBienvenue sur le terminal d'Albert. Tape <span class="l-accent">help</span> pour la liste des commandes.\nAstuce&nbsp;: <span class="kbd">↑</span>/<span class="kbd">↓</span> pour l'historique, <span class="kbd">Tab</span> pour l'autocomplétion.\n`,
-        `\nWelcome to Albert's terminal. Type <span class="l-accent">help</span> for the command list.\nTip&nbsp;: <span class="kbd">↑</span>/<span class="kbd">↓</span> for history, <span class="kbd">Tab</span> for autocomplete.\n`,
+        `\nBienvenue. Tape <span class="l-accent">help</span> pour les commandes disponibles.\nAstuce&nbsp;: <span class="kbd">Tab</span> pour l'autocompletion, <span class="kbd">↑</span>/<span class="kbd">↓</span> pour l'historique.\n`,
+        `\nWelcome. Type <span class="l-accent">help</span> for available commands.\nTip&nbsp;: <span class="kbd">Tab</span> for autocomplete, <span class="kbd">↑</span>/<span class="kbd">↓</span> for history.\n`,
       ),
       'l-info'
     );
   }
 
+  // ── Sequence de boot ──────────────────────────────────────────────────
+  function showBoot(): void {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const bootLines: Array<{ text: string; cls: string; delay: number }> = [
+      { text: '[    0.000000] Linux version 6.1.0-albert SMP (gcc version 12.2.0)', cls: 'l-info', delay: 0 },
+      { text: '[    0.156000] Command line: BOOT_IMAGE=/vmlinuz root=/dev/sda1 ro quiet', cls: 'l-info', delay: 130 },
+      { text: '[  OK  ] Loading kernel modules...', cls: 'l-ok', delay: 300 },
+      { text: '[  OK  ] Mounting /dev/sda1 (ext4)...', cls: 'l-ok', delay: 480 },
+      { text: '[  OK  ] Starting network services...', cls: 'l-ok', delay: 640 },
+      { text: '[  OK  ] SSH daemon started on port 22', cls: 'l-ok', delay: 780 },
+      { text: '[  OK  ] Firewall (ufw) active.', cls: 'l-ok', delay: 890 },
+      { text: '', cls: 'l-info', delay: 970 },
+      { text: t('Welcome to albert-exe v2026 (Debian 13 "Trixie")', 'Welcome to albert-exe v2026 (Debian 13 "Trixie")'), cls: 'l-accent', delay: 1020 },
+    ];
+
+    if (reduced) {
+      for (const line of bootLines) printLine(line.text, line.cls);
+      showBanner();
+      return;
+    }
+
+    for (const line of bootLines) {
+      setTimeout(() => printLine(line.text, line.cls), line.delay);
+    }
+    setTimeout(showBanner, 1200);
+  }
+
   // ── Fake filesystem ───────────────────────────────────────────────────
   const fs: Record<string, string> = {
     'about.txt': t(
-      `Albert Lecomte — En reconversion AIS\nMulhouse, Alsace, France\nReconnu RQTH · alternance AIS recherchée\n\nVenu du web et du design UI, un module infra a tout changé : VMware, Debian, SSH, MariaDB.\nAdmis en formation AIS au GRETA Colmar, je cherche une alternance\ndans le Haut-Rhin. Atout : je comprends le code ET les systèmes.`,
-      `Albert Lecomte — UI Designer\nMulhouse, Alsace, France\nRQTH-recognised · available now\n\nFrom web & UI design, an infra module changed everything: VMware, Debian, SSH, MariaDB.\nAdmitted to AIS training at GRETA Colmar, seeking apprenticeship\nin Haut-Rhin. Bonus: I understand code AND systems.`
+      `Albert Lecomte -- Reconversion AIS\nMulhouse, Alsace, France\nReconnu RQTH · alternance AIS recherchee dans le Haut-Rhin (68)\n\nVenu du web et du design UI, un module infra a tout change :\nVMware, Debian 13, SSH, MariaDB.\nAdmis en formation AIS au GRETA Colmar (rentree 2026).\nAtout rare : je comprends le code ET les systemes.`,
+      `Albert Lecomte -- AIS Career Transition\nMulhouse, Alsace, France\nRQTH-recognised · seeking AIS apprenticeship in Haut-Rhin (68)\n\nFrom web & UI design, an infra module changed everything:\nVMware, Debian 13, SSH, MariaDB.\nAdmitted to AIS training at GRETA Colmar (fall 2026).\nRare advantage: I understand both code AND systems.`
     ),
+    'competences.txt': t(
+      `=== COMPETENCES TECHNIQUES ===\n\nINFRASTRUCTURE\n  Linux/Debian     [########--]  Avance\n  VMware vSphere   [######----]  Intermediaire\n  SSH/OpenSSH      [########--]  Avance\n  MariaDB/MySQL    [######----]  Intermediaire\n  Windows Server   [######----]  Intermediaire\n  Docker           [#####-----]  Debutant+\n\nDEVELOPPEMENT WEB\n  Astro 5          [#########-]  Avance\n  TypeScript       [########--]  Avance\n  Tailwind CSS v4  [#########-]  Avance\n  WordPress        [##########]  Expert\n  PHP/Symfony      [######----]  Intermediaire\n\nDESIGN\n  Figma            [##########]  Expert\n  Adobe XD         [########--]  Avance\n  Photoshop        [########--]  Avance`,
+      `=== TECHNICAL SKILLS ===\n\nINFRASTRUCTURE\n  Linux/Debian     [########--]  Advanced\n  VMware vSphere   [######----]  Intermediate\n  SSH/OpenSSH      [########--]  Advanced\n  MariaDB/MySQL    [######----]  Intermediate\n  Windows Server   [######----]  Intermediate\n  Docker           [#####-----]  Beginner+\n\nWEB DEVELOPMENT\n  Astro 5          [#########-]  Advanced\n  TypeScript       [########--]  Advanced\n  Tailwind CSS v4  [#########-]  Advanced\n  WordPress        [##########]  Expert\n  PHP/Symfony      [######----]  Intermediate\n\nDESIGN\n  Figma            [##########]  Expert\n  Adobe XD         [########--]  Advanced\n  Photoshop        [########--]  Advanced`
+    ),
+    'formations.txt': t(
+      `=== FORMATIONS DIPLOMANTES ===\n\n[EN COURS]\nAIS -- Administration d'Infrastructures Securisees (Niv. 5)\nGRETA CFA Alsace -- Colmar | Rentree 2026\n>> Alternance recherchee dans le Haut-Rhin (68)\n\n[ACQUIS 2026]\nCDUI -- Concepteur Designer UI (Niv. 6)\nGRETA Alsace Sud\nModule infra inclus : VMware/Debian 13, SSH, MariaDB\n\n[ACQUIS 2024]\nDeveloppeur Web & Mobile (Niv. 5)\nElan Formation\n\n[ACQUIS 2023]\nInfographiste Metteur en Page (Niv. 4)\nGRETA Sud Alsace\n\n[ACQUIS 2006]\nTitre Pro. Vendeur Conseil (Niv. 4)\nCEFA Saint-Anne (Belgique)`,
+      `=== ACADEMIC BACKGROUND ===\n\n[IN PROGRESS]\nAIS -- Secure Infrastructure Administration (L. 5)\nGRETA CFA Alsace -- Colmar | Fall 2026\n>> Seeking apprenticeship in Haut-Rhin (68)\n\n[OBTAINED 2026]\nCDUI -- UI Designer Conceptor (L. 6)\nGRETA Alsace Sud\nInfra module: VMware/Debian 13, SSH, MariaDB\n\n[OBTAINED 2024]\nWeb & Mobile Developer (L. 5)\nElan Formation\n\n[OBTAINED 2023]\nGraphic Designer Page Setter (L. 4)\nGRETA Sud Alsace\n\n[OBTAINED 2006]\nSales Advisor Certificate (L. 4)\nCEFA Saint-Anne (Belgium)`
+    ),
+    'experience.txt': t(
+      `=== PARCOURS PROFESSIONNEL ===\n\n2026    NAPOCOM -- Stage CDUI (remote)\n        Refonte Businet.org :\n        Navigation, UX/UI, WordPress avance\n\n2023-25 Freelance -- Web & Design\n        Integration web, UI/UX, WordPress, Astro\n        Clients : agences, TPE, associations\n\n2022-23 Mulhouse Gaming -- Secretaire\n        Organisation tournois e-sport\n\n2020+   Judo Optimal -- President (5 ans)\n        Gestion complete association sportive\n        Instructeur, planning, admin`,
+      `=== PROFESSIONAL JOURNEY ===\n\n2026    NAPOCOM -- CDUI Internship (remote)\n        Businet.org redesign:\n        Navigation, UX/UI, advanced WordPress\n\n2023-25 Freelance -- Web & Design\n        Web integration, UI/UX, WordPress, Astro\n        Clients: agencies, SMEs, associations\n\n2022-23 Mulhouse Gaming -- Secretary\n        E-sport tournament organization\n\n2020+   Judo Optimal -- President (5 years)\n        Full sports association management\n        Instructor, planning, admin`
+    ),
+    'contact.sh': `#!/bin/bash
+# albert-exe v2026 -- Contact
+# Type 'contact' in the terminal to open the form.
+echo "[INFO] Launching contact interface..."
+# xdg-open #contact
+exit 0`,
     'contact.txt': t(
-      `Email   : albert.lecomte1989@gmail.com\nLieu    : Mulhouse, Alsace\nLangues : FR (natif), EN (pro)\nDispo   : du lundi au vendredi, réponse < 24h\n\nUtilise la commande "contact" pour ouvrir le formulaire.`,
-      `Email     : albert.lecomte1989@gmail.com\nLocation  : Mulhouse, Alsace\nLanguages : FR (native), EN (pro)\nAvailable : Mon-Fri, reply < 24h\n\nUse "contact" command to open the form.`
+      `Email   : albert.lecomte1989@gmail.com\nLieu    : Mulhouse, Alsace\nLangues : FR (natif), EN (comprehension ecrite)\nDispo   : lundi au vendredi, reponse < 24h\n\nUtilise la commande "contact" pour ouvrir le formulaire.`,
+      `Email     : albert.lecomte1989@gmail.com\nLocation  : Mulhouse, Alsace\nLanguages : FR (native), EN (reading comprehension)\nAvailable : Mon-Fri, reply < 24h\n\nUse "contact" command to open the form.`
     ),
     'stack.txt': `Infra    : Linux/Debian · VMware · SSH · MariaDB · Windows Server · Docker\nFrontend : Astro 5 · TypeScript · Tailwind CSS v4 · WordPress\nBackend  : PHP / Symfony · MySQL · Node.js\nDesign   : Figma · Adobe XD · Photoshop · Illustrator\nTooling  : Git · Vercel · Plausible · EmailJS\nA11y     : RGAA 4.1 · WCAG 2.2 · axe-core`,
-    'cv.pdf': '[binary] — utilise la commande "cv" pour télécharger.',
+    'cv.pdf': t(
+      '[binary] -- utilise la commande "cv" pour telecharger.',
+      '[binary] -- use the "cv" command to download.'
+    ),
   };
 
   // ── Commands ──────────────────────────────────────────────────────────
   type CmdResult = void | Promise<void>;
   const commands: Record<string, (args: string[]) => CmdResult> = {
+
     help: () => {
-      const rows = [
-        ['help',                t('Affiche cette aide',                    'Show this help')],
-        ['ls [-la]',            t('Liste les fichiers',                    'List files')],
-        ['cat <fichier>',       t('Affiche un fichier',                    'Display a file')],
-        ['pwd',                 t('Répertoire courant',                    'Current directory')],
-        ['whoami',              t('Identité',                              'Identity')],
-        ['date',                t('Date et heure',                         'Date and time')],
-        ['echo <texte>',        t('Affiche le texte',                      'Print text')],
-        ['history',             t('Historique des commandes',              'Command history')],
-        ['clear / cls',         t('Efface l\'écran',                       'Clear screen')],
-        ['—',                   '—'],
-        ['projects [--filter]', t('Liste / ouvre les projets',             'List / open projects')],
-        ['skills',              t('Ouvre les compétences',                 'Open skills')],
-        ['experience',          t('Ouvre le parcours',                     'Open experience')],
-        ['contact',             t('Ouvre le formulaire de contact',        'Open contact form')],
-        ['cv',                  t('Télécharger le CV',                     'Download CV')],
-        ['hire',                t('Disponibilité d\'embauche',             'Hiring availability')],
-        ['quote',               t('Devis instantané (interactif)',         'Instant quote (interactive)')],
-        ['theme <nom>',         t('Change de thème (dark|light)',          'Switch theme (dark|light)')],
-        ['—',                   '—'],
-        ['konami',              '???'],
-        ['sudo …',              '???'],
-        ['exit / close',        t('Ferme le terminal',                     'Close the terminal')],
-      ];
-      for (const [cmd, desc] of rows) {
-        if (cmd === '—') { print(`<span class="l-info">${'─'.repeat(48)}</span>`); continue; }
-        print(`<span class="l-accent">${(cmd ?? '').padEnd(22)}</span><span class="l-info">${escapeHtml(desc ?? '')}</span>`);
-      }
+      const sep = () => print(`<span class="l-info">${'─'.repeat(50)}</span>`);
+      const row = (cmd: string, desc: string) =>
+        print(`<span class="l-accent">${(cmd ?? '').padEnd(24)}</span><span class="l-info">${escapeHtml(desc ?? '')}</span>`);
+
+      row('help',                 t('Affiche cette aide',                   'Show this help'));
+      row('ls [-la]',             t('Liste les fichiers',                   'List files'));
+      row('cat <fichier>',        t('Affiche un fichier',                   'Display a file'));
+      row('pwd',                  t('Repertoire courant',                   'Current directory'));
+      row('whoami',               t('Identite',                             'Identity'));
+      row('date',                 t('Date et heure',                        'Date and time'));
+      row('echo <texte>',         t('Affiche le texte',                     'Print text'));
+      row('history',              t('Historique des commandes',             'Command history'));
+      row('clear / cls',          t('Efface l\'ecran',                      'Clear screen'));
+      sep();
+      row('uname [-a]',           t('Info systeme',                         'System info'));
+      row('ip addr',              t('Interfaces reseau',                    'Network interfaces'));
+      row('ifconfig',             t('Interfaces reseau',                    'Network interfaces'));
+      row('systemctl [status]',   t('Services actifs',                      'Active services'));
+      row('neofetch / fastfetch', t('Resume systeme stylise',               'Stylized system summary'));
+      row('ping <host>',          t('Teste la connectivite',                'Test connectivity'));
+      sep();
+      row('projects [--filter]',  t('Liste / ouvre les projets',            'List / open projects'));
+      row('skills',               t('Ouvre les competences',                'Open skills'));
+      row('experience',           t('Ouvre le parcours',                    'Open experience'));
+      row('contact',              t('Ouvre le formulaire de contact',       'Open contact form'));
+      row('cv',                   t('Telecharger le CV',                    'Download CV'));
+      row('hire',                 t('Disponibilite et recherche',           'Availability info'));
+      row('theme <nom>',          t('Change de theme (dark|light)',         'Switch theme (dark|light)'));
+      row('quote',                t('Devis instantane (interactif)',        'Instant quote (interactive)'));
+      sep();
+      row('exit / close',         t('Ferme le terminal',                    'Close the terminal'));
     },
 
     ls: (args) => {
       const long = args.includes('-la') || args.includes('-l') || args.includes('-a');
-      const files = ['about.txt', 'contact.txt', 'stack.txt', 'cv.pdf', 'projects/', 'skills/', 'experience/'];
+      const files = ['competences.txt', 'formations.txt', 'experience.txt', 'contact.sh', 'cv.pdf', 'projets/', 'skills/'];
       if (long) {
         print(`<span class="l-info">total ${files.length}</span>`);
         for (const f of files) {
           const isDir = f.endsWith('/');
-          const perm  = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
-          const size  = isDir ? '4096'       : Math.floor(Math.random() * 4000 + 200).toString();
-          print(`<span class="l-info">${perm}  albert albert  ${size.padStart(5)} 2026-05-06  </span><span class="${isDir ? 'l-accent' : ''}">${f}</span>`);
+          const isExec = f.endsWith('.sh');
+          const perm  = isDir ? 'drwxr-xr-x' : (isExec ? '-rwxr-xr-x' : '-rw-r--r--');
+          const size  = isDir ? '4096' : Math.floor(Math.random() * 4000 + 200).toString();
+          const cls   = isDir ? 'l-accent' : (isExec ? 'l-ok' : '');
+          print(`<span class="l-info">${perm}  albert albert  ${size.padStart(5)} 2026-05-13  </span><span class="${cls}">${f}</span>`);
         }
       } else {
-        print(files.map(f => f.endsWith('/') ? `<span class="l-accent">${f}</span>` : f).join('  '));
+        print(files.map(f => {
+          if (f.endsWith('/')) return `<span class="l-accent">${f}</span>`;
+          if (f.endsWith('.sh')) return `<span class="l-ok">${f}</span>`;
+          return f;
+        }).join('  '));
       }
     },
 
@@ -319,11 +381,126 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
       printLine(content);
     },
 
-    pwd: () => printLine('/home/albert'),
+    pwd: () => printLine('/home/albert/portfolio'),
 
     whoami: () => {
-      print(`<span class="l-accent">albert</span> — ${escapeHtml(t('En reconversion AIS', 'Transitioning to AIS'))}`);
-      print(`<span class="l-info">${escapeHtml(t('Mulhouse, Alsace · RQTH · disponible', 'Mulhouse, Alsace · RQTH · available'))}</span>`);
+      print(`<span class="l-accent">albert</span> — ${escapeHtml(t('Futur Administrateur d\'Infrastructures Securisees', 'Future Secure Infrastructure Administrator'))}`);
+      print(`<span class="l-info">${escapeHtml(t('Mulhouse, Alsace · RQTH · alternance AIS recherchee (68)', 'Mulhouse, Alsace · RQTH · seeking AIS apprenticeship (68)'))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Issu du web & design UI · GRETA Colmar 2026', 'From web & UI design · GRETA Colmar 2026'))}</span>`);
+    },
+
+    uname: (args) => {
+      if (args.includes('-a') || args.length === 0) {
+        printLine('AlbertOS 2026.05 albert-exe x86_64 GNU/Linux');
+        printLine(t(
+          'albert-exe v2026 (Debian 13 "Trixie") -- Astro 5 / Node.js -- Mulhouse, FR',
+          'albert-exe v2026 (Debian 13 "Trixie") -- Astro 5 / Node.js -- Mulhouse, FR'
+        ));
+        printLine('Kernel: 6.1.0-albert SMP -- TypeScript + Tailwind v4');
+      } else if (args[0] === '-r') {
+        printLine('6.1.0-albert');
+      } else if (args[0] === '-n') {
+        printLine('albert-exe');
+      } else {
+        printLine('AlbertOS');
+      }
+    },
+
+    ip: (args) => {
+      if (!args.includes('addr') && !args.includes('a')) {
+        return printLine(t('Usage : ip addr', 'Usage: ip addr'), 'l-err');
+      }
+      print(`<span class="l-info">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536</span>`);
+      print(`<span class="l-info">   inet 127.0.0.1/8 scope host lo</span>`);
+      print(`<span class="l-info">2: eth0: &lt;BROADCAST,MULTICAST,UP&gt; mtu 1500</span>`);
+      print(`<span class="l-info">   inet 192.168.1.42/24 brd 192.168.1.255 scope global eth0</span>`);
+      print(`<span class="l-ok">3: portfolio0: &lt;UP,RUNNING&gt;</span>`);
+      print(`<span class="l-ok">   inet 76.76.21.21/32  (Vercel CDN -- Mulhouse edge)</span>`);
+    },
+
+    ifconfig: () => {
+      print(`<span class="l-info">lo        Link encap:Local Loopback</span>`);
+      print(`<span class="l-info">          inet addr:127.0.0.1  Mask:255.0.0.0</span>`);
+      print(``);
+      print(`<span class="l-info">eth0      Link encap:Ethernet  HWaddr 00:1A:2B:3C:4D:5E</span>`);
+      print(`<span class="l-info">          inet addr:192.168.1.42  Bcast:192.168.1.255  Mask:255.255.255.0</span>`);
+      print(`<span class="l-info">          RX packets:42042  TX packets:13337</span>`);
+      print(``);
+      print(`<span class="l-ok">portfolio  inet addr:76.76.21.21  (Vercel CDN)</span>`);
+    },
+
+    systemctl: (args) => {
+      const status = args.includes('status') || args.length === 0;
+      if (status) {
+        print(`<span class="l-ok">●</span> <span class="l-accent">albert-exe.target</span> <span class="l-info">-- Portfolio sysadmin</span>`);
+        print(`   <span class="l-info">Loaded: loaded (/etc/systemd/portfolio.target)</span>`);
+        print(`   <span class="l-ok">Active: active (running) since 2026</span>`);
+        print(``);
+        const services = [
+          ['portfolio.service',   t('actif (running)', 'active (running)')],
+          ['contact.service',     t('actif (running)', 'active (running)')],
+          ['skills.service',      t('actif (running)', 'active (running)')],
+          ['experience.service',  t('actif (running)', 'active (running)')],
+          ['terminal.service',    t('actif (running)', 'active (running)')],
+          ['analytics.service',   t('actif (sans cookie)', 'active (cookie-free)')],
+        ];
+        for (const [name, state] of services) {
+          print(`  <span class="l-ok">✓</span>  ${(name ?? '').padEnd(26)}<span class="l-ok">${escapeHtml(state ?? '')}</span>`);
+        }
+        print(``);
+        print(`<span class="l-info">${services.length} ${escapeHtml(t('services listes.', 'services listed.'))}</span>`);
+      }
+    },
+
+    neofetch: () => {
+      print(`<span class="l-accent">albert@portfolio</span>`);
+      print(`<span class="l-info">----------------</span>`);
+      const rows: [string, string][] = [
+        ['OS      ', 'albert-exe v2026 (Debian 13 "Trixie")'],
+        ['Host    ', 'Portfolio -- Astro 5 + Tailwind v4'],
+        ['Kernel  ', '6.1.0-albert SMP'],
+        ['Uptime  ', t('7 ans experience web & design', '7 years web & design experience')],
+        ['Shell   ', 'zsh 5.9 -- Mulhouse, FR'],
+        ['CPU     ', t('Futur Admin AIS (GRETA Colmar 2026)', 'Future AIS Admin (GRETA Colmar 2026)')],
+        ['RAM     ', t('Reconversion complete -- 100% operationnel', 'Full career switch -- 100% operational')],
+        ['GPU     ', t('WordPress Expert + UI/UX Avance', 'WordPress Expert + Advanced UI/UX')],
+        ['Infra   ', 'Linux · VMware · SSH · MariaDB · Docker'],
+        ['Dev     ', 'Astro · TypeScript · Tailwind v4 · PHP'],
+        ['Statut  ', t('Alternance AIS recherchee -- Haut-Rhin (68)', 'Seeking AIS apprenticeship -- Haut-Rhin (68)')],
+      ];
+      for (const [key, val] of rows) {
+        const isStatut = key.includes('Statut');
+        const cls = isStatut ? 'l-ok' : 'l-info';
+        print(`<span class="${cls}">${escapeHtml(key)}:</span> ${escapeHtml(val)}`);
+      }
+    },
+
+    fastfetch: () => commands['neofetch']!([]),
+
+    ping: (args) => {
+      const host = args[0];
+      if (!host) return printLine(t('Usage : ping <host>', 'Usage: ping <host>'), 'l-err');
+
+      const known: Record<string, { ip: string; note?: string }> = {
+        'linkedin':  { ip: '108.174.10.10',  note: t('Profil a jour -- disponible (AIS)', 'Profile up to date -- available (AIS)') },
+        'github':    { ip: '140.82.114.4',   note: t('Depot public visible', 'Public repo visible') },
+        'vercel':    { ip: '76.76.21.21',    note: t('Portfolio en ligne', 'Portfolio online') },
+        'google':    { ip: '142.250.74.46',  note: undefined },
+        'localhost': { ip: '127.0.0.1',      note: undefined },
+      };
+      const info = known[host.toLowerCase()];
+      const ip = info?.ip ?? '93.184.216.34';
+
+      print(`<span class="l-info">PING ${escapeHtml(host)} (${ip}) 56(84) bytes of data.</span>`);
+      for (let i = 1; i <= 3; i++) {
+        const ms = 6 + Math.floor(Math.random() * 18);
+        print(`<span class="l-ok">64 bytes from ${ip}: icmp_seq=${i} ttl=55 time=${ms} ms</span>`);
+      }
+      print(`<span class="l-info">--- ${escapeHtml(host)} ping statistics ---</span>`);
+      print(`<span class="l-info">3 packets transmitted, 3 received, 0% packet loss</span>`);
+      if (info?.note) {
+        print(`<span class="l-accent">${escapeHtml(info.note)}</span>`);
+      }
     },
 
     date: () => {
@@ -345,21 +522,21 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
       const filterIdx = args.indexOf('--filter');
       const filter = filterIdx >= 0 ? args[filterIdx + 1] : undefined;
       if (!filter) {
-        print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture de la fenêtre Projets…', 'Opening Projects window…'))}`);
+        print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture de la fenetre Projets...', 'Opening Projects window...'))}`);
         setTimeout(() => openWindow('projects'), 250);
         return;
       }
       print(`<span class="l-info">${escapeHtml(t(`Filtre actif : ${filter}`, `Active filter: ${filter}`))}</span>`);
-      print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture des projets filtrés…', 'Opening filtered projects…'))}`);
+      print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture des projets filtres...', 'Opening filtered projects...'))}`);
       setTimeout(() => openWindow('projects'), 250);
     },
 
-    skills:     () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture des compétences…', 'Opening skills…'))}`); setTimeout(() => openWindow('skills'), 250); },
-    experience: () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture du parcours…',     'Opening experience…'))}`); setTimeout(() => openWindow('experience'), 250); },
-    contact:    () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture du formulaire…',   'Opening contact form…'))}`); setTimeout(() => openWindow('contact'), 250); },
+    skills:     () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture des competences...', 'Opening skills...'))}`); setTimeout(() => openWindow('skills'), 250); },
+    experience: () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture du parcours...', 'Opening experience...'))}`); setTimeout(() => openWindow('experience'), 250); },
+    contact:    () => { print(`<span class="l-ok">→</span> ${escapeHtml(t('Ouverture du formulaire...', 'Opening contact form...'))}`); setTimeout(() => openWindow('contact'), 250); },
 
     cv: () => {
-      print(`<span class="l-ok">↓</span> ${escapeHtml(t('Téléchargement du CV…', 'Downloading CV…'))}`);
+      print(`<span class="l-ok">↓</span> ${escapeHtml(t('Telechargement du CV...', 'Downloading CV...'))}`);
       const a = document.createElement('a');
       a.href = '/cv/albert-lecomte-cv.pdf';
       a.download = 'albert-lecomte-cv.pdf';
@@ -370,35 +547,37 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
 
     hire: () => {
       print(`<span class="l-ok">●</span> <span class="l-ok">${escapeHtml(t('Statut : DISPONIBLE', 'Status: AVAILABLE'))}</span>`);
-      print(`<span class="l-info">${escapeHtml(t('Type recherché : agence WordPress / SEO, CDD, CDI, freelance', 'Looking for: WordPress / SEO agency, contract, full-time, freelance'))}</span>`);
-      print(`<span class="l-info">${escapeHtml(t('Réponse sous 24h — tape "contact" pour m\'écrire.', 'Reply < 24h — type "contact" to message me.'))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Formation AIS -- GRETA Colmar, rentree 2026', 'AIS Training -- GRETA Colmar, fall 2026'))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Profil : reconversion AIS, ex-designer UI, infra Linux/VMware', 'Profile: AIS career switch, former UI designer, Linux/VMware infra'))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Alternance recherchee dans le Haut-Rhin (68)', 'Seeking apprenticeship in Haut-Rhin (68)'))}</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Reponse sous 24h -- tape "contact" pour m\'ecrire.', 'Reply < 24h -- type "contact" to message me.'))}</span>`);
     },
 
     theme: (args) => {
       const t0 = args[0];
       if (!t0) return printLine(t('Usage : theme <dark|light>', 'Usage: theme <dark|light>'), 'l-err');
-      if (t0 !== 'dark' && t0 !== 'light') return printLine(t(`Thème inconnu : ${t0}`, `Unknown theme: ${t0}`), 'l-err');
+      if (t0 !== 'dark' && t0 !== 'light') return printLine(t(`Theme inconnu : ${t0}`, `Unknown theme: ${t0}`), 'l-err');
       document.documentElement.setAttribute('data-theme', t0);
       try { localStorage.setItem('theme', t0); } catch { /* ignore */ }
-      print(`<span class="l-ok">✓</span> ${escapeHtml(t(`Thème ${t0} appliqué.`, `Theme ${t0} applied.`))}`);
+      print(`<span class="l-ok">✓</span> ${escapeHtml(t(`Theme ${t0} applique.`, `Theme ${t0} applied.`))}`);
     },
 
     quote: () => {
       mode = { kind: 'quote', step: 0, data: {} };
-      print(`<span class="l-accent">┌─ ${escapeHtml(t('Devis instantané', 'Instant quote'))} ─────────────────────────┐</span>`);
-      print(`<span class="l-info">${escapeHtml(t('Tape "cancel" à tout moment pour annuler.', 'Type "cancel" anytime to cancel.'))}</span>`);
+      print(`<span class="l-accent">+-- ${escapeHtml(t('Devis instantane', 'Instant quote'))} -----------------------------------------------+</span>`);
+      print(`<span class="l-info">${escapeHtml(t('Tape "cancel" a tout moment pour annuler.', 'Type "cancel" anytime to cancel.'))}</span>`);
       askQuoteStep();
     },
 
     sudo: () => {
       print(`<span class="l-err">[sudo] ${escapeHtml(t('mot de passe pour albert :', 'password for albert:'))}</span>`);
-      print(`<span class="l-warn">${escapeHtml(t('Permission refusée. Albert n\'est pas root, c\'est un designer.', "Permission denied. Albert isn't root, he's a designer."))}</span>`);
+      print(`<span class="l-warn">${escapeHtml(t('Permission refusee. Albert n\'est pas encore root -- mais il bosse l\'AIS 2026.', "Permission denied. Albert isn't root yet -- but he's working on it. AIS 2026."))}</span>`);
     },
 
     konami: () => {
       root!.classList.add('konami');
       setTimeout(() => root!.classList.remove('konami'), 600);
-      print(`<span class="l-accent">${escapeHtml(t('↑ ↑ ↓ ↓ ← → ← → B A — Code Konami activé !', '↑ ↑ ↓ ↓ ← → ← → B A — Konami code activated!'))}</span>`);
+      print(`<span class="l-accent">${escapeHtml(t('↑ ↑ ↓ ↓ ← → ← → B A -- Code Konami active !', '↑ ↑ ↓ ↓ ← → ← → B A -- Konami code activated!'))}</span>`);
       print(`<span class="l-info">${escapeHtml(t('+99 vies. Bonne navigation.', '+99 lives. Have fun.'))}</span>`);
     },
 
@@ -408,8 +587,8 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
     man: (args) => {
       const c = args[0];
       if (!c) return printLine(t('Quelle commande ?', 'Which command?'), 'l-err');
-      if (!commands[c]) return printLine(t(`Aucune entrée man pour ${c}`, `No manual entry for ${c}`), 'l-err');
-      print(`<span class="l-accent">NAME</span>\n  ${escapeHtml(c)} — ${escapeHtml(t('commande Albert.exe', 'Albert.exe command'))}\n\n<span class="l-accent">DESCRIPTION</span>\n  ${escapeHtml(t('Tape "help" pour la liste complète.', 'Type "help" for the full list.'))}\n`);
+      if (!commands[c]) return printLine(t(`Aucune entree man pour ${c}`, `No manual entry for ${c}`), 'l-err');
+      print(`<span class="l-accent">NAME</span>\n  ${escapeHtml(c)} -- ${escapeHtml(t('commande albert-exe', 'albert-exe command'))}\n\n<span class="l-accent">DESCRIPTION</span>\n  ${escapeHtml(t('Tape "help" pour la liste complete.', 'Type "help" for the full list.'))}\n`);
     },
 
     albert: () => commands['whoami']!([]),
@@ -433,7 +612,7 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
       assign: (data: any, v: string) => { data.multilang = /^(oui|yes|y|o)$/i.test(v); },
     },
     {
-      q: t('Délai serré (< 4 semaines) ? (oui/non)', 'Rush (< 4 weeks)? (yes/no)'),
+      q: t('Delai serre (< 4 semaines) ? (oui/non)', 'Rush (< 4 weeks)? (yes/no)'),
       validate: (v: string) => /^(oui|non|yes|no|y|n|o)$/i.test(v),
       assign: (data: any, v: string) => { data.rush = /^(oui|yes|y|o)$/i.test(v); },
     },
@@ -469,20 +648,20 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
     const max = Math.round(((range[1] ?? 0) + extraPages * perPage * 1.5) * langCoef * rushCoef);
     const weeks = rush ? '3-4' : (pages <= 5 ? '4-6' : pages <= 15 ? '6-8' : '8-12');
 
-    print(`<span class="l-accent">└──────────────────────────────────────────────┘</span>`);
+    print(`<span class="l-accent">+--------------------------------------------------+</span>`);
     print('');
-    print(`<span class="l-ok">${escapeHtml(t('✓ Estimation calculée', '✓ Quote calculated'))}</span>`);
+    print(`<span class="l-ok">${escapeHtml(t('✓ Estimation calculee', '✓ Quote calculated'))}</span>`);
     print('');
     print(`  <span class="l-info">${escapeHtml(t('Type        :', 'Type        :'))}</span> ${escapeHtml(type)}`);
     print(`  <span class="l-info">${escapeHtml(t('Pages       :', 'Pages       :'))}</span> ${pages}`);
     print(`  <span class="l-info">${escapeHtml(t('Multi-langue:', 'Multi-lang  :'))}</span> ${multilang ? t('oui', 'yes') : t('non', 'no')}`);
-    print(`  <span class="l-info">${escapeHtml(t('Délai serré :', 'Rush        :'))}</span> ${rush ? t('oui (+30%)', 'yes (+30%)') : t('non', 'no')}`);
+    print(`  <span class="l-info">${escapeHtml(t('Delai serre :', 'Rush        :'))}</span> ${rush ? t('oui (+30%)', 'yes (+30%)') : t('non', 'no')}`);
     print('');
     const fmt = (n: number) => n.toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US');
-    print(`  <span class="l-accent">${escapeHtml(t('Estimation  :', 'Estimate    :'))}</span> <span class="l-ok">${fmt(min)} € — ${fmt(max)} €</span>`);
-    print(`  <span class="l-accent">${escapeHtml(t('Délai       :', 'Timeline    :'))}</span> ${weeks} ${escapeHtml(t('semaines', 'weeks'))}`);
+    print(`  <span class="l-accent">${escapeHtml(t('Estimation  :', 'Estimate    :'))}</span> <span class="l-ok">${fmt(min)} EUR -- ${fmt(max)} EUR</span>`);
+    print(`  <span class="l-accent">${escapeHtml(t('Delai       :', 'Timeline    :'))}</span> ${weeks} ${escapeHtml(t('semaines', 'weeks'))}`);
     print('');
-    print(`<span class="l-info">${escapeHtml(t('Estimation indicative — tape "contact" pour discuter.', 'Indicative — type "contact" to discuss.'))}</span>`);
+    print(`<span class="l-info">${escapeHtml(t('Estimation indicative -- tape "contact" pour discuter.', 'Indicative -- type "contact" to discuss.'))}</span>`);
     print('');
 
     mode = { kind: 'idle' };
@@ -523,7 +702,7 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
 
     if (mode.kind === 'quote') {
       if (value.toLowerCase() === 'cancel') {
-        print(`<span class="l-warn">${escapeHtml(t('Devis annulé.', 'Quote cancelled.'))}</span>`);
+        print(`<span class="l-warn">${escapeHtml(t('Devis annule.', 'Quote cancelled.'))}</span>`);
         mode = { kind: 'idle' };
         prompt!.textContent = 'albert@portfolio:~$';
         return;
@@ -531,7 +710,7 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
       const q = QUOTE_QUESTIONS[mode.step];
       if (!q) return finishQuote();
       if (!q.validate(value)) {
-        print(`<span class="l-err">${escapeHtml(t('Réponse invalide. Réessaie.', 'Invalid answer. Try again.'))}</span>`);
+        print(`<span class="l-err">${escapeHtml(t('Reponse invalide. Reessaie.', 'Invalid answer. Try again.'))}</span>`);
         askQuoteStep();
         return;
       }
@@ -584,10 +763,9 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
       e.preventDefault();
       clearOutput();
     } else if (e.key === 'c' && e.ctrlKey) {
-      // Ctrl+C : cancel current input or quote
       if (mode.kind === 'quote') {
         e.preventDefault();
-        print(`<span class="l-warn">^C — ${escapeHtml(t('annulé', 'cancelled'))}</span>`);
+        print(`<span class="l-warn">^C -- ${escapeHtml(t('annule', 'cancelled'))}</span>`);
         mode = { kind: 'idle' };
         prompt!.textContent = 'albert@portfolio:~$';
         input.value = '';
@@ -605,12 +783,12 @@ import { open as openWindow, close as closeWindow } from '../../utils/window-man
     input.focus();
   });
 
-  // Show banner when window opens for the first time
+  // Show boot sequence when window opens for the first time
   let booted = false;
   function bootIfNeeded(): void {
     if (booted) return;
     booted = true;
-    showBanner();
+    showBoot();
   }
 
   // Detect when terminal window is opened (its container goes from closed → open)
